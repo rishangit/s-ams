@@ -1,0 +1,441 @@
+import React, { useState, useEffect } from 'react'
+import { useForm, Controller } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
+import * as yup from 'yup'
+import {
+  Box,
+  Typography,
+  Paper,
+  Avatar,
+  Grid,
+  Alert,
+  CircularProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
+} from '@mui/material'
+import {
+  Person as PersonIcon,
+  Save as SaveIcon,
+  Cancel as CancelIcon
+} from '@mui/icons-material'
+import { useSelector, useDispatch } from 'react-redux'
+import { RootState } from '../../../store'
+import { updateProfileRequest, updateProfileSuccess } from '../../../store/actions'
+import FormInput from '../../shared/FormInput'
+import FormButton from '../../shared/FormButton'
+import FileUpload from '../../shared/FileUpload'
+import { getRoleDisplayName, isValidRole } from '../../../constants/roles'
+
+// Validation schema
+const profileSchema = yup.object({
+  firstName: yup
+    .string()
+    .required('First name is required')
+    .min(2, 'First name must be at least 2 characters')
+    .max(50, 'First name must be less than 50 characters'),
+  lastName: yup
+    .string()
+    .required('Last name is required')
+    .min(2, 'Last name must be at least 2 characters')
+    .max(50, 'Last name must be less than 50 characters'),
+  email: yup
+    .string()
+    .email('Please enter a valid email address')
+    .required('Email is required'),
+  phoneNumber: yup
+    .string()
+    .optional()
+    .test('phone-format', 'Please enter a valid phone number', (value) => {
+      if (!value) return true // Allow empty values
+      return /^[+]?[\d\s\-\(\)]+$/.test(value) && value.length >= 10 && value.length <= 15
+    }),
+  role: yup
+    .number()
+    .required('Role is required'),
+  profileImage: yup
+    .string()
+    .optional()
+})
+
+interface ProfileFormData {
+  firstName: string
+  lastName: string
+  email: string
+  phoneNumber?: string
+  role: number
+  profileImage?: string
+}
+
+const UserProfile: React.FC = () => {
+  const dispatch = useDispatch()
+  const { user, loading, error } = useSelector((state: RootState) => state.auth)
+  const uiTheme = useSelector((state: RootState) => state.ui.theme)
+
+  const [isEditing, setIsEditing] = useState(false)
+  const [successMessage, setSuccessMessage] = useState('')
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    setValue,
+    watch,
+    formState: { errors, isDirty }
+  } = useForm<ProfileFormData>({
+    resolver: yupResolver(profileSchema) as any,
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      phoneNumber: '',
+      role: 3, // Default to USER role
+      profileImage: ''
+    }
+  })
+
+  // Initialize form data when user data is available
+  useEffect(() => {
+    if (user) {
+
+      reset({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        phoneNumber: user.phoneNumber || user.phone || '',
+        role: parseInt(user.role) || 3,
+        profileImage: user.profileImage || ''
+      })
+    }
+  }, [user, reset])
+
+  // Debug form state
+  useEffect(() => {
+
+  }, [errors, isDirty, isEditing])
+
+  // Watch form values for debugging
+  const formValues = watch()
+  useEffect(() => {
+
+  }, [formValues])
+
+  // Monitor auth state changes for profile updates
+  const [hasSubmitted, setHasSubmitted] = useState(false)
+
+  useEffect(() => {
+    if (hasSubmitted && !loading) {
+      if (!error && user) {
+        // Profile update was successful
+        setIsEditing(false)
+        setSuccessMessage('Profile updated successfully!')
+        setTimeout(() => setSuccessMessage(''), 3000)
+        setHasSubmitted(false)
+      } else if (error) {
+        // Profile update failed
+        setSuccessMessage(`Failed to update profile: ${error}`)
+        setTimeout(() => setSuccessMessage(''), 3000)
+        setHasSubmitted(false)
+      }
+    }
+  }, [loading, error, user, hasSubmitted])
+
+  const handleEdit = () => {
+    setIsEditing(true)
+    setSuccessMessage('')
+  }
+
+  const handleCancel = () => {
+    setIsEditing(false)
+    setSuccessMessage('')
+    // Reset form data to original user data
+    if (user) {
+      reset({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        phoneNumber: user.phoneNumber || user.phone || '',
+        role: parseInt(user.role) || 3,
+        profileImage: user.profileImage || ''
+      })
+    }
+  }
+
+  const handleFileUploaded = (filePath: string, _fileUrl: string) => {
+    
+    setValue('profileImage', filePath, { shouldDirty: true, shouldValidate: true })
+    
+    // Update Redux state immediately so image shows in header/navigation
+    if (user) {
+      const updatedUser = {
+        ...user,
+        profileImage: filePath
+      }
+      dispatch(updateProfileSuccess({ user: updatedUser }))
+    }
+    
+    setSuccessMessage('Profile image uploaded successfully!')
+    setTimeout(() => setSuccessMessage(''), 3000)
+  }
+
+  const handleFileDeleted = () => {
+    setValue('profileImage', '', { shouldDirty: true, shouldValidate: true })
+    
+    // Update Redux state immediately to remove image from header/navigation
+    if (user) {
+      const updatedUser = {
+        ...user,
+        profileImage: ''
+      }
+      dispatch(updateProfileSuccess({ user: updatedUser }))
+    }
+    
+    setSuccessMessage('Profile image removed successfully!')
+    setTimeout(() => setSuccessMessage(''), 3000)
+  }
+
+  const onSubmit = async (data: ProfileFormData) => {
+
+    setHasSubmitted(true)
+    dispatch(updateProfileRequest({
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+      phoneNumber: data.phoneNumber,
+      profileImage: data.profileImage
+    }))
+  }
+
+  if (!user) {
+    return (
+      <Box className="flex justify-center items-center h-64">
+        <CircularProgress />
+      </Box>
+    )
+  }
+
+  return (
+    <Box className="mx-auto p-6">
+      <Typography
+        variant="h4"
+        className="mb-6 font-bold"
+        style={{ color: uiTheme.text }}
+      >
+        User Profile
+      </Typography>
+
+      {successMessage && (
+        <Alert severity="success" className="mb-4">
+          {successMessage}
+        </Alert>
+      )}
+
+      {error && (
+        <Alert severity="error" className="mb-4">
+          {error}
+        </Alert>
+      )}
+
+            <Grid container spacing={3}>
+                 {/* Profile Image Card */}
+         <Grid item xs={12} md={4}>
+           <Paper
+             className="p-6"
+             style={{ backgroundColor: uiTheme.surface }}
+           >
+             <Box className="flex flex-col items-center text-center">
+               {/* Always show the current avatar */}
+               <Avatar
+                 className="w-64 h-64 mb-6"
+                 style={{ backgroundColor: uiTheme.primary }}
+                 src={user.profileImage ? `/uploads/${user.profileImage}` : undefined}
+                 onError={(e) => {
+                   const target = e.currentTarget as HTMLImageElement
+                   console.error('Avatar image failed to load:', target.src)
+                 }}
+
+               >
+                 <span className="text-white font-semibold text-7xl">
+                   {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
+                 </span>
+               </Avatar>
+               
+                               {/* Show file upload only in edit mode */}
+                {isEditing && (
+                  <FileUpload
+                    key={user.profileImage || 'no-image'} // Force re-render when image changes
+                    onFileUploaded={handleFileUploaded}
+                    onFileDeleted={handleFileDeleted}
+                    currentImagePath={user.profileImage}
+                    folderPath="profile"
+                    label="Upload New Profile Image"
+                    className="mb-4"
+                  />
+                )}
+               
+               <Typography
+                 variant="h5"
+                 className="font-semibold mb-2"
+                 style={{ color: uiTheme.text }}
+               >
+                 {user.firstName} {user.lastName}
+               </Typography>
+               
+               <Typography
+                 variant="body1"
+                 className="mb-4"
+                 style={{ color: uiTheme.textSecondary }}
+               >
+                 {isValidRole(parseInt(user.role)) ? getRoleDisplayName(parseInt(user.role) as any) : 'User'}
+               </Typography>
+               
+               <Typography
+                 variant="body2"
+                 style={{ color: uiTheme.textSecondary }}
+               >
+                 {user.email}
+               </Typography>
+             </Box>
+           </Paper>
+         </Grid>
+
+        {/* Profile Form Card */}
+        <Grid item xs={12} md={8}>
+          <Paper
+            className="p-6"
+            style={{ backgroundColor: uiTheme.surface }}
+          >
+            <Typography
+              variant="h6"
+              className="mb-4 font-semibold"
+              style={{ color: uiTheme.text }}
+            >
+              Profile Information
+            </Typography>
+            
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <Grid container spacing={3}>
+                <Grid item xs={12} sm={6}>
+                  <FormInput
+                    name="firstName"
+                    label="First Name"
+                    type="text"
+                    control={control}
+                    error={errors.firstName}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormInput
+                    name="lastName"
+                    label="Last Name"
+                    type="text"
+                    control={control}
+                    error={errors.lastName}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormInput
+                    name="email"
+                    label="Email"
+                    type="email"
+                    control={control}
+                    error={errors.email}
+                    required
+                    disabled={true}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormInput
+                    name="phoneNumber"
+                    label="Phone Number"
+                    type="tel"
+                    control={control}
+                    error={errors.phoneNumber}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <InputLabel style={{ color: uiTheme.textSecondary }}>
+                      Role
+                    </InputLabel>
+                    <Controller
+                      name="role"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          {...field}
+                          label="Role"
+                          disabled={true} // Role is not editable
+                          style={{
+                            backgroundColor: uiTheme.surface,
+                            color: uiTheme.text
+                          }}
+                          sx={{
+                            '& .MuiSelect-icon': {
+                              color: uiTheme.textSecondary
+                            }
+                          }}
+                        >
+                          <MenuItem value={0}>Administrator</MenuItem>
+                          <MenuItem value={1}>Owner</MenuItem>
+                          <MenuItem value={2}>Staff</MenuItem>
+                          <MenuItem value={3}>User</MenuItem>
+                        </Select>
+                      )}
+                    />
+                  </FormControl>
+                </Grid>
+              </Grid>
+
+              {/* Action Buttons */}
+              <Box className="flex justify-end space-x-3 mt-6">
+                {!isEditing ? (
+                  <FormButton
+                    type="button"
+                    onClick={handleEdit}
+                  >
+                    <Box className="flex items-center space-x-2">
+                      <PersonIcon />
+                      <span>Edit Profile</span>
+                    </Box>
+                  </FormButton>
+                ) : (
+                  <>
+                    <FormButton
+                      type="button"
+                      variant="outlined"
+                      onClick={handleCancel}
+                    >
+                      <Box className="flex items-center space-x-2">
+                        <CancelIcon />
+                        <span>Cancel</span>
+                      </Box>
+                    </FormButton>
+                    <FormButton
+                      type="submit"
+                      disabled={loading || !isDirty}
+                    >
+                      {loading ? (
+                        <CircularProgress size={20} style={{ color: '#fff' }} />
+                      ) : (
+                        <Box className="flex items-center space-x-2">
+                          <SaveIcon />
+                          <span>Save Changes</span>
+                        </Box>
+                      )}
+                    </FormButton>
+                  </>
+                )}
+              </Box>
+            </form>
+          </Paper>
+        </Grid>
+      </Grid>
+    </Box>
+  )
+}
+
+export default UserProfile
