@@ -16,7 +16,8 @@ import {
   Dashboard as DashboardIcon,
   Logout as LogoutIcon,
   Person as PersonIcon,
-  People as PeopleIcon
+  People as PeopleIcon,
+  Business as BusinessIcon
 } from '@mui/icons-material'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate, useLocation } from 'react-router-dom'
@@ -154,6 +155,47 @@ const Navigation: React.FC<NavigationProps> = ({
                 primary="Users"
                 style={{ 
                   color: location.pathname === '/system/users' 
+                    ? '#ffffff' 
+                    : uiTheme.text 
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+        )}
+
+        {/* Companies Management - Admin Only */}
+        {user && isAdminRole(user.role as any) && (
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => handleNavigation('/system/companies')}
+              style={{
+                backgroundColor: location.pathname === '/system/companies' 
+                  ? uiTheme.primary 
+                  : 'transparent',
+                color: location.pathname === '/system/companies' 
+                  ? '#ffffff' 
+                  : uiTheme.text,
+                borderRight: location.pathname === '/system/companies' 
+                  ? `2px solid ${uiTheme.primary}` 
+                  : 'none',
+                margin: '0 8px',
+                borderRadius: '8px'
+              }}
+              className="hover:opacity-80 transition-all duration-200"
+            >
+              <ListItemIcon>
+                <BusinessIcon
+                  style={{ 
+                    color: location.pathname === '/system/companies' 
+                      ? '#ffffff' 
+                      : uiTheme.textSecondary 
+                  }}
+                />
+              </ListItemIcon>
+              <ListItemText
+                primary="Companies"
+                style={{ 
+                  color: location.pathname === '/system/companies' 
                     ? '#ffffff' 
                     : uiTheme.text 
                 }}

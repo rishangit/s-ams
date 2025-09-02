@@ -8,6 +8,7 @@ import { config } from '../config.js'
 import { initializeDatabase } from './database/database.js'
 import authRoutes from './routes/auth.js'
 import fileUploadRoutes from './routes/fileUpload.js'
+import companyRoutes from './routes/company.js'
 
 const app = express()
 
@@ -72,6 +73,7 @@ app.use('/uploads', (req, res, next) => {
 // API routes
 app.use('/api/auth', authRoutes)
 app.use('/api/files', fileUploadRoutes)
+app.use('/api/company', companyRoutes)
 
 // 404 handler
 app.use('*', (req, res) => {

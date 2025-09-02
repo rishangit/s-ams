@@ -45,6 +45,33 @@ const createTables = async () => {
       CREATE INDEX IF NOT EXISTS idx_user_sessions_expires_at ON user_sessions (expires_at)
     `)
 
+    // Create companies table
+    await db.exec(`
+      CREATE TABLE IF NOT EXISTS companies (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        address TEXT NOT NULL,
+        phone_number TEXT NOT NULL,
+        land_phone TEXT NOT NULL,
+        geo_location TEXT NOT NULL,
+        status TEXT CHECK(status IN ('pending', 'active', 'inactive')) DEFAULT 'pending',
+        user_id INTEGER NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+        UNIQUE (user_id)
+      )
+    `)
+
+    // Create indexes for companies table
+    await db.exec(`
+      CREATE INDEX IF NOT EXISTS idx_companies_user_id ON companies (user_id)
+    `)
+
+    await db.exec(`
+      CREATE INDEX IF NOT EXISTS idx_companies_status ON companies (status)
+    `)
+
     console.log('Database tables created successfully')
   } catch (error) {
     console.error('Error creating tables:', error)

@@ -18,11 +18,15 @@ import {
 import {
   Person as PersonIcon,
   Save as SaveIcon,
-  Cancel as CancelIcon
+  Cancel as CancelIcon,
+  Business as BusinessIcon,
+  Send as SendIcon
 } from '@mui/icons-material'
 import { useSelector, useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import { RootState } from '../../../store'
 import { updateProfileRequest, updateProfileSuccess } from '../../../store/actions'
+import { getCompanyByUserRequest } from '../../../store/actions/companyActions'
 import FormInput from '../../shared/FormInput'
 import FormButton from '../../shared/FormButton'
 import FileUpload from '../../shared/FileUpload'
@@ -70,7 +74,9 @@ interface ProfileFormData {
 
 const UserProfile: React.FC = () => {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const { user, loading, error } = useSelector((state: RootState) => state.auth)
+  const { company } = useSelector((state: RootState) => state.company)
   const uiTheme = useSelector((state: RootState) => state.ui.theme)
 
   const [isEditing, setIsEditing] = useState(false)
@@ -94,6 +100,13 @@ const UserProfile: React.FC = () => {
       profileImage: ''
     }
   })
+
+  // Load company data when user data is available
+  useEffect(() => {
+    if (user?.id) {
+      dispatch(getCompanyByUserRequest(user.id))
+    }
+  }, [user?.id, dispatch])
 
   // Initialize form data when user data is available
   useEffect(() => {
@@ -433,6 +446,80 @@ const UserProfile: React.FC = () => {
             </form>
           </Paper>
         </Grid>
+
+        {/* Company Registration Request Card - Only for Users (role 3) */}
+        {parseInt(user.role) === 3 && (
+          <Grid item xs={12}>
+            <Paper
+              className="p-6"
+              style={{ backgroundColor: uiTheme.surface }}
+            >
+              <Box className="flex items-center mb-4">
+                <BusinessIcon 
+                  className="mr-3" 
+                  style={{ color: uiTheme.primary, fontSize: '2rem' }}
+                />
+                <Typography
+                  variant="h6"
+                  className="font-semibold"
+                  style={{ color: uiTheme.text }}
+                >
+                  Company Registration Request
+                </Typography>
+              </Box>
+              
+                             <Typography
+                 variant="body1"
+                 className="mb-4"
+                 style={{ color: uiTheme.textSecondary }}
+               >
+                 {company ? 
+                   `Your company "${company.name}" is registered with status: ${company.status}. You can edit your company details or view the current status.` :
+                   'As a regular user, you can request to register your company with our system. This will allow you to access additional features and manage your organization\'s data.'
+                 }
+               </Typography>
+
+              <Box className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-4">
+                <Typography
+                  variant="body2"
+                  className="font-medium mb-2"
+                  style={{ color: uiTheme.text }}
+                >
+                  Benefits of Company Registration:
+                </Typography>
+                <ul className="list-disc list-inside space-y-1">
+                  <li style={{ color: uiTheme.textSecondary }}>
+                    Access to company-specific features and data
+                  </li>
+                  <li style={{ color: uiTheme.textSecondary }}>
+                    Ability to manage team members and permissions
+                  </li>
+                  <li style={{ color: uiTheme.textSecondary }}>
+                    Enhanced reporting and analytics
+                  </li>
+                  <li style={{ color: uiTheme.textSecondary }}>
+                    Priority support and assistance
+                  </li>
+                </ul>
+              </Box>
+
+              <Box className="flex justify-end">
+                                 <FormButton
+                   type="button"
+                   variant="contained"
+                   onClick={() => {
+                     navigate('/system/company')
+                   }}
+                 >
+                   <Box className="flex items-center space-x-2">
+                     <SendIcon />
+                     <span>{company ? 'View Company Details' : 'Request Company Registration'}</span>
+                   </Box>
+                 </FormButton>
+              </Box>
+            </Paper>
+          </Grid>
+        )}
       </Grid>
     </Box>
   )

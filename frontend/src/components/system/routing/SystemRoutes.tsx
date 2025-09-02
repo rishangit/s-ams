@@ -2,7 +2,8 @@ import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Register from '../auth/register'
 import Login from '../auth/login'
-import { Dashboard, UserProfile, SystemLayout, Users } from '../'
+import { Dashboard, UserProfile, SystemLayout, Users, Companies } from '../'
+import Company from '../company'
 import ProtectedRoute from './ProtectedRoute'
 import PublicRoute from './PublicRoute'
 import AdminRoute from './AdminRoute'
@@ -41,6 +42,20 @@ const SystemRoutes: React.FC = () => {
         <AdminRoute>
           <SystemLayout title="Users Management">
             <Users />
+          </SystemLayout>
+        </AdminRoute>
+      } />
+      <Route path="company" element={
+        <ProtectedRoute>
+          <SystemLayout title="Company Registration">
+            <Company />
+          </SystemLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="companies" element={
+        <AdminRoute>
+          <SystemLayout title="Companies Management">
+            <Companies />
           </SystemLayout>
         </AdminRoute>
       } />

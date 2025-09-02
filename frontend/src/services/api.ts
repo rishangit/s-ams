@@ -139,6 +139,43 @@ class ApiService {
   async healthCheck(): Promise<ApiResponse> {
     return this.request('/health')
   }
+
+  // Company management methods
+  async createCompany(companyData: any): Promise<ApiResponse<any>> {
+    return this.request<any>('/company', {
+      method: 'POST',
+      body: JSON.stringify(companyData)
+    })
+  }
+
+  async updateCompany(id: number, companyData: any): Promise<ApiResponse<any>> {
+    return this.request<any>(`/company/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(companyData)
+    })
+  }
+
+  async getCompanyByUser(userId: number): Promise<ApiResponse<any>> {
+    return this.request<any>(`/company/user/${userId}`)
+  }
+
+  // Admin company management methods
+  async getAllCompanies(): Promise<ApiResponse<any>> {
+    return this.request<any>('/company')
+  }
+
+  async updateCompanyStatus(id: number, status: string): Promise<ApiResponse<any>> {
+    return this.request<any>(`/company/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status })
+    })
+  }
+
+  async deleteCompany(id: number): Promise<ApiResponse<any>> {
+    return this.request<any>(`/company/${id}`, {
+      method: 'DELETE'
+    })
+  }
 }
 
 // Export singleton instance
