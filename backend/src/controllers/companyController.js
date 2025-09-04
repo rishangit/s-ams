@@ -1,4 +1,4 @@
-import Company from '../models/Company.js'
+import { Company } from '../models/index.js'
 import { validateCompanyData } from '../middleware/companyValidation.js'
 
 class CompanyController {

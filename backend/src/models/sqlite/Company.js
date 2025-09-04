@@ -1,4 +1,4 @@
-import { getDatabase } from '../database/database.js'
+import { getDatabase } from '../../database/sqlite/database.js'
 
 class Company {
   static tableName = 'companies'

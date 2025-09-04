@@ -1,4 +1,4 @@
-import { initializeDatabase, getDatabase } from './database.js'
+import { initializeDatabase, getDatabase } from './index.js'
 import bcrypt from 'bcryptjs'
 import { ROLES } from '../constants/roles.js'
 

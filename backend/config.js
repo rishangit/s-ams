@@ -13,7 +13,15 @@ export const config = {
     nodeEnv: process.env.NODE_ENV || 'development'
   },
   database: {
-    path: process.env.DB_PATH || './database/s-ams.db'
+    type: process.env.DB_TYPE || 'sqlite', // 'sqlite' or 'mysql'
+    // SQLite configuration
+    path: process.env.DB_PATH || './database/s-ams.db',
+    // MySQL configuration
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT) || 3306,
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    name: process.env.DB_NAME || 's_ams'
   },
   jwt: {
     secret: process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production',

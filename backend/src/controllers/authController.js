@@ -1,4 +1,4 @@
-import { User } from '../models/User.js'
+import { User } from '../models/index.js'
 import { generateToken } from '../middleware/auth.js'
 import { isValidRoleName } from '../constants/roles.js'
 

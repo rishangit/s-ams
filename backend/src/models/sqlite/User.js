@@ -1,6 +1,6 @@
-import { getDatabase } from '../database/database.js'
+import { getDatabase } from '../../database/sqlite/database.js'
 import bcrypt from 'bcryptjs'
-import { ROLES, getRoleId, isValidRole, isValidRoleName } from '../constants/roles.js'
+import { ROLES, getRoleId, isValidRole, isValidRoleName } from '../../constants/roles.js'
 
 export class User {
   static async create(userData) {

@@ -8,12 +8,13 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "test": "jest",
-    "db:migrate": "node src/database/migrate.js",
+    "db:migrate": "node scripts/migrate-mysql.js",
+    "db:create:mysql": "node scripts/create-mysql-db.js",
     "db:seed": "node src/database/seed.js"
   },
   "keywords": [
     "express",
-    "sqlite",
+    "mysql",
     "api",
     "authentication"
   ],
@@ -30,6 +31,7 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "multer": "^2.0.2",
+    "mysql2": "^3.14.4",
     "sqlite": "^5.0.1",
     "sqlite3": "^5.1.6"
   },
@@ -39,3 +41,5 @@
     "supertest": "^6.3.3"
   }
 }
+
+
