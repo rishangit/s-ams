@@ -23,6 +23,7 @@ import {
 import { useSelector } from 'react-redux'
 import { RootState } from '../../../store'
 import { getRoleDisplayName } from '../../../constants/roles'
+import { getProfileImageUrl } from '../../../utils/fileUtils'
 import { useUsers } from '../../../hooks/useUsers'
 
 interface User {
@@ -224,7 +225,7 @@ const Users: React.FC = () => {
                                                                                <Avatar
                             className="w-10 h-10 border-2 border-white shadow-sm"
                             style={{ backgroundColor: uiTheme.primary }}
-                            src={user.profileImage ? `/uploads/${user.profileImage}` : undefined}
+                            src={getProfileImageUrl(user.profileImage)}
                             onError={(e) => {
                               const target = e.currentTarget as HTMLImageElement
                               console.error('User Avatar image failed to load:', target.src)

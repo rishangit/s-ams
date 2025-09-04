@@ -31,6 +31,7 @@ import FormInput from '../../shared/FormInput'
 import FormButton from '../../shared/FormButton'
 import FileUpload from '../../shared/FileUpload'
 import { getRoleDisplayName, isValidRole, ROLES, DEFAULT_USER_ROLE } from '../../../constants/roles'
+import { getProfileImageUrl } from '../../../utils/fileUtils'
 
 // Validation schema
 const profileSchema = yup.object({
@@ -266,7 +267,7 @@ const UserProfile: React.FC = () => {
               <Avatar
                 className="w-64 h-64 mb-6"
                 style={{ backgroundColor: uiTheme.primary }}
-                src={previewImage ? `/uploads/${previewImage}` : (user.profileImage ? `/uploads/${user.profileImage}` : undefined)}
+                src={previewImage ? getProfileImageUrl(previewImage) : getProfileImageUrl(user.profileImage)}
                 onError={(e) => {
                   const target = e.currentTarget as HTMLImageElement
                   console.error('Avatar image failed to load:', target.src)

@@ -24,17 +24,58 @@ A Node.js Express backend with SQLite database for the S-AMS (Student Attendance
    ```
 
 2. **Set up environment variables:**
-   Create a `.env` file in the root directory:
+   Create a `.env` file in the root directory with the following variables:
+
    ```env
-   PORT=5000
+   # Server Configuration
+   PORT=5001
    NODE_ENV=development
+
+   # Database Configuration
    DB_PATH=./database/s-ams.db
+
+   # JWT Configuration
    JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
    JWT_EXPIRES_IN=24h
+
+   # Rate Limiting
    RATE_LIMIT_WINDOW_MS=900000
    RATE_LIMIT_MAX_REQUESTS=100
-   CORS_ORIGIN=http://localhost:5173
+
+   # CORS Configuration
+   CORS_ORIGIN=http://localhost:5173,http://localhost:3001,http://localhost:3002,http://localhost:3003
+
+   # File Upload Configuration
+   UPLOAD_MAX_SIZE=5242880
+   UPLOAD_ALLOWED_TYPES=image/jpeg,image/png,image/gif,image/webp
+   UPLOAD_PATH=./uploads
+
+   # Security Configuration
+   BCRYPT_SALT_ROUNDS=12
+
+   # Application Configuration
+   APP_NAME=S-AMS Backend
+   APP_VERSION=1.0.0
+   APP_DESCRIPTION=Student Attendance Management System Backend API
    ```
+
+   ### Environment Variable Descriptions
+
+   - **PORT**: Server port number (default: 5001)
+   - **NODE_ENV**: Environment mode (development/production)
+   - **DB_PATH**: SQLite database file path
+   - **JWT_SECRET**: Secret key for JWT token signing (change in production!)
+   - **JWT_EXPIRES_IN**: JWT token expiration time
+   - **RATE_LIMIT_WINDOW_MS**: Rate limiting window in milliseconds (15 minutes)
+   - **RATE_LIMIT_MAX_REQUESTS**: Maximum requests per window
+   - **CORS_ORIGIN**: Comma-separated list of allowed origins
+   - **UPLOAD_MAX_SIZE**: Maximum file upload size in bytes (5MB)
+   - **UPLOAD_ALLOWED_TYPES**: Comma-separated list of allowed file types
+   - **UPLOAD_PATH**: Directory for file uploads
+   - **BCRYPT_SALT_ROUNDS**: Number of salt rounds for password hashing
+   - **APP_NAME**: Application name
+   - **APP_VERSION**: Application version
+   - **APP_DESCRIPTION**: Application description
 
 3. **Initialize database:**
    ```bash

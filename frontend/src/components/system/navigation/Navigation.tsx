@@ -22,6 +22,7 @@ import {
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { RootState } from '../../../store'
+import { getProfileImageUrl } from '../../../utils/fileUtils'
 import { logout } from '../../../store/actions'
 import { setSidebarOpen } from '../../../store/reducers/uiSlice'
 import { isAdminRole, getRoleDisplayName } from '../../../constants/roles'
@@ -254,7 +255,7 @@ const Navigation: React.FC<NavigationProps> = ({
                     ? uiTheme.primary 
                     : uiTheme.border
                 }}
-                                 src={user?.profileImage ? `/uploads/${user.profileImage}` : undefined}
+                                                                   src={getProfileImageUrl(user?.profileImage)}
                 onError={(e) => {
                   const target = e.currentTarget as HTMLImageElement
                   console.error('Navigation Avatar image failed to load:', target.src)

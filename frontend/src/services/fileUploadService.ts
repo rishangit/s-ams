@@ -1,4 +1,5 @@
 import { apiService, ApiResponse } from './api'
+import { getFileUrl } from '../utils/fileUtils'
 
 export interface FileUploadData {
   fileName: string
@@ -88,10 +89,7 @@ class FileUploadService {
     return response.data!
   }
 
-  // Helper method to get full URL for a file
-  getFileUrl(filePath: string): string {
-    return `http://localhost:5001/uploads/${filePath}`
-  }
+
 }
 
 export const fileUploadService = new FileUploadService()

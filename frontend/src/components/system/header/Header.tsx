@@ -17,6 +17,7 @@ import {
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '../../../store'
 import { setSettingsOpen } from '../../../store/reducers/uiSlice'
+import { getProfileImageUrl } from '../../../utils/fileUtils'
 
 interface HeaderProps {
   title: string
@@ -100,7 +101,7 @@ const Header: React.FC<HeaderProps> = ({
                           <Avatar
                   className="w-12 h-12 bg-blue-500 border-2 border-white shadow-sm"
                   style={{ backgroundColor: '#3b82f6' }}
-                                     src={user?.profileImage ? `/uploads/${user.profileImage}` : undefined}
+                                     src={getProfileImageUrl(user?.profileImage)}
                   onError={(e) => {
                     const target = e.currentTarget as HTMLImageElement
                     console.error('Header Avatar image failed to load:', target.src)

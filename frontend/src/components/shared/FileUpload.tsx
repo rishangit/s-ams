@@ -32,8 +32,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
   currentImagePath,
   folderPath,
   label = 'Upload Image',
-  accept = 'image/*',
-  maxSize = 5,
+  accept = import.meta.env.VITE_UPLOAD_ALLOWED_TYPES || 'image/*',
+  maxSize = parseInt(import.meta.env.VITE_UPLOAD_MAX_SIZE || '5242880') / (1024 * 1024), // Convert bytes to MB
   className = ''
 }) => {
   const uiTheme = useSelector((state: RootState) => state.ui.theme)
