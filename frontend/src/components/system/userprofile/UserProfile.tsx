@@ -25,12 +25,12 @@ import {
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { RootState } from '../../../store'
-import { updateProfileRequest, updateProfileSuccess } from '../../../store/actions'
+import { updateProfileRequest } from '../../../store/actions'
 import { getCompanyByUserRequest } from '../../../store/actions/companyActions'
 import FormInput from '../../shared/FormInput'
 import FormButton from '../../shared/FormButton'
 import FileUpload from '../../shared/FileUpload'
-import { getRoleDisplayName, isValidRole } from '../../../constants/roles'
+import { getRoleDisplayName, isValidRole, ROLES, DEFAULT_USER_ROLE } from '../../../constants/roles'
 
 // Validation schema
 const profileSchema = yup.object({
@@ -81,6 +81,9 @@ const UserProfile: React.FC = () => {
 
   const [isEditing, setIsEditing] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
+  const [imageUploadMessage, setImageUploadMessage] = useState('')
+  const [previewImage, setPreviewImage] = useState<string | null>(null)
+  const [originalImage, setOriginalImage] = useState<string | null>(null)
 
   const {
     control,
@@ -96,10 +99,13 @@ const UserProfile: React.FC = () => {
       lastName: '',
       email: '',
       phoneNumber: '',
-      role: 3, // Default to USER role
+      role: DEFAULT_USER_ROLE, // Default to USER role
       profileImage: ''
     }
   })
+
+  // Watch the profileImage field to track changes
+  const watchedProfileImage = watch('profileImage')
 
   // Load company data when user data is available
   useEffect(() => {
@@ -111,28 +117,20 @@ const UserProfile: React.FC = () => {
   // Initialize form data when user data is available
   useEffect(() => {
     if (user) {
-
+      const userImage = user.profileImage || ''
+      setOriginalImage(userImage)
+      setPreviewImage(userImage)
+      
       reset({
         firstName: user.firstName || '',
         lastName: user.lastName || '',
         email: user.email || '',
         phoneNumber: user.phoneNumber || user.phone || '',
-        role: parseInt(user.role) || 3,
-        profileImage: user.profileImage || ''
+        role: parseInt(user.role) || DEFAULT_USER_ROLE,
+        profileImage: userImage
       })
     }
   }, [user, reset])
-
-  // Debug form state
-  useEffect(() => {
-
-  }, [errors, isDirty, isEditing])
-
-  // Watch form values for debugging
-  const formValues = watch()
-  useEffect(() => {
-
-  }, [formValues])
 
   // Monitor auth state changes for profile updates
   const [hasSubmitted, setHasSubmitted] = useState(false)
@@ -143,6 +141,8 @@ const UserProfile: React.FC = () => {
         // Profile update was successful
         setIsEditing(false)
         setSuccessMessage('Profile updated successfully!')
+        setPreviewImage(null) // Clear preview after successful save
+        setOriginalImage(user.profileImage || null) // Update original image
         setTimeout(() => setSuccessMessage(''), 3000)
         setHasSubmitted(false)
       } else if (error) {
@@ -157,11 +157,16 @@ const UserProfile: React.FC = () => {
   const handleEdit = () => {
     setIsEditing(true)
     setSuccessMessage('')
+    setImageUploadMessage('')
+    setPreviewImage(originalImage) // Reset preview to original
   }
 
   const handleCancel = () => {
     setIsEditing(false)
     setSuccessMessage('')
+    setImageUploadMessage('')
+    setPreviewImage(originalImage) // Reset preview to original
+    
     // Reset form data to original user data
     if (user) {
       reset({
@@ -169,47 +174,37 @@ const UserProfile: React.FC = () => {
         lastName: user.lastName || '',
         email: user.email || '',
         phoneNumber: user.phoneNumber || user.phone || '',
-        role: parseInt(user.role) || 3,
+        role: parseInt(user.role) || DEFAULT_USER_ROLE,
         profileImage: user.profileImage || ''
       })
     }
   }
 
   const handleFileUploaded = (filePath: string, _fileUrl: string) => {
-    
+    // Update the form value for profileImage
     setValue('profileImage', filePath, { shouldDirty: true, shouldValidate: true })
     
-    // Update Redux state immediately so image shows in header/navigation
-    if (user) {
-      const updatedUser = {
-        ...user,
-        profileImage: filePath
-      }
-      dispatch(updateProfileSuccess({ user: updatedUser }))
-    }
+    // Update preview image to show the uploaded image
+    setPreviewImage(filePath)
     
-    setSuccessMessage('Profile image uploaded successfully!')
-    setTimeout(() => setSuccessMessage(''), 3000)
+    // Show success message for image upload
+    setImageUploadMessage('Profile image uploaded successfully! Click "Save Changes" to update your profile.')
+    setTimeout(() => setImageUploadMessage(''), 5000)
   }
 
   const handleFileDeleted = () => {
+    // Update the form value for profileImage
     setValue('profileImage', '', { shouldDirty: true, shouldValidate: true })
     
-    // Update Redux state immediately to remove image from header/navigation
-    if (user) {
-      const updatedUser = {
-        ...user,
-        profileImage: ''
-      }
-      dispatch(updateProfileSuccess({ user: updatedUser }))
-    }
+    // Clear preview image
+    setPreviewImage('')
     
-    setSuccessMessage('Profile image removed successfully!')
-    setTimeout(() => setSuccessMessage(''), 3000)
+    // Show success message for image deletion
+    setImageUploadMessage('Profile image removed successfully! Click "Save Changes" to update your profile.')
+    setTimeout(() => setImageUploadMessage(''), 5000)
   }
 
   const onSubmit = async (data: ProfileFormData) => {
-
     setHasSubmitted(true)
     dispatch(updateProfileRequest({
       firstName: data.firstName,
@@ -219,6 +214,9 @@ const UserProfile: React.FC = () => {
       profileImage: data.profileImage
     }))
   }
+
+  // Check if there are any changes including image changes
+  const hasChanges = isDirty || watchedProfileImage !== originalImage
 
   if (!user) {
     return (
@@ -244,74 +242,79 @@ const UserProfile: React.FC = () => {
         </Alert>
       )}
 
+      {imageUploadMessage && (
+        <Alert severity="info" className="mb-4">
+          {imageUploadMessage}
+        </Alert>
+      )}
+
       {error && (
         <Alert severity="error" className="mb-4">
           {error}
         </Alert>
       )}
 
-            <Grid container spacing={3}>
-                 {/* Profile Image Card */}
-         <Grid item xs={12} md={4}>
-           <Paper
-             className="p-6"
-             style={{ backgroundColor: uiTheme.surface }}
-           >
-             <Box className="flex flex-col items-center text-center">
-               {/* Always show the current avatar */}
-               <Avatar
-                 className="w-64 h-64 mb-6"
-                 style={{ backgroundColor: uiTheme.primary }}
-                 src={user.profileImage ? `/uploads/${user.profileImage}` : undefined}
-                 onError={(e) => {
-                   const target = e.currentTarget as HTMLImageElement
-                   console.error('Avatar image failed to load:', target.src)
-                 }}
-
-               >
-                 <span className="text-white font-semibold text-7xl">
-                   {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
-                 </span>
-               </Avatar>
-               
-                               {/* Show file upload only in edit mode */}
-                {isEditing && (
-                  <FileUpload
-                    key={user.profileImage || 'no-image'} // Force re-render when image changes
-                    onFileUploaded={handleFileUploaded}
-                    onFileDeleted={handleFileDeleted}
-                    currentImagePath={user.profileImage}
-                    folderPath="profile"
-                    label="Upload New Profile Image"
-                    className="mb-4"
-                  />
-                )}
-               
-               <Typography
-                 variant="h5"
-                 className="font-semibold mb-2"
-                 style={{ color: uiTheme.text }}
-               >
-                 {user.firstName} {user.lastName}
-               </Typography>
-               
-               <Typography
-                 variant="body1"
-                 className="mb-4"
-                 style={{ color: uiTheme.textSecondary }}
-               >
-                 {isValidRole(parseInt(user.role)) ? getRoleDisplayName(parseInt(user.role) as any) : 'User'}
-               </Typography>
-               
-               <Typography
-                 variant="body2"
-                 style={{ color: uiTheme.textSecondary }}
-               >
-                 {user.email}
-               </Typography>
-             </Box>
-           </Paper>
-         </Grid>
+      <Grid container spacing={3}>
+        {/* Profile Image Card */}
+        <Grid item xs={12} md={4}>
+          <Paper
+            className="p-6"
+            style={{ backgroundColor: uiTheme.surface }}
+          >
+            <Box className="flex flex-col items-center text-center">
+              {/* Show preview image if available, otherwise show current avatar */}
+              <Avatar
+                className="w-64 h-64 mb-6"
+                style={{ backgroundColor: uiTheme.primary }}
+                src={previewImage ? `/uploads/${previewImage}` : (user.profileImage ? `/uploads/${user.profileImage}` : undefined)}
+                onError={(e) => {
+                  const target = e.currentTarget as HTMLImageElement
+                  console.error('Avatar image failed to load:', target.src)
+                }}
+              >
+                <span className="text-white font-semibold text-7xl">
+                  {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
+                </span>
+              </Avatar>
+              
+              {/* Show file upload only in edit mode */}
+              {isEditing && (
+                <FileUpload
+                  key={watchedProfileImage || 'no-image'} // Force re-render when image changes
+                  onFileUploaded={handleFileUploaded}
+                  onFileDeleted={handleFileDeleted}
+                  currentImagePath={watchedProfileImage}
+                  folderPath="profile"
+                  label="Upload New Profile Image"
+                  className="mb-4"
+                />
+              )}
+              
+              <Typography
+                variant="h5"
+                className="font-semibold mb-2"
+                style={{ color: uiTheme.text }}
+              >
+                {user.firstName} {user.lastName}
+              </Typography>
+              
+              <Typography
+                variant="body1"
+                className="mb-4"
+                style={{ color: uiTheme.textSecondary }}
+              >
+                {isValidRole(parseInt(user.role)) ? getRoleDisplayName(parseInt(user.role) as any) : 'User'}
+              </Typography>
+              
+              <Typography
+                variant="body2"
+                style={{ color: uiTheme.textSecondary }}
+              >
+                {user.email}
+              </Typography>
+            </Box>
+          </Paper>
+        </Grid>
 
         {/* Profile Form Card */}
         <Grid item xs={12} md={8}>
@@ -392,10 +395,10 @@ const UserProfile: React.FC = () => {
                             }
                           }}
                         >
-                          <MenuItem value={0}>Administrator</MenuItem>
-                          <MenuItem value={1}>Owner</MenuItem>
-                          <MenuItem value={2}>Staff</MenuItem>
-                          <MenuItem value={3}>User</MenuItem>
+                          <MenuItem value={ROLES.ADMIN}>Administrator</MenuItem>
+                          <MenuItem value={ROLES.OWNER}>Owner</MenuItem>
+                          <MenuItem value={ROLES.STAFF}>Staff</MenuItem>
+                          <MenuItem value={ROLES.USER}>User</MenuItem>
                         </Select>
                       )}
                     />
@@ -429,7 +432,7 @@ const UserProfile: React.FC = () => {
                     </FormButton>
                     <FormButton
                       type="submit"
-                      disabled={loading || !isDirty}
+                      disabled={loading || !hasChanges}
                     >
                       {loading ? (
                         <CircularProgress size={20} style={{ color: '#fff' }} />
@@ -447,8 +450,8 @@ const UserProfile: React.FC = () => {
           </Paper>
         </Grid>
 
-        {/* Company Registration Request Card - Only for Users (role 3) */}
-        {parseInt(user.role) === 3 && (
+        {/* Company Registration Request Card - Only for Users (role USER) */}
+        {parseInt(user.role) === ROLES.USER && (
           <Grid item xs={12}>
             <Paper
               className="p-6"
@@ -468,16 +471,16 @@ const UserProfile: React.FC = () => {
                 </Typography>
               </Box>
               
-                             <Typography
-                 variant="body1"
-                 className="mb-4"
-                 style={{ color: uiTheme.textSecondary }}
-               >
-                 {company ? 
-                   `Your company "${company.name}" is registered with status: ${company.status}. You can edit your company details or view the current status.` :
-                   'As a regular user, you can request to register your company with our system. This will allow you to access additional features and manage your organization\'s data.'
-                 }
-               </Typography>
+              <Typography
+                variant="body1"
+                className="mb-4"
+                style={{ color: uiTheme.textSecondary }}
+              >
+                {company ? 
+                  `Your company "${company.name}" is registered with status: ${company.status}. You can edit your company details or view the current status.` :
+                  'As a regular user, you can request to register your company with our system. This will allow you to access additional features and manage your organization\'s data.'
+                }
+              </Typography>
 
               <Box className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-4">
                 <Typography
@@ -504,18 +507,18 @@ const UserProfile: React.FC = () => {
               </Box>
 
               <Box className="flex justify-end">
-                                 <FormButton
-                   type="button"
-                   variant="contained"
-                   onClick={() => {
-                     navigate('/system/company')
-                   }}
-                 >
-                   <Box className="flex items-center space-x-2">
-                     <SendIcon />
-                     <span>{company ? 'View Company Details' : 'Request Company Registration'}</span>
-                   </Box>
-                 </FormButton>
+                <FormButton
+                  type="button"
+                  variant="contained"
+                  onClick={() => {
+                    navigate('/system/company')
+                  }}
+                >
+                  <Box className="flex items-center space-x-2">
+                    <SendIcon />
+                    <span>{company ? 'View Company Details' : 'Request Company Registration'}</span>
+                  </Box>
+                </FormButton>
               </Box>
             </Paper>
           </Grid>
