@@ -1,5 +1,13 @@
 import express from 'express'
-import CompanyController from '../controllers/companyController.js'
+import { 
+  createCompany, 
+  getCompanyByUser, 
+  updateCompany, 
+  getAllCompanies, 
+  getCompanyById, 
+  updateCompanyStatus, 
+  deleteCompany 
+} from '../controllers/companyController.js'
 import { authenticateToken } from '../middleware/auth.js'
 import { requireAdmin } from '../middleware/auth.js'
 
@@ -9,14 +17,14 @@ const router = express.Router()
 router.use(authenticateToken)
 
 // Company routes for all authenticated users
-router.post('/', CompanyController.createCompany) // Create company
-router.get('/user/:userId', CompanyController.getCompanyByUser) // Get company by user ID
-router.put('/:id', CompanyController.updateCompany) // Update company
+router.post('/', createCompany) // Create company
+router.get('/user/:userId', getCompanyByUser) // Get company by user ID
+router.put('/:id', updateCompany) // Update company
 
 // Admin-only routes
-router.get('/', requireAdmin, CompanyController.getAllCompanies) // Get all companies
-router.get('/:id', requireAdmin, CompanyController.getCompanyById) // Get company by ID
-router.put('/:id/status', requireAdmin, CompanyController.updateCompanyStatus) // Update company status
-router.delete('/:id', requireAdmin, CompanyController.deleteCompany) // Delete company
+router.get('/', requireAdmin, getAllCompanies) // Get all companies
+router.get('/:id', requireAdmin, getCompanyById) // Get company by ID
+router.put('/:id/status', requireAdmin, updateCompanyStatus) // Update company status
+router.delete('/:id', requireAdmin, deleteCompany) // Delete company
 
 export default router

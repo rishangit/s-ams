@@ -1,6 +1,6 @@
 import { getDatabase } from '../../database/sqlite/database.js'
 
-class Company {
+export class Company {
   static tableName = 'companies'
 
   static async create(companyData) {
@@ -186,5 +186,3 @@ class Company {
     }
   }
 }
-
-export default Company

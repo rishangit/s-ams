@@ -3,8 +3,8 @@ import { config } from '../../config.js'
 // Import model implementations
 import { User as SQLiteUser } from './sqlite/User.js'
 import { User as MySQLUser } from './mysql/User.js'
-import SQLiteCompany from './sqlite/Company.js'
-import MySQLCompany from './mysql/Company.js'
+import {Company as SQLiteCompany} from './sqlite/Company.js'
+import {Company as MySQLCompany}   from './mysql/Company.js'
 
 // Get database type from config
 const getDatabaseType = () => {

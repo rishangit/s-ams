@@ -1,6 +1,6 @@
 import { executeQuery } from '../../database/mysql/database.js'
 
-class Company {
+export class Company {
   static tableName = 'companies'
 
   static async create(companyData) {
@@ -131,14 +131,14 @@ class Company {
     // Add ordering
     query += ' ORDER BY c.created_at DESC'
     
-    // Add pagination
+    // Add pagination - ensure values are strings for MySQL2
     if (options.limit) {
       query += ' LIMIT ?'
-      values.push(options.limit)
+      values.push(String(options.limit))
       
       if (options.offset) {
         query += ' OFFSET ?'
-        values.push(options.offset)
+        values.push(String(options.offset))
       }
     }
     
@@ -179,4 +179,4 @@ class Company {
   }
 }
 
-export default Company
+

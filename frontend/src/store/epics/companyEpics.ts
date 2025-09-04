@@ -27,10 +27,8 @@ export const createCompanyEpic = (action$: any) =>
   action$.pipe(
     ofType(createCompanyRequest.type),
     switchMap((action: any) => {
-      console.log('Company epic triggered:', action)
       return from(apiService.createCompany(action.payload)).pipe(
         map((response) => {
-          console.log('Company API response:', response)
           if (response.success && response.data) {
             return createCompanySuccess(response.data)
           } else {
@@ -38,7 +36,6 @@ export const createCompanyEpic = (action$: any) =>
           }
         }),
         catchError((error) => {
-          console.error('Company API error:', error)
           return of(createCompanyFailure(error.message || 'Failed to create company'))
         })
       )
@@ -94,8 +91,8 @@ export const getAllCompaniesEpic = (action$: any) =>
     switchMap(() => {
       return from(apiService.getAllCompanies()).pipe(
         map((response) => {
-          if (response.success && response.data) {
-            return getAllCompaniesSuccess(response.data)
+          if (response.success && response.data && response.data.companies) {
+            return getAllCompaniesSuccess(response.data.companies)
           } else {
             return getAllCompaniesFailure(response.message || 'Failed to fetch companies')
           }
