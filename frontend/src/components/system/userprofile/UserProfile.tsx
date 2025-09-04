@@ -9,11 +9,7 @@ import {
   Avatar,
   Grid,
   Alert,
-  CircularProgress,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem
+  CircularProgress
 } from '@mui/material'
 import {
   Person as PersonIcon,
@@ -28,6 +24,7 @@ import { RootState } from '../../../store'
 import { updateProfileRequest } from '../../../store/actions'
 import { getCompanyByUserRequest } from '../../../store/actions/companyActions'
 import FormInput from '../../shared/FormInput'
+import FormSelect from '../../shared/FormSelect'
 import FormButton from '../../shared/FormButton'
 import FileUpload from '../../shared/FileUpload'
 import { getRoleDisplayName, isValidRole, ROLES, DEFAULT_USER_ROLE } from '../../../constants/roles'
@@ -260,7 +257,10 @@ const UserProfile: React.FC = () => {
         <Grid item xs={12} md={4}>
           <Paper
             className="p-6"
-            style={{ backgroundColor: uiTheme.surface }}
+            style={{ 
+              backgroundColor: uiTheme.surface,
+              border: `1px solid ${uiTheme.mode === 'dark' ? '#334155' : '#e5e7eb'}`
+            }}
           >
             <Box className="flex flex-col items-center text-center">
               {/* Show preview image if available, otherwise show current avatar */}
@@ -321,7 +321,10 @@ const UserProfile: React.FC = () => {
         <Grid item xs={12} md={8}>
           <Paper
             className="p-6"
-            style={{ backgroundColor: uiTheme.surface }}
+            style={{ 
+              backgroundColor: uiTheme.surface,
+              border: `1px solid ${uiTheme.mode === 'dark' ? '#334155' : '#e5e7eb'}`
+            }}
           >
             <Typography
               variant="h6"
@@ -374,36 +377,19 @@ const UserProfile: React.FC = () => {
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth>
-                    <InputLabel style={{ color: uiTheme.textSecondary }}>
-                      Role
-                    </InputLabel>
-                    <Controller
-                      name="role"
-                      control={control}
-                      render={({ field }) => (
-                        <Select
-                          {...field}
-                          label="Role"
-                          disabled={true} // Role is not editable
-                          style={{
-                            backgroundColor: uiTheme.surface,
-                            color: uiTheme.text
-                          }}
-                          sx={{
-                            '& .MuiSelect-icon': {
-                              color: uiTheme.textSecondary
-                            }
-                          }}
-                        >
-                          <MenuItem value={ROLES.ADMIN}>Administrator</MenuItem>
-                          <MenuItem value={ROLES.OWNER}>Owner</MenuItem>
-                          <MenuItem value={ROLES.STAFF}>Staff</MenuItem>
-                          <MenuItem value={ROLES.USER}>User</MenuItem>
-                        </Select>
-                      )}
-                    />
-                  </FormControl>
+                  <FormSelect
+                    name="role"
+                    label="Role"
+                    control={control}
+                    options={[
+                      { value: ROLES.ADMIN, label: 'Administrator' },
+                      { value: ROLES.OWNER, label: 'Owner' },
+                      { value: ROLES.STAFF, label: 'Staff' },
+                      { value: ROLES.USER, label: 'User' }
+                    ]}
+                    required
+                    disabled={true}
+                  />
                 </Grid>
               </Grid>
 
@@ -456,7 +442,10 @@ const UserProfile: React.FC = () => {
           <Grid item xs={12}>
             <Paper
               className="p-6"
-              style={{ backgroundColor: uiTheme.surface }}
+              style={{ 
+                backgroundColor: uiTheme.surface,
+                border: `1px solid ${uiTheme.mode === 'dark' ? '#334155' : '#e5e7eb'}`
+              }}
             >
               <Box className="flex items-center mb-4">
                 <BusinessIcon 
@@ -483,7 +472,13 @@ const UserProfile: React.FC = () => {
                 }
               </Typography>
 
-              <Box className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-4">
+              <Box 
+                className="p-4 rounded-lg mb-4"
+                style={{ 
+                  backgroundColor: uiTheme.mode === 'dark' ? '#1e3a8a20' : '#dbeafe',
+                  border: `1px solid ${uiTheme.mode === 'dark' ? '#3b82f620' : '#93c5fd'}`
+                }}
+              >
                 <Typography
                   variant="body2"
                   className="font-medium mb-2"
@@ -512,7 +507,11 @@ const UserProfile: React.FC = () => {
                   type="button"
                   variant="contained"
                   onClick={() => {
-                    navigate('/system/company')
+                    if (company?.id) {
+                      navigate(`/system/companies/${company.id}`)
+                    } else {
+                      navigate('/system/companies/new')
+                    }
                   }}
                 >
                   <Box className="flex items-center space-x-2">

@@ -1,5 +1,5 @@
 import { createAction } from '@reduxjs/toolkit'
-import { Company, CompanyFormData } from '../../../constants/company'
+import { Company, CompanyFormData } from '../../constants/company'
 
 // Create company request
 export const createCompanyRequest = createAction<CompanyFormData>('company/createCompanyRequest')
@@ -15,6 +15,11 @@ export const updateCompanyFailure = createAction<string>('company/updateCompanyF
 export const getCompanyByUserRequest = createAction<number>('company/getCompanyByUserRequest')
 export const getCompanyByUserSuccess = createAction<Company>('company/getCompanyByUserSuccess')
 export const getCompanyByUserFailure = createAction<string>('company/getCompanyByUserFailure')
+
+// Get company by ID request
+export const getCompanyByIdRequest = createAction<number>('company/getCompanyByIdRequest')
+export const getCompanyByIdSuccess = createAction<Company>('company/getCompanyByIdSuccess')
+export const getCompanyByIdFailure = createAction<string>('company/getCompanyByIdFailure')
 
 // Get all companies request (admin only)
 export const getAllCompaniesRequest = createAction('company/getAllCompaniesRequest')
@@ -34,3 +39,4 @@ export const deleteCompanyFailure = createAction<string>('company/deleteCompanyF
 // Clear company state
 export const clearCompanyError = createAction('company/clearCompanyError')
 export const clearCompanySuccess = createAction('company/clearCompanySuccess')
+export const clearCompanyData = createAction('company/clearCompanyData')

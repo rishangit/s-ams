@@ -2,8 +2,10 @@ import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Register from '../auth/register'
 import Login from '../auth/login'
-import { Dashboard, UserProfile, SystemLayout, Users, Companies } from '../'
+import { Dashboard, UserProfile, SystemLayout, Users, Companies, CompanyDetail } from '../'
 import Company from '../company'
+import CompanyRouter from '../company/CompanyRouter'
+import CompanyRouteWrapper from '../company/CompanyRouteWrapper'
 import ProtectedRoute from './ProtectedRoute'
 import PublicRoute from './PublicRoute'
 import AdminRoute from './AdminRoute'
@@ -45,19 +47,17 @@ const SystemRoutes: React.FC = () => {
           </SystemLayout>
         </AdminRoute>
       } />
-      <Route path="company" element={
-        <ProtectedRoute>
-          <SystemLayout title="Company Registration">
-            <Company />
-          </SystemLayout>
-        </ProtectedRoute>
-      } />
       <Route path="companies" element={
         <AdminRoute>
           <SystemLayout title="Companies Management">
             <Companies />
           </SystemLayout>
         </AdminRoute>
+      } />
+      <Route path="companies/:id" element={
+        <ProtectedRoute>
+          <CompanyRouteWrapper />
+        </ProtectedRoute>
       } />
       
       {/* Redirect root to dashboard if authenticated, otherwise to login */}

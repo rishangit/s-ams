@@ -26,20 +26,33 @@ const FormButton: React.FC<FormButtonProps> = ({
     switch (variant) {
       case 'outlined':
         return {
-          // Let MUI handle the outlined styling completely
+          color: theme.primary,
+          backgroundColor: 'transparent',
+          border: `1px solid ${theme.primary}`,
+          '&:hover': {
+            backgroundColor: `${theme.primary}10`,
+            borderColor: theme.primary,
+          },
         }
       case 'text':
         return {
           color: theme.text,
           backgroundColor: 'transparent',
-          border: `1px solid ${theme.border}`
+          border: `1px solid ${theme.border}`,
+          '&:hover': {
+            backgroundColor: theme.mode === 'dark' ? '#334155' : '#f8fafc',
+          },
         }
       default:
         return {
           backgroundColor: theme.primary,
           color: '#fff',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          border: 'none'
+          boxShadow: theme.mode === 'dark' ? '0 2px 8px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0,0,0,0.1)',
+          border: 'none',
+          '&:hover': {
+            backgroundColor: theme.mode === 'dark' ? '#1e40af' : '#1565c0',
+            boxShadow: theme.mode === 'dark' ? '0 4px 12px rgba(0,0,0,0.4)' : '0 4px 12px rgba(0,0,0,0.2)',
+          },
         }
     }
   }
@@ -52,7 +65,7 @@ const FormButton: React.FC<FormButtonProps> = ({
       onClick={onClick}
       fullWidth={fullWidth}
       className="px-4 py-2 rounded-md transition-all duration-200 hover:scale-105"
-      style={getButtonStyle()}
+      sx={getButtonStyle()}
     >
       {children}
     </Button>

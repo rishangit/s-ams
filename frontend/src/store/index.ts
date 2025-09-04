@@ -7,6 +7,7 @@ import {
   createCompanyEpic, 
   updateCompanyEpic, 
   getCompanyByUserEpic,
+  getCompanyByIdEpic,
   getAllCompaniesEpic,
   updateCompanyStatusEpic,
   deleteCompanyEpic
@@ -23,6 +24,7 @@ const rootEpic = combineEpics(
   createCompanyEpic,
   updateCompanyEpic,
   getCompanyByUserEpic,
+  getCompanyByIdEpic,
   getAllCompaniesEpic,
   updateCompanyStatusEpic,
   deleteCompanyEpic
@@ -39,12 +41,7 @@ export const store = configureStore({
   devTools: true,
 })
 
-// Add logging middleware for debugging
-const originalDispatch = store.dispatch
-store.dispatch = (action: any) => {
-  console.log('Dispatching action:', action)
-  return originalDispatch(action)
-}
+
 
 // Run the root epic
 epicMiddleware.run(rootEpic)

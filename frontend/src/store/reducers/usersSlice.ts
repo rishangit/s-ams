@@ -12,6 +12,7 @@ import {
   clearUsersError,
   clearUsersSuccess
 } from '../actions/userActions'
+import { logoutAndClearData, logout } from '../actions'
 
 interface User {
   id: number
@@ -115,6 +116,27 @@ const usersSlice = createSlice({
       })
       .addCase(clearUsersSuccess, (state) => {
         state.success = null
+        state.updateSuccess = null
+      })
+
+    // Clear data on logout
+    builder
+      .addCase(logoutAndClearData, (state) => {
+        state.users = []
+        state.loading = false
+        state.error = null
+        state.success = null
+        state.updateLoading = false
+        state.updateError = null
+        state.updateSuccess = null
+      })
+      .addCase(logout, (state) => {
+        state.users = []
+        state.loading = false
+        state.error = null
+        state.success = null
+        state.updateLoading = false
+        state.updateError = null
         state.updateSuccess = null
       })
   }

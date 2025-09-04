@@ -1,19 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import {
   Box,
-  Typography,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Avatar,
   Chip,
-  CircularProgress,
-  Alert,
-  TablePagination,
   IconButton,
   Tooltip
 } from '@mui/material'
@@ -25,6 +14,8 @@ import { RootState } from '../../../store'
 import { getRoleDisplayName } from '../../../constants/roles'
 import { getProfileImageUrl } from '../../../utils/fileUtils'
 import { useUsers } from '../../../hooks/useUsers'
+import { CustomGrid } from '../../../components/shared'
+import { ColDef, ICellRendererParams } from 'ag-grid-community'
 
 interface User {
   id: number
@@ -39,7 +30,6 @@ interface User {
 }
 
 const Users: React.FC = () => {
-
   const { user: currentUser } = useSelector((state: RootState) => state.auth)
   const uiTheme = useSelector((state: RootState) => state.ui.theme)
   const { 
@@ -51,11 +41,6 @@ const Users: React.FC = () => {
     clearError, 
     clearSuccess 
   } = useUsers()
-  
-
-  
-  const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(10)
 
   useEffect(() => {
     fetchAllUsers()
@@ -80,15 +65,6 @@ const Users: React.FC = () => {
     }
   }, [success, clearSuccess])
 
-  const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage)
-  }
-
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10))
-    setPage(0)
-  }
-
   const getRoleColor = (role: number) => {
     switch (role) {
       case 0: // Admin
@@ -112,213 +88,123 @@ const Users: React.FC = () => {
     })
   }
 
-  if (loading) {
+  // User Cell Renderer Component
+  const UserCellRenderer = (props: ICellRendererParams) => {
+    const { data } = props
     return (
-      <Box className="flex justify-center items-center h-64">
-        <CircularProgress style={{ color: uiTheme.primary }} />
+      <Box className="flex items-center gap-3">
+        <Avatar
+          className="w-10 h-10 border-2 border-white shadow-sm"
+          style={{ backgroundColor: uiTheme.primary }}
+          src={getProfileImageUrl(data.profileImage)}
+          onError={(e) => {
+            const target = e.currentTarget as HTMLImageElement
+            console.error('User Avatar image failed to load:', target.src)
+            console.error('User profile image path:', data.profileImage)
+          }}
+        >
+          <span className="text-white font-semibold text-sm">
+            {data.firstName?.charAt(0)}{data.lastName?.charAt(0)}
+          </span>
+        </Avatar>
+        <Box>
+          <div className="font-semibold text-sm" style={{ color: uiTheme.text }}>
+            {data.firstName} {data.lastName}
+          </div>
+          <div className="text-xs" style={{ color: uiTheme.textSecondary }}>
+            ID: {data.id}
+          </div>
+        </Box>
       </Box>
     )
   }
 
-  if (error) {
+  // Role Cell Renderer Component
+  const RoleCellRenderer = (props: ICellRendererParams) => {
+    const { value } = props
     return (
-      <Box className="mx-auto p-6">
-        <Alert severity="error" className="mb-4">
-          {error}
-        </Alert>
-      </Box>
+      <Chip
+        label={getRoleDisplayName(value as any)}
+        size="small"
+        style={{
+          backgroundColor: getRoleColor(value),
+          color: '#ffffff',
+          fontWeight: 'bold'
+        }}
+      />
     )
   }
+
+
+
+  // Column Definitions
+  const columnDefs = useMemo<ColDef[]>(() => [
+    {
+      headerName: 'User',
+      field: 'firstName',
+      cellRenderer: UserCellRenderer,
+      sortable: true,
+      filter: true,
+      resizable: true,
+      width: 250,
+      minWidth: 200
+    },
+    {
+      headerName: 'Email',
+      field: 'email',
+      sortable: true,
+      filter: true,
+      resizable: true,
+      width: 200,
+      minWidth: 150
+    },
+    {
+      headerName: 'Phone',
+      field: 'phoneNumber',
+      sortable: true,
+      filter: true,
+      resizable: true,
+      width: 150,
+      minWidth: 120,
+      valueGetter: (params) => params.data.phoneNumber || 'N/A'
+    },
+    {
+      headerName: 'Role',
+      field: 'role',
+      cellRenderer: RoleCellRenderer,
+      sortable: true,
+      filter: true,
+      resizable: true,
+      width: 120,
+      minWidth: 100
+    },
+
+    {
+      headerName: 'Created',
+      field: 'createdAt',
+      sortable: true,
+      filter: true,
+      resizable: true,
+      width: 150,
+      minWidth: 120,
+      valueGetter: (params) => formatDate(params.data.createdAt)
+    }
+  ], [uiTheme, currentUser])
 
   return (
-    <Box className="mx-auto p-6">
-      {/* Header */}
-      <Box className="flex justify-between items-center mb-6">
-        <Typography
-          variant="h4"
-          className="font-bold"
-          style={{ color: uiTheme.text }}
-        >
-          Users Management
-        </Typography>
-        <Tooltip title="Refresh Users">
-          <IconButton
-            onClick={fetchAllUsers}
-            disabled={loading}
-            style={{ color: uiTheme.primary }}
-            className="hover:bg-opacity-10"
-          >
-            <RefreshIcon />
-          </IconButton>
-        </Tooltip>
-      </Box>
-
-             {/* Success/Error Messages */}
-       {success && (
-         <Alert severity="success" className="mb-4">
-           {success}
-         </Alert>
-       )}
-
-      {/* Users Table */}
-      <Paper 
-        className="overflow-hidden shadow-lg"
-        style={{ backgroundColor: uiTheme.surface }}
-      >
-        <TableContainer>
-          <Table>
-                                                   <TableHead>
-                <TableRow style={{ backgroundColor: uiTheme.background }}>
-                  <TableCell 
-                    style={{ color: uiTheme.text, fontWeight: 'bold' }}
-                    className="font-semibold"
-                  >
-                    User
-                  </TableCell>
-                  <TableCell 
-                    style={{ color: uiTheme.text, fontWeight: 'bold' }}
-                    className="font-semibold"
-                  >
-                    ID
-                  </TableCell>
-                  <TableCell 
-                    style={{ color: uiTheme.text, fontWeight: 'bold' }}
-                    className="font-semibold"
-                  >
-                    Email
-                  </TableCell>
-                  <TableCell 
-                    style={{ color: uiTheme.text, fontWeight: 'bold' }}
-                    className="font-semibold"
-                  >
-                    Phone
-                  </TableCell>
-                  <TableCell 
-                    style={{ color: uiTheme.text, fontWeight: 'bold' }}
-                    className="font-semibold"
-                  >
-                    Role
-                  </TableCell>
-                  <TableCell 
-                    style={{ color: uiTheme.text, fontWeight: 'bold' }}
-                    className="font-semibold"
-                  >
-                    Created
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-                                                   <TableBody>
-                {users
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((user: User) => (
-                    <TableRow 
-                      key={user.id}
-                      className="hover:bg-opacity-50 transition-colors"
-                      style={{ 
-                        backgroundColor: user.id === currentUser?.id 
-                          ? `${uiTheme.primary}20` 
-                          : 'transparent'
-                      }}
-                    >
-                      <TableCell>
-                        <Box className="flex items-center space-x-3">
-                                                                               <Avatar
-                            className="w-10 h-10 border-2 border-white shadow-sm"
-                            style={{ backgroundColor: uiTheme.primary }}
-                            src={getProfileImageUrl(user.profileImage)}
-                            onError={(e) => {
-                              const target = e.currentTarget as HTMLImageElement
-                              console.error('User Avatar image failed to load:', target.src)
-                              console.error('User profile image path:', user.profileImage)
-                            }}
-                            
-                          >
-                            <span className="text-white font-semibold text-sm">
-                              {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
-                            </span>
-                          </Avatar>
-                          <Box>
-                            <Typography
-                              variant="body1"
-                              className="font-semibold"
-                              style={{ color: uiTheme.text }}
-                            >
-                              {user.firstName} {user.lastName}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Typography
-                          variant="body2"
-                          style={{ color: uiTheme.text }}
-                          className="font-semibold"
-                        >
-                          {user.id}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography
-                          variant="body2"
-                          style={{ color: uiTheme.text }}
-                        >
-                          {user.email}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography
-                          variant="body2"
-                          style={{ color: uiTheme.text }}
-                        >
-                          {user.phoneNumber || 'N/A'}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={getRoleDisplayName(user.role as any)}
-                          size="small"
-                          style={{
-                            backgroundColor: getRoleColor(user.role),
-                            color: '#ffffff',
-                            fontWeight: 'bold'
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Typography
-                          variant="body2"
-                          style={{ color: uiTheme.textSecondary }}
-                        >
-                          {formatDate(user.createdAt)}
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-          </Table>
-        </TableContainer>
-        
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25, 50]}
-          component="div"
-          count={users.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          style={{ 
-            backgroundColor: uiTheme.background,
-            color: uiTheme.text 
-          }}
-        />
-      </Paper>
-
-      {/* Summary */}
-      <Box className="mt-4 p-4 rounded-lg" style={{ backgroundColor: uiTheme.background }}>
-        <Typography variant="body2" style={{ color: uiTheme.textSecondary }}>
-          Total Users: {users.length} | Current Page: {page + 1} of {Math.ceil(users.length / rowsPerPage)}
-        </Typography>
-      </Box>
+    <Box className="h-full p-6">
+      <CustomGrid
+        title="Users Management"
+        data={users || []}
+        columnDefs={columnDefs}
+        loading={loading}
+        error={error}
+        success={success}
+        theme={uiTheme}
+        height="calc(100vh - 120px)"
+        showTitle={true}
+        showAlerts={true}
+      />
     </Box>
   )
 }

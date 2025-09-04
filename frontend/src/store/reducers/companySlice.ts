@@ -10,6 +10,9 @@ import {
   getCompanyByUserRequest,
   getCompanyByUserSuccess,
   getCompanyByUserFailure,
+  getCompanyByIdRequest,
+  getCompanyByIdSuccess,
+  getCompanyByIdFailure,
   getAllCompaniesRequest,
   getAllCompaniesSuccess,
   getAllCompaniesFailure,
@@ -20,8 +23,11 @@ import {
   deleteCompanySuccess,
   deleteCompanyFailure,
   clearCompanyError,
-  clearCompanySuccess
+  clearCompanySuccess,
+  clearCompanyData
 } from '../actions/companyActions'
+import { logoutAndClearData } from '../actions/logoutActions'
+import { logout } from '../actions/authActions'
 
 interface CompanyState {
   company: Company | null
@@ -99,6 +105,21 @@ const companySlice = createSlice({
         state.error = action.payload
       })
 
+    // Get company by ID
+    builder
+      .addCase(getCompanyByIdRequest, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(getCompanyByIdSuccess, (state, action: PayloadAction<Company>) => {
+        state.loading = false
+        state.company = action.payload
+      })
+      .addCase(getCompanyByIdFailure, (state, action: PayloadAction<string>) => {
+        state.loading = false
+        state.error = action.payload
+      })
+
                 // Get all companies
             builder
               .addCase(getAllCompaniesRequest, (state) => {
@@ -164,6 +185,36 @@ const companySlice = createSlice({
               })
               .addCase(clearCompanySuccess, (state) => {
                 state.success = null
+              })
+              .addCase(clearCompanyData, (state) => {
+                state.company = null
+                state.companies = null
+                state.loading = false
+                state.error = null
+                state.success = null
+                state.createLoading = false
+                state.updateLoading = false
+                state.deleteLoading = false
+              })
+              .addCase(logoutAndClearData, (state) => {
+                state.company = null
+                state.companies = null
+                state.loading = false
+                state.error = null
+                state.success = null
+                state.createLoading = false
+                state.updateLoading = false
+                state.deleteLoading = false
+              })
+              .addCase(logout, (state) => {
+                state.company = null
+                state.companies = null
+                state.loading = false
+                state.error = null
+                state.success = null
+                state.createLoading = false
+                state.updateLoading = false
+                state.deleteLoading = false
               })
   }
 })

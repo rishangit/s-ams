@@ -46,7 +46,7 @@ export const isValidRoleName = (roleName) => {
 
 // Admin role checks
 export const isAdminRole = (roleId) => {
-  return roleId === ROLES.ADMIN || roleId === ROLES.OWNER
+  return roleId === ROLES.ADMIN
 }
 
 export const isOwnerRole = (roleId) => {

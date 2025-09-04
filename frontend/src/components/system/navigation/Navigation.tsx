@@ -23,7 +23,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { RootState } from '../../../store'
 import { getProfileImageUrl } from '../../../utils/fileUtils'
-import { logout } from '../../../store/actions'
+import { logoutAndClearData } from '../../../store/actions/logoutActions'
 import { setSidebarOpen } from '../../../store/reducers/uiSlice'
 import { isAdminRole, getRoleDisplayName } from '../../../constants/roles'
 
@@ -46,11 +46,11 @@ const Navigation: React.FC<NavigationProps> = ({
 
   const { user } = useSelector((state: RootState) => state.auth)
   const uiTheme = useSelector((state: RootState) => state.ui.theme)
-  
+
 
 
   const handleLogout = () => {
-    dispatch(logout())
+    dispatch(logoutAndClearData())
     navigate('/system/login')
   }
 
@@ -62,14 +62,14 @@ const Navigation: React.FC<NavigationProps> = ({
   }
 
   const drawerContent = (
-    <Box 
+    <Box
       className="h-full flex flex-col"
       style={{ backgroundColor: uiTheme.surface }}
     >
       {/* Logo/Brand Section - aligned with header */}
-      <Box 
+      <Box
         className="p-4"
-        style={{ 
+        style={{
           borderBottom: `1px solid ${uiTheme.border}`,
           backgroundColor: uiTheme.surface
         }}
@@ -89,14 +89,14 @@ const Navigation: React.FC<NavigationProps> = ({
           <ListItemButton
             onClick={() => handleNavigation('/system/dashboard')}
             style={{
-              backgroundColor: location.pathname === '/system/dashboard' 
-                ? uiTheme.primary 
+              backgroundColor: location.pathname === '/system/dashboard'
+                ? uiTheme.primary
                 : 'transparent',
-              color: location.pathname === '/system/dashboard' 
-                ? '#ffffff' 
+              color: location.pathname === '/system/dashboard'
+                ? '#ffffff'
                 : uiTheme.text,
-              borderRight: location.pathname === '/system/dashboard' 
-                ? `2px solid ${uiTheme.primary}` 
+              borderRight: location.pathname === '/system/dashboard'
+                ? `2px solid ${uiTheme.primary}`
                 : 'none',
               margin: '0 8px',
               borderRadius: '8px'
@@ -105,19 +105,19 @@ const Navigation: React.FC<NavigationProps> = ({
           >
             <ListItemIcon>
               <DashboardIcon
-                style={{ 
-                  color: location.pathname === '/system/dashboard' 
-                    ? '#ffffff' 
-                    : uiTheme.textSecondary 
+                style={{
+                  color: location.pathname === '/system/dashboard'
+                    ? '#ffffff'
+                    : uiTheme.textSecondary
                 }}
               />
             </ListItemIcon>
             <ListItemText
               primary="Dashboard"
-              style={{ 
-                color: location.pathname === '/system/dashboard' 
-                  ? '#ffffff' 
-                  : uiTheme.text 
+              style={{
+                color: location.pathname === '/system/dashboard'
+                  ? '#ffffff'
+                  : uiTheme.text
               }}
             />
           </ListItemButton>
@@ -129,14 +129,14 @@ const Navigation: React.FC<NavigationProps> = ({
             <ListItemButton
               onClick={() => handleNavigation('/system/users')}
               style={{
-                backgroundColor: location.pathname === '/system/users' 
-                  ? uiTheme.primary 
+                backgroundColor: location.pathname === '/system/users'
+                  ? uiTheme.primary
                   : 'transparent',
-                color: location.pathname === '/system/users' 
-                  ? '#ffffff' 
+                color: location.pathname === '/system/users'
+                  ? '#ffffff'
                   : uiTheme.text,
-                borderRight: location.pathname === '/system/users' 
-                  ? `2px solid ${uiTheme.primary}` 
+                borderRight: location.pathname === '/system/users'
+                  ? `2px solid ${uiTheme.primary}`
                   : 'none',
                 margin: '0 8px',
                 borderRadius: '8px'
@@ -145,19 +145,19 @@ const Navigation: React.FC<NavigationProps> = ({
             >
               <ListItemIcon>
                 <PeopleIcon
-                  style={{ 
-                    color: location.pathname === '/system/users' 
-                      ? '#ffffff' 
-                      : uiTheme.textSecondary 
+                  style={{
+                    color: location.pathname === '/system/users'
+                      ? '#ffffff'
+                      : uiTheme.textSecondary
                   }}
                 />
               </ListItemIcon>
               <ListItemText
                 primary="Users"
-                style={{ 
-                  color: location.pathname === '/system/users' 
-                    ? '#ffffff' 
-                    : uiTheme.text 
+                style={{
+                  color: location.pathname === '/system/users'
+                    ? '#ffffff'
+                    : uiTheme.text
                 }}
               />
             </ListItemButton>
@@ -170,14 +170,14 @@ const Navigation: React.FC<NavigationProps> = ({
             <ListItemButton
               onClick={() => handleNavigation('/system/companies')}
               style={{
-                backgroundColor: location.pathname === '/system/companies' 
-                  ? uiTheme.primary 
+                backgroundColor: location.pathname === '/system/companies'
+                  ? uiTheme.primary
                   : 'transparent',
-                color: location.pathname === '/system/companies' 
-                  ? '#ffffff' 
+                color: location.pathname === '/system/companies'
+                  ? '#ffffff'
                   : uiTheme.text,
-                borderRight: location.pathname === '/system/companies' 
-                  ? `2px solid ${uiTheme.primary}` 
+                borderRight: location.pathname === '/system/companies'
+                  ? `2px solid ${uiTheme.primary}`
                   : 'none',
                 margin: '0 8px',
                 borderRadius: '8px'
@@ -186,19 +186,19 @@ const Navigation: React.FC<NavigationProps> = ({
             >
               <ListItemIcon>
                 <BusinessIcon
-                  style={{ 
-                    color: location.pathname === '/system/companies' 
-                      ? '#ffffff' 
-                      : uiTheme.textSecondary 
+                  style={{
+                    color: location.pathname === '/system/companies'
+                      ? '#ffffff'
+                      : uiTheme.textSecondary
                   }}
                 />
               </ListItemIcon>
               <ListItemText
                 primary="Companies"
-                style={{ 
-                  color: location.pathname === '/system/companies' 
-                    ? '#ffffff' 
-                    : uiTheme.text 
+                style={{
+                  color: location.pathname === '/system/companies'
+                    ? '#ffffff'
+                    : uiTheme.text
                 }}
               />
             </ListItemButton>
@@ -219,8 +219,8 @@ const Navigation: React.FC<NavigationProps> = ({
       </List>
 
       {/* User Section at Bottom */}
-      <Box 
-        style={{ 
+      <Box
+        style={{
           borderTop: `1px solid ${uiTheme.border}`,
           backgroundColor: uiTheme.surface
         }}
@@ -229,58 +229,58 @@ const Navigation: React.FC<NavigationProps> = ({
           <ListItemButton
             onClick={() => handleNavigation('/system/profile')}
             style={{
-              backgroundColor: location.pathname === '/system/profile' 
-                ? uiTheme.primary 
+              backgroundColor: location.pathname === '/system/profile'
+                ? uiTheme.primary
                 : 'transparent',
-              color: location.pathname === '/system/profile' 
-                ? '#ffffff' 
+              color: location.pathname === '/system/profile'
+                ? '#ffffff'
                 : uiTheme.text,
               borderRadius: '8px',
               marginBottom: '8px',
               padding: '8px',
-              border: location.pathname === '/system/profile' 
-                ? `2px solid ${uiTheme.primary}` 
+              border: location.pathname === '/system/profile'
+                ? `2px solid ${uiTheme.primary}`
                 : 'none'
             }}
             className="hover:opacity-80 transition-all duration-200"
           >
             <Box className="flex items-center space-x-2 w-full">
-              <Avatar 
+              <Avatar
                 className="w-8 h-8 border shadow-sm"
-                style={{ 
-                  backgroundColor: location.pathname === '/system/profile' 
-                    ? '#ffffff' 
+                style={{
+                  backgroundColor: location.pathname === '/system/profile'
+                    ? '#ffffff'
                     : uiTheme.primary,
-                  borderColor: location.pathname === '/system/profile' 
-                    ? uiTheme.primary 
+                  borderColor: location.pathname === '/system/profile'
+                    ? uiTheme.primary
                     : uiTheme.border
                 }}
-                                                                   src={getProfileImageUrl(user?.profileImage)}
+                src={getProfileImageUrl(user?.profileImage)}
                 onError={(e) => {
                   const target = e.currentTarget as HTMLImageElement
                   console.error('Navigation Avatar image failed to load:', target.src)
                 }}
-                
+
               >
                 {user ? (
-                  <span 
+                  <span
                     className="font-semibold text-xs"
-                    style={{ 
-                      color: location.pathname === '/system/profile' 
-                        ? uiTheme.primary 
-                        : '#ffffff' 
+                    style={{
+                      color: location.pathname === '/system/profile'
+                        ? uiTheme.primary
+                        : '#ffffff'
                     }}
                   >
                     {user.firstName.charAt(0)}{user.lastName.charAt(0)}
                   </span>
                 ) : (
-                  <PersonIcon 
-                    style={{ 
-                      color: location.pathname === '/system/profile' 
-                        ? uiTheme.primary 
-                        : '#ffffff', 
-                      fontSize: '1rem' 
-                    }} 
+                  <PersonIcon
+                    style={{
+                      color: location.pathname === '/system/profile'
+                        ? uiTheme.primary
+                        : '#ffffff',
+                      fontSize: '1rem'
+                    }}
                   />
                 )}
               </Avatar>
@@ -288,10 +288,10 @@ const Navigation: React.FC<NavigationProps> = ({
                 <Typography
                   variant="subtitle2"
                   className="font-medium truncate text-sm"
-                  style={{ 
-                    color: location.pathname === '/system/profile' 
-                      ? '#ffffff' 
-                      : uiTheme.text 
+                  style={{
+                    color: location.pathname === '/system/profile'
+                      ? '#ffffff'
+                      : uiTheme.text
                   }}
                 >
                   {user ? `${user.firstName} ${user.lastName}` : 'User'}
@@ -299,13 +299,13 @@ const Navigation: React.FC<NavigationProps> = ({
                 <Typography
                   variant="caption"
                   className="block truncate text-xs"
-                  style={{ 
-                    color: location.pathname === '/system/profile' 
-                      ? '#ffffff' 
-                      : uiTheme.textSecondary 
+                  style={{
+                    color: location.pathname === '/system/profile'
+                      ? '#ffffff'
+                      : uiTheme.textSecondary
                   }}
                 >
-                                     {user?.role !== undefined ? getRoleDisplayName(user.role as any) : 'User'}
+                  {user?.role !== undefined ? getRoleDisplayName(user.role as any) : 'User'}
                 </Typography>
               </Box>
             </Box>
@@ -335,19 +335,19 @@ const Navigation: React.FC<NavigationProps> = ({
   )
 
   return (
-         <Box
-       component="nav"
-       className="flex-shrink-0"
-               style={{ 
-          width: isMobile ? 0 : drawerWidth,
-          position: 'fixed',
-          left: 0,
-          top: 0,
-          height: '100vh',
-          zIndex: 70,
-          minWidth: 0
-        }}
-     >
+    <Box
+      component="nav"
+      className="flex-shrink-0"
+      style={{
+        width: isMobile ? 0 : drawerWidth,
+        position: 'fixed',
+        left: 0,
+        top: 0,
+        height: '100vh',
+        zIndex: 70,
+        minWidth: 0
+      }}
+    >
       {/* Desktop Drawer */}
       {!isMobile && (
         <Drawer

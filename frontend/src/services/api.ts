@@ -159,6 +159,10 @@ class ApiService {
     return this.request<any>(`/company/user/${userId}`)
   }
 
+  async getCompanyById(companyId: number): Promise<ApiResponse<any>> {
+    return this.request<any>(`/company/${companyId}`)
+  }
+
   // Admin company management methods
   async getAllCompanies(): Promise<ApiResponse<any>> {
     return this.request<any>('/company')

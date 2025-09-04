@@ -10,6 +10,9 @@ import {
   getCompanyByUserRequest,
   getCompanyByUserSuccess,
   getCompanyByUserFailure,
+  getCompanyByIdRequest,
+  getCompanyByIdSuccess,
+  getCompanyByIdFailure,
   getAllCompaniesRequest,
   getAllCompaniesSuccess,
   getAllCompaniesFailure,
@@ -29,8 +32,8 @@ export const createCompanyEpic = (action$: any) =>
     switchMap((action: any) => {
       return from(apiService.createCompany(action.payload)).pipe(
         map((response) => {
-          if (response.success && response.data) {
-            return createCompanySuccess(response.data)
+          if (response.success && response.data && response.data.company) {
+            return createCompanySuccess(response.data.company)
           } else {
             return createCompanyFailure(response.message || 'Failed to create company')
           }
@@ -50,8 +53,8 @@ export const updateCompanyEpic = (action$: any) =>
       const { id, data } = action.payload
       return from(apiService.updateCompany(id, data)).pipe(
         map((response) => {
-          if (response.success && response.data) {
-            return updateCompanySuccess(response.data)
+          if (response.success && response.data && response.data.company) {
+            return updateCompanySuccess(response.data.company)
           } else {
             return updateCompanyFailure(response.message || 'Failed to update company')
           }
@@ -71,14 +74,35 @@ export const getCompanyByUserEpic = (action$: any) =>
       const userId = action.payload
       return from(apiService.getCompanyByUser(userId)).pipe(
         map((response) => {
-          if (response.success && response.data) {
-            return getCompanyByUserSuccess(response.data)
+          if (response.success && response.data && response.data.company) {
+            return getCompanyByUserSuccess(response.data.company)
           } else {
             return getCompanyByUserFailure(response.message || 'Failed to fetch company')
           }
         }),
         catchError((error) => {
           return of(getCompanyByUserFailure(error.message || 'Failed to fetch company'))
+        })
+      )
+    })
+  )
+
+// Get company by ID epic
+export const getCompanyByIdEpic = (action$: any) =>
+  action$.pipe(
+    ofType(getCompanyByIdRequest.type),
+    switchMap((action: any) => {
+      const companyId = action.payload
+      return from(apiService.getCompanyById(companyId)).pipe(
+        map((response) => {
+          if (response.success && response.data && response.data.company) {
+            return getCompanyByIdSuccess(response.data.company)
+          } else {
+            return getCompanyByIdFailure(response.message || 'Failed to fetch company')
+          }
+        }),
+        catchError((error) => {
+          return of(getCompanyByIdFailure(error.message || 'Failed to fetch company'))
         })
       )
     })
@@ -112,8 +136,8 @@ export const updateCompanyStatusEpic = (action$: any) =>
       const { id, status } = action.payload
       return from(apiService.updateCompanyStatus(id, status)).pipe(
         map((response) => {
-          if (response.success && response.data) {
-            return updateCompanyStatusSuccess(response.data)
+          if (response.success && response.data && response.data.company) {
+            return updateCompanyStatusSuccess(response.data.company)
           } else {
             return updateCompanyStatusFailure(response.message || 'Failed to update company status')
           }

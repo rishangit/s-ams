@@ -23,7 +23,7 @@ router.put('/:id', updateCompany) // Update company
 
 // Admin-only routes
 router.get('/', requireAdmin, getAllCompanies) // Get all companies
-router.get('/:id', requireAdmin, getCompanyById) // Get company by ID
+router.get('/:id', getCompanyById) // Get company by ID (users can view their own company)
 router.put('/:id/status', requireAdmin, updateCompanyStatus) // Update company status
 router.delete('/:id', requireAdmin, deleteCompany) // Delete company
 

@@ -85,19 +85,69 @@ const FormInput: React.FC<FormInputProps> = ({
           }}
           className="w-full rounded-md transition-all duration-200"
           style={{
-            backgroundColor: theme.surface,
+            backgroundColor: disabled ? (theme.mode === 'dark' ? '#1e293b' : '#f9fafb') : theme.surface,
           }}
           sx={{
             '& .MuiInputBase-input': {
+              color: theme.text,
               '&:-webkit-autofill': {
-                WebkitBoxShadow: `0 0 0 100px ${theme.surface} inset`,
-                WebkitTextFillColor: theme.text,
+                WebkitBoxShadow: `0 0 0 100px ${disabled ? (theme.mode === 'dark' ? '#1e293b' : '#f9fafb') : theme.surface} inset`,
+                WebkitTextFillColor: disabled ? (theme.mode === 'dark' ? '#64748b' : '#9ca3af') : theme.text,
               },
               '&:-webkit-autofill:hover': {
-                WebkitBoxShadow: `0 0 0 100px ${theme.surface} inset`,
+                WebkitBoxShadow: `0 0 0 100px ${disabled ? (theme.mode === 'dark' ? '#1e293b' : '#f9fafb') : theme.surface} inset`,
               },
               '&:-webkit-autofill:focus': {
-                WebkitBoxShadow: `0 0 0 100px ${theme.surface} inset`,
+                WebkitBoxShadow: `0 0 0 100px ${disabled ? (theme.mode === 'dark' ? '#1e293b' : '#f9fafb') : theme.surface} inset`,
+              },
+              '&:disabled': {
+                color: theme.mode === 'dark' ? '#64748b' : '#9ca3af',
+                WebkitTextFillColor: theme.mode === 'dark' ? '#64748b' : '#9ca3af',
+                cursor: 'not-allowed',
+              },
+            },
+            '& .MuiInputLabel-root': {
+              color: theme.textSecondary,
+              '&.Mui-focused': {
+                color: disabled ? (theme.mode === 'dark' ? '#64748b' : '#9ca3af') : theme.primary,
+              },
+              '&.Mui-disabled': {
+                color: theme.mode === 'dark' ? '#64748b' : '#9ca3af',
+              },
+            },
+            '& .MuiOutlinedInput-root': {
+              backgroundColor: disabled ? (theme.mode === 'dark' ? '#1e293b' : '#f9fafb') : theme.surface,
+              '& fieldset': {
+                borderColor: theme.mode === 'dark' ? '#334155' : '#e5e7eb',
+              },
+              '&:hover fieldset': {
+                borderColor: disabled ? (theme.mode === 'dark' ? '#1e293b' : '#f1f5f9') : (theme.mode === 'dark' ? '#475569' : '#cbd5e1'),
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: disabled ? (theme.mode === 'dark' ? '#1e293b' : '#f1f5f9') : theme.primary,
+              },
+              '&.Mui-disabled fieldset': {
+                borderColor: theme.mode === 'dark' ? '#1e293b' : '#f1f5f9',
+              },
+              '&.Mui-disabled': {
+                backgroundColor: theme.mode === 'dark' ? '#1e293b' : '#f9fafb',
+                cursor: 'not-allowed',
+              },
+            },
+            '& .MuiFormHelperText-root': {
+              color: error ? '#ef4444' : theme.textSecondary,
+              '&.Mui-disabled': {
+                color: theme.mode === 'dark' ? '#64748b' : '#9ca3af',
+              },
+            },
+            '& .MuiInputAdornment-root': {
+              '& .MuiSvgIcon-root': {
+                color: disabled ? (theme.mode === 'dark' ? '#64748b' : '#9ca3af') : theme.textSecondary,
+              },
+            },
+            '& .MuiIconButton-root': {
+              '&:disabled': {
+                color: theme.mode === 'dark' ? '#64748b' : '#9ca3af',
               },
             },
           }}

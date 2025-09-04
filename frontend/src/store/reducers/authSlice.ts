@@ -15,6 +15,7 @@ import {
   updateProfileSuccess,
   updateProfileFailure,
 } from '../actions'
+import { logoutAndClearData } from '../actions/logoutActions'
 
 interface AuthState {
   user: User | null
@@ -79,6 +80,16 @@ const authSlice = createSlice({
 
     // Logout
     builder.addCase(logout, (state) => {
+      state.user = null
+      state.token = null
+      state.isAuthenticated = false
+      state.loading = false
+      state.error = null
+      localStorage.removeItem('authToken')
+    })
+
+    // Logout and clear all data
+    builder.addCase(logoutAndClearData, (state) => {
       state.user = null
       state.token = null
       state.isAuthenticated = false
