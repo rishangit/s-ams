@@ -1,6 +1,17 @@
 import React, { useState } from 'react'
 import { TextField, InputAdornment, IconButton } from '@mui/material'
-import { Email, Lock, Person, Phone, Visibility, VisibilityOff } from '@mui/icons-material'
+import { 
+  Email, 
+  Lock, 
+  Person, 
+  Phone, 
+  Visibility, 
+  VisibilityOff,
+  Build,
+  AttachMoney,
+  Description,
+  Schedule
+} from '@mui/icons-material'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
 import { Controller, Control, FieldError } from 'react-hook-form'
@@ -8,7 +19,7 @@ import { Controller, Control, FieldError } from 'react-hook-form'
 interface FormInputProps {
   name: string
   label: string
-  type?: 'text' | 'email' | 'password' | 'tel'
+  type?: 'text' | 'email' | 'password' | 'tel' | 'service' | 'price' | 'description' | 'duration'
   control: Control<any>
   error?: FieldError
   required?: boolean
@@ -35,6 +46,14 @@ const FormInput: React.FC<FormInputProps> = ({
         return <Lock style={{ color: theme.textSecondary }} />
       case 'tel':
         return <Phone style={{ color: theme.textSecondary }} />
+      case 'service':
+        return <Build style={{ color: theme.textSecondary }} />
+      case 'price':
+        return <AttachMoney style={{ color: theme.textSecondary }} />
+      case 'description':
+        return <Description style={{ color: theme.textSecondary }} />
+      case 'duration':
+        return <Schedule style={{ color: theme.textSecondary }} />
       default:
         return <Person style={{ color: theme.textSecondary }} />
     }

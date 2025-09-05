@@ -180,6 +180,42 @@ class ApiService {
       method: 'DELETE'
     })
   }
+
+  // Services endpoints
+  async createService(serviceData: any): Promise<ApiResponse<any>> {
+    return this.request<any>('/services', {
+      method: 'POST',
+      body: JSON.stringify(serviceData)
+    })
+  }
+
+  async getServices(): Promise<ApiResponse<any>> {
+    return this.request<any>('/services')
+  }
+
+  async getServiceById(serviceId: number): Promise<ApiResponse<any>> {
+    return this.request<any>(`/services/${serviceId}`)
+  }
+
+  async updateService(serviceId: number, serviceData: any): Promise<ApiResponse<any>> {
+    return this.request<any>(`/services/${serviceId}`, {
+      method: 'PUT',
+      body: JSON.stringify(serviceData)
+    })
+  }
+
+  async updateServiceStatus(serviceId: number, status: string): Promise<ApiResponse<any>> {
+    return this.request<any>(`/services/${serviceId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status })
+    })
+  }
+
+  async deleteService(serviceId: number): Promise<ApiResponse<any>> {
+    return this.request<any>(`/services/${serviceId}`, {
+      method: 'DELETE'
+    })
+  }
 }
 
 // Export singleton instance

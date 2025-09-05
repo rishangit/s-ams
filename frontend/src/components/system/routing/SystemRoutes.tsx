@@ -6,9 +6,11 @@ import { Dashboard, UserProfile, SystemLayout, Users, Companies, CompanyDetail }
 import Company from '../company'
 import CompanyRouter from '../company/CompanyRouter'
 import CompanyRouteWrapper from '../company/CompanyRouteWrapper'
+import ServiceRouter from '../services/ServiceRouter'
 import ProtectedRoute from './ProtectedRoute'
 import PublicRoute from './PublicRoute'
 import AdminRoute from './AdminRoute'
+import OwnerRoute from './OwnerRoute'
 
 const SystemRoutes: React.FC = () => {
   return (
@@ -58,6 +60,13 @@ const SystemRoutes: React.FC = () => {
         <ProtectedRoute>
           <CompanyRouteWrapper />
         </ProtectedRoute>
+      } />
+      <Route path="services/*" element={
+        <OwnerRoute>
+          <SystemLayout title="Services Management">
+            <ServiceRouter />
+          </SystemLayout>
+        </OwnerRoute>
       } />
       
       {/* Redirect root to dashboard if authenticated, otherwise to login */}

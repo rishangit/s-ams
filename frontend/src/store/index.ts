@@ -12,6 +12,14 @@ import {
   updateCompanyStatusEpic,
   deleteCompanyEpic
 } from './epics/companyEpics'
+import {
+  createServiceEpic,
+  getServicesEpic,
+  getServiceByIdEpic,
+  updateServiceEpic,
+  updateServiceStatusEpic,
+  deleteServiceEpic
+} from './epics/servicesEpics'
 
 const epicMiddleware = createEpicMiddleware()
 
@@ -27,7 +35,13 @@ const rootEpic = combineEpics(
   getCompanyByIdEpic,
   getAllCompaniesEpic,
   updateCompanyStatusEpic,
-  deleteCompanyEpic
+  deleteCompanyEpic,
+  createServiceEpic,
+  getServicesEpic,
+  getServiceByIdEpic,
+  updateServiceEpic,
+  updateServiceStatusEpic,
+  deleteServiceEpic
 )
 
 export const store = configureStore({

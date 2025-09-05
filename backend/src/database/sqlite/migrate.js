@@ -72,6 +72,31 @@ const createTables = async () => {
       CREATE INDEX IF NOT EXISTS idx_companies_status ON companies (status)
     `)
 
+    // Create services table
+    await db.exec(`
+      CREATE TABLE IF NOT EXISTS services (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        description TEXT,
+        duration TEXT,
+        price DECIMAL(10,2),
+        status TEXT CHECK(status IN ('active', 'inactive')) DEFAULT 'active',
+        company_id INTEGER NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (company_id) REFERENCES companies (id) ON DELETE CASCADE
+      )
+    `)
+
+    // Create indexes for services table
+    await db.exec(`
+      CREATE INDEX IF NOT EXISTS idx_services_company_id ON services (company_id)
+    `)
+
+    await db.exec(`
+      CREATE INDEX IF NOT EXISTS idx_services_status ON services (status)
+    `)
+
     console.log('Database tables created successfully')
   } catch (error) {
     console.error('Error creating tables:', error)

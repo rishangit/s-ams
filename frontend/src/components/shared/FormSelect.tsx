@@ -1,5 +1,5 @@
 import React from 'react'
-import { FormControl, InputLabel, Select, MenuItem } from '@mui/material'
+import { FormControl, InputLabel, Select, MenuItem, InputAdornment } from '@mui/material'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
 import { Controller, Control, FieldError } from 'react-hook-form'
@@ -17,6 +17,7 @@ interface FormSelectProps {
   error?: FieldError
   required?: boolean
   disabled?: boolean
+  icon?: React.ReactNode
 }
 
 const FormSelect: React.FC<FormSelectProps> = ({
@@ -26,7 +27,8 @@ const FormSelect: React.FC<FormSelectProps> = ({
   options,
   error,
   required = false,
-  disabled = false
+  disabled = false,
+  icon
 }) => {
   const theme = useSelector((state: RootState) => state.ui.theme)
 
@@ -48,6 +50,11 @@ const FormSelect: React.FC<FormSelectProps> = ({
             label={label}
             required={required}
             disabled={disabled}
+            startAdornment={icon ? (
+              <InputAdornment position="start">
+                {icon}
+              </InputAdornment>
+            ) : undefined}
             sx={{
               backgroundColor: disabled ? (theme.mode === 'dark' ? '#1e293b' : '#f9fafb') : theme.surface,
               color: disabled ? (theme.mode === 'dark' ? '#64748b' : '#9ca3af') : theme.text,

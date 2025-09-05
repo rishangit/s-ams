@@ -54,6 +54,24 @@ const createTables = async () => {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `)
 
+    // Create services table
+    await executeQuery(`
+      CREATE TABLE IF NOT EXISTS services (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        description TEXT,
+        duration VARCHAR(100),
+        price DECIMAL(10,2),
+        status ENUM('active', 'inactive') DEFAULT 'active',
+        company_id INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (company_id) REFERENCES companies (id) ON DELETE CASCADE,
+        INDEX idx_services_company_id (company_id),
+        INDEX idx_services_status (status)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `)
+
     console.log('MySQL Database tables created successfully')
   } catch (error) {
     console.error('Error creating MySQL tables:', error)
