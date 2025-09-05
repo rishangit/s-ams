@@ -26,7 +26,7 @@ import {
   clearCompanySuccess
 } from '../../../store/actions/companyActions'
 import { CompanyStatus, getCompanyStatusDisplayName, getCompanyStatusColor } from '../../../constants/company'
-import { isAdminRole } from '../../../constants/roles'
+import { isAdminOnlyRole } from '../../../constants/roles'
 import { CustomGrid } from '../../../components/shared'
 import { ColDef, ICellRendererParams } from 'ag-grid-community'
 import { getProfileImageUrl } from '../../../utils/fileUtils'
@@ -40,7 +40,7 @@ const Companies: React.FC = () => {
 
   // Load companies when component mounts
   useEffect(() => {
-    if (user && isAdminRole(parseInt(user.role) as any)) {
+    if (user && isAdminOnlyRole(parseInt(user.role) as any)) {
       dispatch(getAllCompaniesRequest())
     }
   }, [user?.role, dispatch])
@@ -281,7 +281,7 @@ const Companies: React.FC = () => {
     }
   ], [uiTheme])
 
-  if (!user || !isAdminRole(parseInt(user.role) as any)) {
+  if (!user || !isAdminOnlyRole(parseInt(user.role) as any)) {
     return (
       <Box className="flex justify-center items-center h-64">
         <div className="text-lg font-semibold" style={{ color: uiTheme.text }}>

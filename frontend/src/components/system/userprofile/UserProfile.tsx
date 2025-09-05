@@ -437,8 +437,8 @@ const UserProfile: React.FC = () => {
           </Paper>
         </Grid>
 
-        {/* Company Registration Request Card - Only for Users (role USER) */}
-        {parseInt(user.role) === ROLES.USER && (
+        {/* Company Registration Request Card - For Users and Owners (role USER and OWNER) */}
+        {(parseInt(user.role) === ROLES.USER || parseInt(user.role) === ROLES.OWNER) && (
           <Grid item xs={12}>
             <Paper
               className="p-6"
@@ -468,7 +468,7 @@ const UserProfile: React.FC = () => {
               >
                 {company ? 
                   `Your company "${company.name}" is registered with status: ${company.status}. You can edit your company details or view the current status.` :
-                  'As a regular user, you can request to register your company with our system. This will allow you to access additional features and manage your organization\'s data.'
+                  'You can request to register your company with our system. This will allow you to access additional features and manage your organization\'s data.'
                 }
               </Typography>
 

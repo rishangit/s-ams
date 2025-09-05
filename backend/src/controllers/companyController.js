@@ -1,4 +1,5 @@
 import { Company } from '../models/index.js'
+import { User } from '../models/index.js'
 import { validateCompanyData } from '../middleware/companyValidation.js'
 
 // Create a new company
@@ -37,9 +38,12 @@ export const createCompany = async (req, res) => {
 
     const company = await Company.create(companyData)
 
+    // Update user role to owner when company request is sent
+    await User.updateRole(userId, 'owner')
+
     res.status(201).json({
       success: true,
-      message: 'Company registration request submitted successfully',
+      message: 'Company registration request submitted successfully. Your role has been updated to Owner.',
       data: {
         company: {
           id: company.id,
@@ -301,9 +305,14 @@ export const updateCompanyStatus = async (req, res) => {
 
     const updatedCompany = await Company.updateStatus(companyId, status)
 
+    // Update user role to owner when company becomes active
+    if (status === 'active') {
+      await User.updateRole(existingCompany.userId, 'owner')
+    }
+
     res.json({
       success: true,
-      message: `Company status updated to ${status}`,
+      message: `Company status updated to ${status}${status === 'active' ? '. User role has been updated to Owner.' : ''}`,
       data: {
         company: {
           id: updatedCompany.id,

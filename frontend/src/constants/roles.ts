@@ -54,6 +54,11 @@ export const isAdminRole = (roleId: RoleId): boolean => {
   return roleId === ROLES.ADMIN || roleId === ROLES.OWNER
 }
 
+// Admin only role check (excludes owners)
+export const isAdminOnlyRole = (roleId: RoleId): boolean => {
+  return roleId === ROLES.ADMIN
+}
+
 export const isOwnerRole = (roleId: RoleId): boolean => {
   return roleId === ROLES.OWNER
 }

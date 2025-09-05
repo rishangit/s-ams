@@ -11,7 +11,7 @@ import {
 } from '@mui/icons-material'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../../store'
-import { getRoleDisplayName } from '../../../constants/roles'
+import { getRoleDisplayName, isAdminOnlyRole } from '../../../constants/roles'
 import { getProfileImageUrl } from '../../../utils/fileUtils'
 import { useUsers } from '../../../hooks/useUsers'
 import { CustomGrid } from '../../../components/shared'
@@ -43,8 +43,10 @@ const Users: React.FC = () => {
   } = useUsers()
 
   useEffect(() => {
-    fetchAllUsers()
-  }, [fetchAllUsers])
+    if (currentUser && isAdminOnlyRole(currentUser.role as any)) {
+      fetchAllUsers()
+    }
+  }, [fetchAllUsers, currentUser])
 
   // Clear error and success messages after 3 seconds
   useEffect(() => {
@@ -190,6 +192,17 @@ const Users: React.FC = () => {
       valueGetter: (params) => formatDate(params.data.createdAt)
     }
   ], [uiTheme, currentUser])
+
+  // Access control check
+  if (!currentUser || !isAdminOnlyRole(currentUser.role as any)) {
+    return (
+      <Box className="flex justify-center items-center h-64">
+        <div className="text-lg font-semibold" style={{ color: uiTheme.text }}>
+          Access Denied. Admin privileges required.
+        </div>
+      </Box>
+    )
+  }
 
   return (
     <Box className="h-full p-6">

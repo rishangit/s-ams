@@ -25,7 +25,7 @@ import { RootState } from '../../../store'
 import { getProfileImageUrl } from '../../../utils/fileUtils'
 import { logoutAndClearData } from '../../../store/actions/logoutActions'
 import { setSidebarOpen } from '../../../store/reducers/uiSlice'
-import { isAdminRole, getRoleDisplayName } from '../../../constants/roles'
+import { isAdminOnlyRole, getRoleDisplayName } from '../../../constants/roles'
 
 interface NavigationProps {
   drawerWidth: number
@@ -123,8 +123,8 @@ const Navigation: React.FC<NavigationProps> = ({
           </ListItemButton>
         </ListItem>
 
-        {/* Users Management - Admin Only */}
-        {user && isAdminRole(user.role as any) && (
+        {/* Users Management - Admin Only (excludes owners) */}
+        {user && isAdminOnlyRole(user.role as any) && (
           <ListItem disablePadding>
             <ListItemButton
               onClick={() => handleNavigation('/system/users')}
@@ -164,8 +164,8 @@ const Navigation: React.FC<NavigationProps> = ({
           </ListItem>
         )}
 
-        {/* Companies Management - Admin Only */}
-        {user && isAdminRole(user.role as any) && (
+        {/* Companies Management - Admin Only (excludes owners) */}
+        {user && isAdminOnlyRole(user.role as any) && (
           <ListItem disablePadding>
             <ListItemButton
               onClick={() => handleNavigation('/system/companies')}

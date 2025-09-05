@@ -110,3 +110,23 @@ export const requireAdmin = (req, res, next) => {
 
   next()
 }
+
+// Middleware to require admin role only (excludes owners)
+export const requireAdminOnly = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ 
+      success: false, 
+      message: 'Authentication required' 
+    })
+  }
+
+  // Check if user has admin role (0) only
+  if (req.user.role !== 0) {
+    return res.status(403).json({ 
+      success: false, 
+      message: 'Access denied. Admin role required.' 
+    })
+  }
+
+  next()
+}

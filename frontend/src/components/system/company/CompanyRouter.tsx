@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux'
 import { RootState } from '../../../store'
 import Company from './Company'
 import CompanyDetail from './CompanyDetail'
-import { isAdminRole } from '../../../constants/roles'
+import { isAdminOnlyRole } from '../../../constants/roles'
 
 const CompanyRouter: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -14,11 +14,11 @@ const CompanyRouter: React.FC = () => {
   useEffect(() => {
     // If no ID is provided, redirect based on user role
     if (!id) {
-      if (user && isAdminRole(parseInt(user.role) as any)) {
+      if (user && isAdminOnlyRole(parseInt(user.role) as any)) {
         // Admin users should see companies list
         navigate('/system/companies', { replace: true })
       } else {
-        // Regular users should see company registration form
+        // Regular users and owners should see company registration form
         navigate('/system/companies/new', { replace: true })
       }
       return
@@ -32,8 +32,8 @@ const CompanyRouter: React.FC = () => {
     // If ID is a number, show company details (for both admin and regular users)
     const numericId = parseInt(id)
     if (isNaN(numericId)) {
-      // Invalid ID, redirect to companies list for admin, or new for regular users
-      if (user && isAdminRole(parseInt(user.role) as any)) {
+      // Invalid ID, redirect to companies list for admin, or new for regular users and owners
+      if (user && isAdminOnlyRole(parseInt(user.role) as any)) {
         navigate('/system/companies', { replace: true })
       } else {
         navigate('/system/companies/new', { replace: true })

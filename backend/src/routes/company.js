@@ -9,7 +9,7 @@ import {
   deleteCompany 
 } from '../controllers/companyController.js'
 import { authenticateToken } from '../middleware/auth.js'
-import { requireAdmin } from '../middleware/auth.js'
+import { requireAdmin, requireAdminOnly } from '../middleware/auth.js'
 
 const router = express.Router()
 
@@ -22,7 +22,7 @@ router.get('/user/:userId', getCompanyByUser) // Get company by user ID
 router.put('/:id', updateCompany) // Update company
 
 // Admin-only routes
-router.get('/', requireAdmin, getAllCompanies) // Get all companies
+router.get('/', requireAdminOnly, getAllCompanies) // Get all companies (admin only, excludes owners)
 router.get('/:id', getCompanyById) // Get company by ID (users can view their own company)
 router.put('/:id/status', requireAdmin, updateCompanyStatus) // Update company status
 router.delete('/:id', requireAdmin, deleteCompany) // Delete company
