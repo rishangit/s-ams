@@ -59,31 +59,47 @@ const Header: React.FC<HeaderProps> = ({
               aria-label="open drawer"
               edge="start"
               onClick={onDrawerToggle}
-              className="mr-2 hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="mr-2"
               style={{ 
                 color: uiTheme.text,
                 backgroundColor: 'transparent'
+              }}
+              sx={{
+                '&:focus': {
+                  outline: 'none',
+                  backgroundColor: 'transparent !important',
+                  boxShadow: 'none !important'
+                },
+                '&:focus-visible': {
+                  outline: 'none',
+                  backgroundColor: 'transparent !important',
+                  boxShadow: 'none !important'
+                }
               }}
             >
               <MenuIcon style={{ fontSize: '1.5rem' }} />
             </IconButton>
           )}
-          <Typography
-            variant="h6"
-            className="font-semibold"
-            style={{ color: uiTheme.text }}
-          >
-            {title}
-          </Typography>
+          {!isMobile && (
+            <Typography
+              variant="h6"
+              className="font-semibold"
+              style={{ color: uiTheme.text }}
+            >
+              {title}
+            </Typography>
+          )}
         </Box>
 
         <Box className="flex items-center space-x-3">
-          <Typography
-            variant="body2"
-            style={{ color: uiTheme.textSecondary }}
-          >
-            Welcome, {user ? `${user.firstName} ${user.lastName}` : 'User'}
-          </Typography>
+          {!isMobile && (
+            <Typography
+              variant="body2"
+              style={{ color: uiTheme.textSecondary }}
+            >
+              Welcome, {user ? `${user.firstName} ${user.lastName}` : 'User'}
+            </Typography>
+          )}
           
           {/* Settings Icon */}
           <IconButton

@@ -379,7 +379,11 @@ const Appointments: React.FC = () => {
   if (authLoading || !user) {
     return (
       <Box className="flex items-center justify-center h-64">
-        <Typography variant="h6" style={{ color: uiTheme.text }}>
+        <Typography 
+          variant="h6" 
+          className="text-base md:text-xl" 
+          style={{ color: uiTheme.text }}
+        >
           Loading user data...
         </Typography>
       </Box>
@@ -387,49 +391,59 @@ const Appointments: React.FC = () => {
   }
 
   return (
-    <Box className="h-full p-6">
-      <Box className="flex items-center justify-between mb-6">
+    <Box className="h-full p-0 md:p-6">
+      <Box className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
         <Box className="flex items-center gap-3">
           <ScheduleIcon style={{ color: uiTheme.primary, fontSize: 32 }} />
-          <Typography variant="h4" style={{ color: uiTheme.text, fontWeight: 'bold' }}>
+          <Typography 
+            variant="h6" 
+            className="text-lg md:text-3xl font-bold" 
+            style={{ color: uiTheme.text }}
+          >
             Appointments
           </Typography>
         </Box>
 
-        <Box className="flex items-center gap-4">
-          <FormControl size="small" style={{ minWidth: 120 }}>
-            <Select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              label="Status"
-            >
-              <MenuItem value="">All</MenuItem>
-              <MenuItem value="pending">Pending</MenuItem>
-              <MenuItem value="confirmed">Confirmed</MenuItem>
-              <MenuItem value="completed">Completed</MenuItem>
-              <MenuItem value="cancelled">Cancelled</MenuItem>
-            </Select>
-          </FormControl>
+        <Box className="flex flex-col gap-4">
+          {/* First row: Status filter and Add button */}
+          <Box className="flex items-center gap-4">
+            <FormControl size="small" style={{ minWidth: 120 }}>
+              <Select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                label="Status"
+              >
+                <MenuItem value="">All</MenuItem>
+                <MenuItem value="pending">Pending</MenuItem>
+                <MenuItem value="confirmed">Confirmed</MenuItem>
+                <MenuItem value="completed">Completed</MenuItem>
+                <MenuItem value="cancelled">Cancelled</MenuItem>
+              </Select>
+            </FormControl>
 
-          <Tooltip title="Refresh Appointments">
-            <IconButton
-              onClick={handleRefresh}
-              style={{ color: uiTheme.primary }}
-            >
-              <RefreshIcon />
-            </IconButton>
-          </Tooltip>
+            {user && (parseInt(user.role) === 0 || parseInt(user.role) === 1 || parseInt(user.role) === 3) && (
+              <Button
+                variant="contained"
+                onClick={handleAddAppointment}
+                style={{ backgroundColor: uiTheme.primary, color: '#ffffff' }}
+                startIcon={<AddIcon />}
+              >
+                <span>Book Appointment</span>
+              </Button>
+            )}
+          </Box>
 
-          {user && (parseInt(user.role) === 0 || parseInt(user.role) === 1 || parseInt(user.role) === 3) && (
-            <Button
-              variant="contained"
-              onClick={handleAddAppointment}
-              style={{ backgroundColor: uiTheme.primary, color: '#ffffff' }}
-              startIcon={<AddIcon />}
-            >
-              <span>Book Appointment</span>
-            </Button>
-          )}
+          {/* Second row: Refresh button */}
+          <Box className="flex items-center">
+            <Tooltip title="Refresh Appointments">
+              <IconButton
+                onClick={handleRefresh}
+                style={{ color: uiTheme.primary }}
+              >
+                <RefreshIcon />
+              </IconButton>
+            </Tooltip>
+          </Box>
         </Box>
       </Box>
 

@@ -11,14 +11,14 @@ interface AdminRouteProps {
 
 const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   const dispatch = useDispatch()
-  const { user, isAuthenticated, loading } = useSelector((state: RootState) => state.auth)
+  const { user, isAuthenticated, loading, profileRequestInProgress } = useSelector((state: RootState) => state.auth)
   
   // Load user profile if authenticated but user data is missing
   useEffect(() => {
-    if (isAuthenticated && !user && !loading) {
+    if (isAuthenticated && !user && !loading && !profileRequestInProgress) {
       dispatch(getProfileRequest())
     }
-  }, [isAuthenticated, user, loading, dispatch])
+  }, [isAuthenticated, user, loading, profileRequestInProgress, dispatch])
 
   // If not authenticated, redirect to login
   if (!isAuthenticated) {

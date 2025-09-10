@@ -6,6 +6,7 @@ export interface ApiResponse<T = any> {
   message: string
   data?: T
   error?: string
+  status?: number
 }
 
 export interface User {
@@ -44,6 +45,7 @@ export interface AuthResponse {
 
 class ApiService {
   private baseURL: string
+  private requestQueue: Map<string, Promise<any>> = new Map()
 
   constructor(baseURL: string = API_BASE_URL) {
     this.baseURL = baseURL
@@ -54,7 +56,12 @@ class ApiService {
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseURL}${endpoint}`
+    const requestKey = `${options.method || 'GET'}:${endpoint}`
     
+    // Check if there's already a request in progress for this endpoint
+    if (this.requestQueue.has(requestKey)) {
+      return this.requestQueue.get(requestKey)!
+    }
     
     const defaultHeaders: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -74,23 +81,48 @@ class ApiService {
       ...options,
     }
 
+    const requestPromise = this.makeRequest<T>(url, config)
+    this.requestQueue.set(requestKey, requestPromise)
+    
+    try {
+      const result = await requestPromise
+      return result
+    } finally {
+      this.requestQueue.delete(requestKey)
+    }
+  }
+
+  private async makeRequest<T>(url: string, config: RequestInit): Promise<ApiResponse<T>> {
     try {
       const response = await fetch(url, config)
       const data = await response.json()
 
       if (!response.ok) {
+        // Handle 429 Too Many Requests specifically
+        if (response.status === 429) {
+          console.warn('Rate limit exceeded, clearing auth token')
+          localStorage.removeItem('authToken')
+        }
+        
         // Return the error response data instead of throwing
         return {
           success: false,
           message: data.message || `HTTP error! status: ${response.status}`,
-          error: data.message || `HTTP error! status: ${response.status}`
+          error: data.message || `HTTP error! status: ${response.status}`,
+          status: response.status
         }
       }
 
       return data
     } catch (error) {
       console.error('API request failed:', error)
-      throw error
+      // Return a structured error response instead of throwing
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Network error',
+        error: error instanceof Error ? error.message : 'Network error',
+        status: 0
+      }
     }
   }
 

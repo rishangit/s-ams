@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import {
     Box,
     Paper,
@@ -51,9 +51,22 @@ const CustomGrid: React.FC<CustomGridProps> = ({
     theme,
     height = 'calc(100vh - 200px)',
     showTitle = true,
-    showAlerts = true
+    showAlerts = true,
 }) => {
     const [, setGridApi] = useState<GridApi | null>(null)
+    const [isMobile, setIsMobile] = useState(false)
+
+    // Check if screen is mobile size
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768)
+        }
+        
+        checkMobile()
+        window.addEventListener('resize', checkMobile)
+        
+        return () => window.removeEventListener('resize', checkMobile)
+    }, [])
 
     console.log('📊 CustomGrid Debug:', {
         title,
@@ -132,7 +145,7 @@ const CustomGrid: React.FC<CustomGridProps> = ({
             )}
 
             {/* Alerts Section */}
-            {showAlerts && (
+            {showAlerts && (success || error) && (
                 <Box className="mb-4 space-y-2">
                     {success && (
                         <Alert severity="success" className="rounded-lg">
@@ -167,7 +180,7 @@ const CustomGrid: React.FC<CustomGridProps> = ({
                         onGridReady={handleGridReady}
                         pagination={true}
                         paginationPageSize={20}
-                        paginationPageSizeSelector={[10, 20, 50, 100]}
+                        paginationPageSizeSelector={isMobile ? false : [10, 20, 50, 100]}
                         defaultColDef={defaultColDef}
                         animateRows={true}
                         domLayout="normal"

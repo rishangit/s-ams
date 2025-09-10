@@ -244,12 +244,15 @@ const Services: React.FC = () => {
   }
 
   return (
-    <Box className="h-full p-6">
+    <Box className="h-full p-0 md:p-6">
       {/* Header with Add Button */}
-      <Box className="flex justify-between items-center mb-6">
+      <Box className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
         <Box className="flex items-center space-x-3">
           <ServicesIcon style={{ color: uiTheme.primary, fontSize: '2rem' }} />
-          <h1 className="text-2xl font-bold" style={{ color: uiTheme.text }}>
+          <h1 
+            className="text-lg md:text-3xl font-bold" 
+            style={{ color: uiTheme.text }}
+          >
             Services Management
           </h1>
         </Box>

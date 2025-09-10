@@ -57,6 +57,48 @@ const CalendarView: React.FC = () => {
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<number | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
 
+  // Add custom CSS for mobile calendar toolbar
+  useEffect(() => {
+    const style = document.createElement('style')
+    style.textContent = `
+      @media (max-width: 768px) {
+        .fc-toolbar {
+          flex-direction: column !important;
+          gap: 12px !important;
+          align-items: center !important;
+        }
+        
+        .fc-toolbar-chunk {
+          display: flex !important;
+          justify-content: center !important;
+          width: 100% !important;
+        }
+        
+        .fc-toolbar-title {
+          font-size: 1.25rem !important;
+          margin: 0 !important;
+          text-align: center !important;
+        }
+        
+        .fc-button-group {
+          display: flex !important;
+          justify-content: center !important;
+          gap: 4px !important;
+        }
+        
+        .fc-button {
+          font-size: 0.875rem !important;
+          padding: 6px 12px !important;
+        }
+      }
+    `
+    document.head.appendChild(style)
+    
+    return () => {
+      document.head.removeChild(style)
+    }
+  }, [])
+
 
   // Force calendar re-render when theme changes
   useEffect(() => {
@@ -312,7 +354,7 @@ const CalendarView: React.FC = () => {
 
   if (error) {
     return (
-      <Box className="p-6">
+      <Box className="p-0 md:p-6">
         <Alert severity="error" style={{ backgroundColor: '#f44336', color: '#ffffff' }}>
           {error}
         </Alert>
@@ -321,21 +363,28 @@ const CalendarView: React.FC = () => {
   }
 
   return (
-    <Box className="p-6">
+    <Box className="p-0 md:p-6">
       {/* Header */}
-      <Box className="flex justify-between items-center mb-6">
+      <Box className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
         <Box className="flex items-center space-x-3">
           <CalendarIcon style={{ fontSize: '2rem', color: theme.primary }} />
-          <Typography variant="h4" style={{ color: theme.text }}>
+          <Typography 
+            variant="h6" 
+            className="text-lg md:text-3xl"
+            style={{ color: theme.text }}
+          >
             Appointment Calendar
           </Typography>
         </Box>
-
       </Box>
 
       {/* Status Summary */}
       <Paper className="p-4 mb-6" style={{ backgroundColor: theme.surface }}>
-        <Typography variant="h6" className="mb-3" style={{ color: theme.text }}>
+        <Typography 
+          variant="h6" 
+          className="mb-3 text-base md:text-xl" 
+          style={{ color: theme.text }}
+        >
           Appointment Summary
         </Typography>
         <Box className="flex flex-wrap gap-3">
@@ -375,7 +424,11 @@ const CalendarView: React.FC = () => {
         {calendarEvents.length === 0 ? (
           <Box className="flex flex-col items-center justify-center py-12">
             <CalendarIcon style={{ fontSize: '4rem', color: theme.textSecondary, marginBottom: '1rem' }} />
-            <Typography variant="h6" style={{ color: theme.textSecondary, marginBottom: '0.5rem' }}>
+            <Typography 
+              variant="h6" 
+              className="text-base md:text-xl" 
+              style={{ color: theme.textSecondary, marginBottom: '0.5rem' }}
+            >
               No Appointments Found
             </Typography>
             <Typography variant="body2" style={{ color: theme.textSecondary }}>

@@ -9,14 +9,14 @@ import { SystemRoutes } from './components/system/routing'
 function App() {
   const dispatch = useDispatch()
   const theme = useSelector((state: RootState) => state.ui.theme)
-  const { isAuthenticated, user, loading } = useSelector((state: RootState) => state.auth)
+  const { isAuthenticated, user, loading, profileRequestInProgress } = useSelector((state: RootState) => state.auth)
 
   // Initialize user profile if authenticated but user data is missing
   useEffect(() => {
-    if (isAuthenticated && !user && !loading) {
+    if (isAuthenticated && !user && !loading && !profileRequestInProgress) {
       dispatch(getProfileRequest())
     }
-  }, [isAuthenticated, user, loading, dispatch])
+  }, [isAuthenticated, user, loading, profileRequestInProgress, dispatch])
 
   return (
     <div 

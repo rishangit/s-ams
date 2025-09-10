@@ -164,7 +164,7 @@ const CompanyDetail: React.FC = () => {
 
   if (!company) {
     return (
-      <Box className="mx-auto p-6">
+      <Box className="mx-auto p-0 md:p-6">
         <Alert severity="error" className="mb-4">
           Company not found
         </Alert>
@@ -173,11 +173,11 @@ const CompanyDetail: React.FC = () => {
   }
 
   return (
-    <Box className="mx-auto p-6">
+    <Box className="mx-auto p-0 md:p-6">
       <Box className="flex items-center justify-between mb-6">
         <Typography
-          variant="h4"
-          className="font-bold"
+          variant="h6"
+          className="font-bold text-lg md:text-3xl"
           style={{ color: uiTheme.text }}
         >
           Company Details
@@ -243,7 +243,7 @@ const CompanyDetail: React.FC = () => {
             className="p-6"
             style={{ backgroundColor: uiTheme.surface }}
           >
-            <Box className="flex items-center justify-between mb-4">
+            <Box className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
               <Typography
                 variant="h6"
                 className="font-semibold"
@@ -262,7 +262,7 @@ const CompanyDetail: React.FC = () => {
                   </Box>
                 </FormButton>
               ) : (
-                <Box className="flex space-x-2">
+                <Box className="flex flex-col md:flex-row gap-2">
                   <FormButton
                     type="button"
                     variant="outlined"

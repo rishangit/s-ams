@@ -225,10 +225,10 @@ const UserProfile: React.FC = () => {
   }
 
   return (
-    <Box className="mx-auto p-6">
+    <Box className="mx-auto p-0 md:p-6">
       <Typography
-        variant="h4"
-        className="mb-6 font-bold"
+        variant="h6"
+        className="mb-6 font-bold text-lg md:text-3xl"
         style={{ color: uiTheme.text }}
       >
         User Profile
@@ -394,7 +394,7 @@ const UserProfile: React.FC = () => {
               </Grid>
 
               {/* Action Buttons */}
-              <Box className="flex justify-end space-x-3 mt-6">
+              <Box className="flex flex-col md:flex-row md:justify-end gap-3 mt-6">
                 {!isEditing ? (
                   <FormButton
                     type="button"

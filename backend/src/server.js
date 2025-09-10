@@ -37,8 +37,8 @@ const generalLimiter = rateLimit({
 
 // Rate limiting - Auth routes (more lenient for login attempts)
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // Allow 20 login attempts per 15 minutes
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: config.server.nodeEnv === 'development' ? 100 : 20, // More lenient in development
   message: {
     success: false,
     message: 'Too many login attempts from this IP, please try again later.'

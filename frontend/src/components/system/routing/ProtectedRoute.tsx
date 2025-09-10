@@ -11,14 +11,14 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const dispatch = useDispatch()
-  const { isAuthenticated, user, loading } = useSelector((state: RootState) => state.auth)
+  const { isAuthenticated, user, loading, profileRequestInProgress } = useSelector((state: RootState) => state.auth)
   
   // Load user profile if authenticated but user data is missing
   useEffect(() => {
-    if (isAuthenticated && !user && !loading) {
+    if (isAuthenticated && !user && !loading && !profileRequestInProgress) {
       dispatch(getProfileRequest())
     }
-  }, [isAuthenticated, user, loading, dispatch])
+  }, [isAuthenticated, user, loading, profileRequestInProgress, dispatch])
   
   if (!isAuthenticated) {
     return <Navigate to="/system/login" replace />

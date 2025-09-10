@@ -23,6 +23,8 @@ interface AuthState {
   isAuthenticated: boolean
   loading: boolean
   error: string | null
+  profileRequestInProgress: boolean
+  lastProfileRequestTime: number | null
 }
 
 const initialState: AuthState = {
@@ -31,6 +33,8 @@ const initialState: AuthState = {
   isAuthenticated: !!localStorage.getItem('authToken'),
   loading: false,
   error: null,
+  profileRequestInProgress: false,
+  lastProfileRequestTime: null,
 }
 
 const authSlice = createSlice({
@@ -101,17 +105,35 @@ const authSlice = createSlice({
     // Get Profile
     builder
       .addCase(getProfileRequest, (state) => {
-        state.loading = true
-        state.error = null
+        const now = Date.now()
+        const timeSinceLastRequest = state.lastProfileRequestTime ? now - state.lastProfileRequestTime : Infinity
+        
+        // Only proceed if no request is in progress and enough time has passed (1 second cooldown)
+        if (!state.profileRequestInProgress && timeSinceLastRequest > 1000) {
+          state.loading = true
+          state.error = null
+          state.profileRequestInProgress = true
+          state.lastProfileRequestTime = now
+        }
       })
       .addCase(getProfileSuccess, (state, action: PayloadAction<{ user: User }>) => {
         state.loading = false
         state.user = action.payload.user
         state.error = null
+        state.profileRequestInProgress = false
       })
       .addCase(getProfileFailure, (state, action: PayloadAction<string>) => {
         state.loading = false
         state.error = action.payload
+        state.profileRequestInProgress = false
+        // If profile request fails, it might be due to invalid token
+        // Check if token was removed from localStorage
+        const token = localStorage.getItem('authToken')
+        if (!token) {
+          state.isAuthenticated = false
+          state.token = null
+          state.user = null
+        }
       })
 
     // Update Profile
