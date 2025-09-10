@@ -1,0 +1,550 @@
+import React, { useState, useEffect, memo } from 'react'
+import { useForm } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
+import * as yup from 'yup'
+import {
+  Box,
+  Typography,
+  Grid,
+  Alert,
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent
+} from '@mui/material'
+import {
+  Save as SaveIcon,
+  Cancel as CancelIcon,
+  Event as AppointmentIcon
+} from '@mui/icons-material'
+import { useSelector, useDispatch } from 'react-redux'
+import { useNavigate, useParams } from 'react-router-dom'
+import { RootState } from '../../../store'
+import FormInput from '../../shared/FormInput'
+import FormSelect from '../../shared/FormSelect'
+import FormButton from '../../shared/FormButton'
+import {
+  createAppointmentRequest,
+  updateAppointmentRequest,
+  getAppointmentByIdRequest,
+  clearAppointmentsMessages
+} from '../../../store/actions/appointmentsActions'
+import { getServicesByCompanyIdRequest, getServicesByCompanyIdSuccess } from '../../../store/actions/servicesActions'
+import { getCompaniesForBookingRequest, getCompanyByUserRequest } from '../../../store/actions/companyActions'
+import { getAllUsersRequest } from '../../../store/actions/userActions'
+
+// Validation schema
+const appointmentSchema = yup.object({
+  userId: yup
+    .mixed()
+    .optional()
+    .test('is-valid-user', 'Please select a valid user', function(value) {
+      if (!value || value === '') return true // Optional field
+      const numValue = typeof value === 'string' ? parseInt(value) : Number(value)
+      return !isNaN(numValue) && numValue > 0
+    }),
+  companyId: yup
+    .mixed()
+    .required('Company is required')
+    .test('is-valid-company', 'Please select a valid company', function(value) {
+      if (!value || value === '') return false
+      const numValue = typeof value === 'string' ? parseInt(value) : Number(value)
+      return !isNaN(numValue) && numValue > 0
+    }),
+  serviceId: yup
+    .mixed()
+    .required('Service is required')
+    .test('is-valid-service', 'Please select a valid service', function(value) {
+      if (!value || value === '') return false
+      const numValue = typeof value === 'string' ? parseInt(value) : Number(value)
+      return !isNaN(numValue) && numValue > 0
+    }),
+  appointmentDate: yup 
+    .string()
+    .required('Appointment date is required')
+    .matches(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format'),
+  appointmentTime: yup
+    .string()
+    .required('Appointment time is required')
+    .matches(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Time must be in HH:MM format'),
+  notes: yup
+    .string()
+    .optional()
+    .max(500, 'Notes must be less than 500 characters'),
+  status: yup
+    .string()
+    .optional()
+    .oneOf(['pending', 'confirmed', 'completed', 'cancelled'], 'Invalid status')
+})
+
+interface AppointmentFormData {
+  userId?: number | string
+  companyId: number | string
+  serviceId: number | string
+  appointmentDate: string
+  appointmentTime: string
+  notes: string
+  status?: 'pending' | 'confirmed' | 'completed' | 'cancelled'
+}
+
+interface AppointmentFormProps {
+  isOpen?: boolean
+  onClose?: () => void
+  appointmentId?: number | null
+  onSuccess?: () => void
+}
+
+const AppointmentForm: React.FC<AppointmentFormProps> = ({ 
+  isOpen = false, 
+  onClose, 
+  appointmentId = null,
+  onSuccess
+}) => {
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const { id } = useParams<{ id: string }>()
+  
+  // Determine if this is a modal or standalone form
+  const isModal = isOpen !== false
+  const isEditAppointment = id && id !== 'new'
+  const uiTheme = useSelector((state: RootState) => state.ui.theme)
+  const { user } = useSelector((state: RootState) => state.auth)
+  const { 
+    currentAppointment,
+    error, 
+    success, 
+    createLoading, 
+    updateLoading 
+  } = useSelector((state: RootState) => state.appointments)
+  const { services } = useSelector((state: RootState) => state.services)
+  const { companies, company } = useSelector((state: RootState) => state.company)
+  const { users } = useSelector((state: RootState) => state.users)
+
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [hasHandledSuccess, setHasHandledSuccess] = useState(false)
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { errors, isDirty }
+  } = useForm<AppointmentFormData>({
+    resolver: yupResolver(appointmentSchema) as any,
+    defaultValues: {
+      userId: '',
+      companyId: '',
+      serviceId: '',
+      appointmentDate: '',
+      appointmentTime: '',
+      notes: '',
+      status: 'pending'
+    }
+  })
+
+  const watchedCompanyId = watch('companyId')
+
+  // Load users and company for company owners when creating new appointments
+  useEffect(() => {
+    if (user && parseInt(user.role) === 1 && !isEditMode && isOpen) {
+      dispatch(getAllUsersRequest())
+      // Load the company owner's company
+      dispatch(getCompanyByUserRequest(user.id))
+    }
+  }, [user?.id, user?.role, isEditMode, isOpen, dispatch])
+
+  // Determine if this is edit mode
+  useEffect(() => {
+    const currentAppointmentId = appointmentId || (isEditAppointment ? parseInt(id) : null)
+    setIsEditMode(!!currentAppointmentId)
+    setHasHandledSuccess(false)
+  }, [appointmentId, id, isEditAppointment])
+
+  // Reset form when modal opens for new appointment
+  useEffect(() => {
+    if (isOpen && !isEditMode) {
+      reset({
+        userId: '',
+        companyId: '',
+        serviceId: '',
+        appointmentDate: '',
+        appointmentTime: '',
+        notes: '',
+        status: 'pending'
+      })
+    }
+  }, [isOpen, isEditMode, reset])
+
+  // Set company owner's company as default when loaded
+  useEffect(() => {
+    if (user && parseInt(user.role) === 1 && !isEditMode && company && isOpen) {
+      const currentValues = watch()
+      reset({
+        ...currentValues,
+        companyId: company.id
+      })
+    }
+  }, [user, isEditMode, company, isOpen, reset, watch])
+
+  // Load appointment data if in edit mode
+  useEffect(() => {
+    if (isEditMode) {
+      const currentAppointmentId = appointmentId || (id ? parseInt(id) : null)
+      if (currentAppointmentId) {
+        dispatch(getAppointmentByIdRequest(currentAppointmentId))
+      }
+    }
+  }, [isEditMode, appointmentId, id, isEditAppointment, dispatch])
+
+  // Load companies when component mounts
+  useEffect(() => {
+    dispatch(getCompaniesForBookingRequest())
+  }, [dispatch])
+
+  // Load services when company changes
+  useEffect(() => {
+    if (watchedCompanyId && watchedCompanyId !== '' && parseInt(watchedCompanyId as string) > 0) {
+      // Reset service selection when company changes
+      const currentValues = watch()
+      reset({ ...currentValues, serviceId: '' })
+      // Load services for the selected company
+      dispatch(getServicesByCompanyIdRequest(parseInt(watchedCompanyId as string)))
+    } else {
+      // Clear services when no company is selected
+      dispatch(getServicesByCompanyIdSuccess([]))
+    }
+  }, [watchedCompanyId, dispatch, reset])
+
+  // Populate form when appointment data is loaded
+  useEffect(() => {
+    if (currentAppointment && isEditMode) {
+      // First load services for the company
+      dispatch(getServicesByCompanyIdRequest(currentAppointment.companyId))
+      
+      // Populate the form with basic data (without serviceId for now)
+      const formData = {
+        userId: currentAppointment.userId || '',
+        companyId: currentAppointment.companyId,
+        serviceId: '', // Set to empty string initially
+        appointmentDate: currentAppointment.appointmentDate ? new Date(currentAppointment.appointmentDate).toISOString().split('T')[0] : '',
+        appointmentTime: currentAppointment.appointmentTime ? 
+          (currentAppointment.appointmentTime.includes('T') ? 
+            new Date(currentAppointment.appointmentTime).toTimeString().slice(0, 5) : 
+            currentAppointment.appointmentTime) : '',
+        notes: currentAppointment.notes || '',
+        status: currentAppointment.status || 'pending'
+      }
+      reset(formData)
+    }
+  }, [currentAppointment, isEditMode, reset, dispatch])
+
+  // Update serviceId after services are loaded for edit mode
+  useEffect(() => {
+    if (currentAppointment && isEditMode && services && services.length > 0) {
+      // Check if the current serviceId exists in the loaded services
+      const serviceExists = services.some(service => service.id === currentAppointment.serviceId)
+      if (serviceExists) {
+        // Update the form with the correct serviceId
+        const currentValues = watch()
+        reset({
+          ...currentValues,
+          serviceId: currentAppointment.serviceId
+        })
+      }
+    }
+  }, [currentAppointment, isEditMode, services, reset, watch])
+
+  const onSubmit = (data: AppointmentFormData) => {
+    if (isEditMode) {
+      const updateData: any = {
+        id: appointmentId || parseInt(id || '0'),
+        appointmentDate: data.appointmentDate,
+        appointmentTime: data.appointmentTime,
+        notes: data.notes
+      }
+      
+      // Add status field for company owners (role: 1)
+      if (user && parseInt(user.role) === 1 && data.status) {
+        updateData.status = data.status
+      }
+      
+      dispatch(updateAppointmentRequest(updateData))
+    } else {
+      const createData: any = {
+        companyId: parseInt(data.companyId as string),
+        serviceId: parseInt(data.serviceId as string),
+        appointmentDate: data.appointmentDate,
+        appointmentTime: data.appointmentTime,
+        notes: data.notes
+      }
+      
+      // Add userId for company owners (role: 1) when creating appointments
+      if (user && parseInt(user.role) === 1 && data.userId) {
+        createData.userId = parseInt(data.userId as string)
+      } else if (user && parseInt(user.role) !== 1) {
+        // For regular users, use their own ID
+        createData.userId = user.id
+      }
+      dispatch(createAppointmentRequest(createData))
+    }
+  }
+
+  const handleCancel = () => {
+    reset()
+    if (isModal && onClose) {
+      onClose()
+    } else {
+      navigate('/system/appointments')
+    }
+  }
+
+  // Handle success
+  useEffect(() => {
+    if (success && !hasHandledSuccess) {
+      setHasHandledSuccess(true)
+      reset()
+      if (onClose) {
+        setTimeout(() => {
+          onClose()
+        }, 1500)
+      } else {
+        setTimeout(() => {
+          navigate('/system/appointments')
+        }, 1500)
+      }
+    }
+  }, [success, hasHandledSuccess, reset, onClose, navigate])
+
+  // Clear messages when component unmounts or form closes
+  useEffect(() => {
+    return () => {
+      dispatch(clearAppointmentsMessages())
+    }
+  }, [dispatch])
+
+  // Handle successful save operations
+  useEffect(() => {
+    if (success && onSuccess) {
+      onSuccess()
+    }
+  }, [success, onSuccess])
+
+  const formContent = (
+    <Box className="p-6">
+      <Box className="flex items-center space-x-3 mb-6">
+        <AppointmentIcon style={{ color: uiTheme.primary, fontSize: '2rem' }} />
+        <Typography
+          variant="h4"
+          className="font-bold"
+          style={{ color: uiTheme.text }}
+        >
+          {isEditMode 
+            ? 'Edit Appointment' 
+            : user && parseInt(user.role) === 1 
+              ? 'Book Appointment for User' 
+              : 'Book New Appointment'
+          }
+        </Typography>
+      </Box>
+
+      {error && (
+        <Alert severity="error" className="mb-4">
+          {error}
+        </Alert>
+      )}
+
+      {success && (
+        <Alert severity="success" className="mb-4">
+          {success}
+        </Alert>
+      )}
+
+      {/* Help text for company owners */}
+      {user && parseInt(user.role) === 1 && !isEditMode && (
+        <Alert severity="info" className="mb-4">
+          As a company owner, you can book appointments for any user. Your company has been automatically selected. Choose the user, service, date, and time for the appointment.
+        </Alert>
+      )}
+
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Grid container spacing={3}>
+          {/* User selection for company owners when creating new appointments */}
+          {user && parseInt(user.role) === 1 && !isEditMode && (
+            <Grid item xs={12} sm={6}>
+              <FormSelect
+                name="userId"
+                label="Select User to Book For"
+                control={control}
+                options={users?.filter(user => user?.id).map(user => ({
+                  value: user.id || '',
+                  label: `${user.firstName} ${user.lastName} (${user.email})`
+                })) || []}
+                error={errors.userId}
+                required
+              />
+            </Grid>
+          )}
+          
+          <Grid item xs={12} sm={6}>
+            <FormSelect
+              name="companyId"
+              label="Company"
+              control={control}
+              options={companies?.filter(company => company?.id).map(company => ({
+                value: company.id || '',
+                label: company.name || 'Unknown Company'
+              })) || []}
+              error={errors.companyId}
+              required
+              disabled={isEditMode || Boolean(user && parseInt(user.role) === 1 && company)}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormSelect
+              name="serviceId"
+              label="Service"
+              control={control}
+              options={services && services.length > 0 
+                ? services.map(service => ({
+                    value: service.id,
+                    label: `${service.name} - $${service.price}`
+                  }))
+                : watchedCompanyId && watchedCompanyId !== '' && parseInt(watchedCompanyId as string) > 0 
+                  ? [{ value: '', label: 'No active services available for this company' }]
+                  : [{ value: '', label: 'Please select a company first' }]
+              }
+              error={errors.serviceId}
+              required
+              disabled={isEditMode || !watchedCompanyId || watchedCompanyId === '' || !services || services.length === 0}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormInput
+              name="appointmentDate"
+              label="Appointment Date"
+              type="date"
+              control={control}
+              error={errors.appointmentDate}
+              required
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormInput
+              name="appointmentTime"
+              label="Appointment Time"
+              type="time"
+              control={control}
+              error={errors.appointmentTime}
+              required
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <FormInput
+              name="notes"
+              label="Notes (Optional)"
+              type="description"
+              control={control}
+              error={errors.notes}
+            />
+          </Grid>
+          
+          {/* Status dropdown for company owners in edit mode */}
+          {user && parseInt(user.role) === 1 && isEditMode && (
+            <Grid item xs={12} sm={6}>
+              <FormSelect
+                name="status"
+                label="Status"
+                control={control}
+                options={[
+                  { value: 'pending', label: 'Pending' },
+                  { value: 'confirmed', label: 'Confirmed' },
+                  { value: 'completed', label: 'Completed' },
+                  { value: 'cancelled', label: 'Cancelled' }
+                ]}
+                error={errors.status}
+              />
+            </Grid>
+          )}
+        </Grid>
+
+        {/* Action Buttons */}
+        <Box className="flex justify-end space-x-3 mt-6">
+          <FormButton
+            type="button"
+            variant="outlined"
+            onClick={handleCancel}
+          >
+            <Box className="flex items-center space-x-2">
+              <CancelIcon />
+              <span>Cancel</span>
+            </Box>
+          </FormButton>
+          <FormButton
+            type="submit"
+            disabled={createLoading || updateLoading || !isDirty}
+          >
+            {(createLoading || updateLoading) ? (
+              <CircularProgress size={20} style={{ color: '#fff' }} />
+            ) : (
+              <Box className="flex items-center space-x-2">
+                <SaveIcon />
+                <span>
+                  {isEditMode 
+                    ? 'Update Appointment' 
+                    : user && parseInt(user.role) === 1 
+                      ? 'Book Appointment for User' 
+                      : 'Book Appointment'
+                  }
+                </span>
+              </Box>
+            )}
+          </FormButton>
+        </Box>
+      </form>
+    </Box>
+  )
+
+
+  // If used as modal
+  if (isOpen) {
+    return (
+      <Dialog 
+        open={isOpen} 
+        onClose={onClose}
+        maxWidth="md"
+        fullWidth
+        disableEscapeKeyDown={false}
+        sx={{
+          '& .MuiDialog-paper': {
+            backgroundColor: uiTheme.surface,
+            color: uiTheme.text,
+            zIndex: 1300,
+            position: 'relative'
+          },
+          '& .MuiBackdrop-root': {
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 1299
+          }
+        }}
+      >
+        <DialogTitle style={{ color: uiTheme.text }}>
+          {isEditMode 
+            ? 'Edit Appointment' 
+            : user && parseInt(user.role) === 1 
+              ? 'Book Appointment for User' 
+              : 'Book New Appointment'
+          }
+        </DialogTitle>
+        <DialogContent>
+          {formContent}
+        </DialogContent>
+      </Dialog>
+    )
+  }
+
+  // Return null when not open to prevent rendering below other components
+  return null
+}
+
+export default memo(AppointmentForm)
+
