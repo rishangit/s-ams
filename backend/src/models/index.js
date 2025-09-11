@@ -9,6 +9,8 @@ import { Service as SQLiteService } from './sqlite/Service.js'
 import { Service as MySQLService } from './mysql/Service.js'
 import { Appointment as SQLiteAppointment } from './sqlite/Appointment.js'
 import { Appointment as MySQLAppointment } from './mysql/Appointment.js'
+import { Staff as SQLiteStaff } from './sqlite/staff.js'
+import { Staff as MySQLStaff } from './mysql/staff.js'
 
 // Get database type from config
 const getDatabaseType = () => {
@@ -20,6 +22,7 @@ export const User = getDatabaseType() === 'mysql' ? MySQLUser : SQLiteUser
 export const Company = getDatabaseType() === 'mysql' ? MySQLCompany : SQLiteCompany
 export const Service = getDatabaseType() === 'mysql' ? MySQLService : SQLiteService
 export const Appointment = getDatabaseType() === 'mysql' ? MySQLAppointment : SQLiteAppointment
+export const Staff = getDatabaseType() === 'mysql' ? MySQLStaff : SQLiteStaff
 
 // Export database type for other modules
 export const getCurrentDatabaseType = getDatabaseType

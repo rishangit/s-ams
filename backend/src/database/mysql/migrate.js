@@ -72,6 +72,28 @@ const createTables = async () => {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `)
 
+    // Create staff table
+    await executeQuery(`
+      CREATE TABLE IF NOT EXISTS staff (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        company_id INT NOT NULL,
+        working_hours_start TIME,
+        working_hours_end TIME,
+        skills TEXT,
+        professional_qualifications TEXT,
+        status TINYINT CHECK(status IN (0, 1, 2, 3)) DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+        FOREIGN KEY (company_id) REFERENCES companies (id) ON DELETE CASCADE,
+        UNIQUE KEY unique_user_company_staff (user_id, company_id),
+        INDEX idx_staff_user_id (user_id),
+        INDEX idx_staff_company_id (company_id),
+        INDEX idx_staff_status (status)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `)
+
     // Create appointments table
     await executeQuery(`
       CREATE TABLE IF NOT EXISTS appointments (
@@ -79,6 +101,8 @@ const createTables = async () => {
         user_id INT NOT NULL,
         company_id INT NOT NULL,
         service_id INT NOT NULL,
+        staff_id INT NULL,
+        staff_preferences JSON NULL,
         appointment_date DATE NOT NULL,
         appointment_time TIME NOT NULL,
         status ENUM('pending', 'confirmed', 'completed', 'cancelled') DEFAULT 'pending',
@@ -88,9 +112,11 @@ const createTables = async () => {
         FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
         FOREIGN KEY (company_id) REFERENCES companies (id) ON DELETE CASCADE,
         FOREIGN KEY (service_id) REFERENCES services (id) ON DELETE CASCADE,
+        FOREIGN KEY (staff_id) REFERENCES staff (id) ON DELETE SET NULL,
         INDEX idx_appointments_user_id (user_id),
         INDEX idx_appointments_company_id (company_id),
         INDEX idx_appointments_service_id (service_id),
+        INDEX idx_appointments_staff_id (staff_id),
         INDEX idx_appointments_date_time (appointment_date, appointment_time),
         INDEX idx_appointments_status (status)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci

@@ -10,6 +10,15 @@ import {
   updateCompanyStatusEpic,
   deleteCompanyEpic
 } from './companyEpics'
+import {
+  getStaffEpic,
+  getStaffByCompanyIdEpic,
+  getStaffByIdEpic,
+  createStaffEpic,
+  updateStaffEpic,
+  deleteStaffEpic,
+  getAvailableUsersEpic
+} from './staffEpics'
 
 export const rootEpic = combineEpics(
   loginEpic,
@@ -25,7 +34,14 @@ export const rootEpic = combineEpics(
   getCompanyByIdEpic,
   getAllCompaniesEpic,
   updateCompanyStatusEpic,
-  deleteCompanyEpic
+  deleteCompanyEpic,
+  getStaffEpic,
+  getStaffByCompanyIdEpic,
+  getStaffByIdEpic,
+  createStaffEpic,
+  updateStaffEpic,
+  deleteStaffEpic,
+  getAvailableUsersEpic
 )
 
 // Export all epics from this central location

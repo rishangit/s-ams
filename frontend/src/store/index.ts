@@ -33,6 +33,15 @@ import {
   deleteAppointmentEpic,
   getAppointmentStatsEpic
 } from './epics/appointmentsEpics'
+import {
+  getStaffEpic,
+  getStaffByCompanyIdEpic,
+  getStaffByIdEpic,
+  createStaffEpic,
+  updateStaffEpic,
+  deleteStaffEpic,
+  getAvailableUsersEpic
+} from './epics/staffEpics'
 
 const epicMiddleware = createEpicMiddleware()
 
@@ -57,6 +66,13 @@ const rootEpic = combineEpics(
   updateServiceEpic,
   updateServiceStatusEpic,
   deleteServiceEpic,
+  getStaffEpic,
+  getStaffByCompanyIdEpic,
+  getStaffByIdEpic,
+  createStaffEpic,
+  updateStaffEpic,
+  deleteStaffEpic,
+  getAvailableUsersEpic,
   createAppointmentEpic,
   getAppointmentsByUserEpic,
   getAppointmentsByCompanyEpic,

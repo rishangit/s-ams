@@ -261,6 +261,52 @@ const Appointments: React.FC = () => {
         resizable: true,
         width: 120,
         minWidth: 100
+      },
+      {
+        headerName: 'Staff Assignment',
+        field: 'staffAssignment',
+        cellRenderer: (params: ICellRendererParams) => {
+          const data = params.data
+          const staffId = data?.staffId
+          const staffPreferences = data?.staffPreferences
+          const staffName = data?.staffName
+          
+          if (staffId && staffName) {
+            // Staff is assigned
+            return (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <CheckCircle sx={{ color: 'green', fontSize: 16 }} />
+                <Typography variant="body2" sx={{ color: 'green' }}>
+                  {staffName}
+                </Typography>
+              </Box>
+            )
+          } else if (staffPreferences && staffPreferences.length > 0) {
+            // Has preferred staff but not assigned
+            return (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <ScheduleIcon sx={{ color: 'orange', fontSize: 16 }} />
+                <Typography variant="body2" sx={{ color: 'orange' }}>
+                  {staffPreferences.length} preferred
+                </Typography>
+              </Box>
+            )
+          } else {
+            // No staff preferences
+            return (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography variant="body2" sx={{ color: '#666' }}>
+                  No staff
+                </Typography>
+              </Box>
+            )
+          }
+        },
+        sortable: true,
+        filter: true,
+        resizable: true,
+        width: 150,
+        minWidth: 120
       }
     ]
 

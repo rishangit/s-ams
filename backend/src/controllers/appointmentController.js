@@ -4,7 +4,7 @@ import { APPOINTMENT_STATUS, isValidStatusName } from '../constants/appointmentS
 // Create a new appointment
 export const createAppointment = async (req, res) => {
   try {
-    const { companyId, serviceId, appointmentDate, appointmentTime, notes, userId: requestUserId } = req.body
+    const { companyId, serviceId, staffId, staffPreferences, appointmentDate, appointmentTime, notes, userId: requestUserId } = req.body
     const currentUserId = req.user.id
     const userRole = req.user.role
     
@@ -104,6 +104,8 @@ export const createAppointment = async (req, res) => {
       userId: appointmentUserId,
       companyId,
       serviceId,
+      staffId: staffId || null,
+      staffPreferences: staffPreferences || null,
       appointmentDate,
       appointmentTime,
       notes: notes || null
@@ -259,7 +261,7 @@ export const getAppointmentById = async (req, res) => {
 export const updateAppointment = async (req, res) => {
   try {
     const { id } = req.params
-    const { appointmentDate, appointmentTime, notes, status } = req.body
+    const { appointmentDate, appointmentTime, notes, status, staffId, staffPreferences } = req.body
     const userId = req.user.id
 
     const appointment = await Appointment.findById(id)
@@ -339,7 +341,9 @@ export const updateAppointment = async (req, res) => {
       appointmentDate,
       appointmentTime,
       status: status || null, // Use provided status or null
-      notes
+      notes,
+      staffId,
+      staffPreferences
     })
 
     res.json({

@@ -11,6 +11,7 @@ import fileUploadRoutes from './routes/fileUpload.js'
 import companyRoutes from './routes/company.js'
 import serviceRoutes from './routes/service.js'
 import appointmentRoutes from './routes/appointment.js'
+import staffRoutes from './routes/staff.js'
 
 const app = express()
 
@@ -113,6 +114,7 @@ app.use('/api/files', fileUploadRoutes)
 app.use('/api/company', companyRoutes)
 app.use('/api/services', serviceRoutes)
 app.use('/api/appointments', appointmentRoutes)
+app.use('/api/staff', staffRoutes)
 
 // 404 handler
 app.use('*', (req, res) => {

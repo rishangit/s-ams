@@ -20,7 +20,8 @@ import {
   Business as BusinessIcon,
   Build as ServicesIcon,
   Event as EventIcon,
-  CalendarToday as CalendarIcon
+  CalendarToday as CalendarIcon,
+  Group as StaffIcon
 } from '@mui/icons-material'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate, useLocation } from 'react-router-dom'
@@ -241,6 +242,47 @@ const Navigation: React.FC<NavigationProps> = ({
                 primary="Services"
                 style={{
                   color: location.pathname === '/system/services'
+                    ? '#ffffff'
+                    : uiTheme.text
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+        )}
+
+        {/* Staff Management - Owner Only (role 1) */}
+        {user && parseInt(user.role) === 1 && (
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => handleNavigation('/system/staff')}
+              style={{
+                backgroundColor: location.pathname === '/system/staff'
+                  ? uiTheme.primary
+                  : 'transparent',
+                color: location.pathname === '/system/staff'
+                  ? '#ffffff'
+                  : uiTheme.text,
+                borderRight: location.pathname === '/system/staff'
+                  ? `2px solid ${uiTheme.primary}`
+                  : 'none',
+                margin: '0 8px',
+                borderRadius: '8px'
+              }}
+              className="hover:opacity-80 transition-all duration-200"
+            >
+              <ListItemIcon>
+                <StaffIcon
+                  style={{
+                    color: location.pathname === '/system/staff'
+                      ? '#ffffff'
+                      : uiTheme.textSecondary
+                  }}
+                />
+              </ListItemIcon>
+              <ListItemText
+                primary="Staff"
+                style={{
+                  color: location.pathname === '/system/staff'
                     ? '#ffffff'
                     : uiTheme.text
                 }}

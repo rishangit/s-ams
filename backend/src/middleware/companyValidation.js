@@ -1,4 +1,23 @@
 // Company validation
+export const validateCompanyOwner = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ 
+      success: false, 
+      message: 'Authentication required' 
+    })
+  }
+
+  // Check if user has owner role (1) or admin role (0)
+  if (req.user.role !== 1 && req.user.role !== 0) {
+    return res.status(403).json({ 
+      success: false, 
+      message: 'Access denied. Company owner privileges required.' 
+    })
+  }
+
+  next()
+}
+
 export const validateCompanyData = (data) => {
   const errors = []
 

@@ -22,6 +22,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { RootState } from '../../../store'
 import FormInput from '../../shared/FormInput'
 import FormSelect from '../../shared/FormSelect'
+import FormMultiSelect from '../../shared/FormMultiSelect'
 import FormButton from '../../shared/FormButton'
 import {
   createAppointmentRequest,
@@ -32,6 +33,7 @@ import {
 import { getServicesByCompanyIdRequest, getServicesByCompanyIdSuccess } from '../../../store/actions/servicesActions'
 import { getCompaniesForBookingRequest, getCompanyByUserRequest } from '../../../store/actions/companyActions'
 import { getAllUsersRequest } from '../../../store/actions/userActions'
+import { getStaffByCompanyIdRequest, getStaffByCompanyIdSuccess } from '../../../store/actions/staffActions'
 
 // Validation schema
 const appointmentSchema = yup.object({
@@ -74,13 +76,28 @@ const appointmentSchema = yup.object({
   status: yup
     .string()
     .optional()
-    .oneOf(['pending', 'confirmed', 'completed', 'cancelled'], 'Invalid status')
+    .oneOf(['pending', 'confirmed', 'completed', 'cancelled'], 'Invalid status'),
+  staffId: yup
+    .mixed()
+    .optional()
+    .test('is-valid-staff', 'Please select a valid staff member', function(value) {
+      if (!value || value === '') return true // Optional field
+      const numValue = typeof value === 'string' ? parseInt(value) : Number(value)
+      return !isNaN(numValue) && numValue > 0
+    }),
+  staffPreferences: yup
+    .array()
+    .of(yup.number().positive())
+    .max(3, 'You can select up to 3 preferred staff members')
+    .optional()
 })
 
 interface AppointmentFormData {
   userId?: number | string
   companyId: number | string
   serviceId: number | string
+  staffId?: number | string
+  staffPreferences?: number[]
   appointmentDate: string
   appointmentTime: string
   notes: string
@@ -119,6 +136,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
   const { services } = useSelector((state: RootState) => state.services)
   const { companies, company } = useSelector((state: RootState) => state.company)
   const { users } = useSelector((state: RootState) => state.users)
+  const { staff } = useSelector((state: RootState) => state.staff)
 
   const [isEditMode, setIsEditMode] = useState(false)
   const [hasHandledSuccess, setHasHandledSuccess] = useState(false)
@@ -135,6 +153,8 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
       userId: '',
       companyId: '',
       serviceId: '',
+      staffId: '',
+      staffPreferences: [],
       appointmentDate: '',
       appointmentTime: '',
       notes: '',
@@ -186,6 +206,47 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
     }
   }, [user, isEditMode, company, isOpen, reset, watch])
 
+  // Load staff when company changes (same pattern as services)
+  useEffect(() => {
+    console.log('Staff loading effect triggered:', {
+      watchedCompanyId,
+      userRole: user?.role,
+      companyIdParsed: watchedCompanyId ? parseInt(watchedCompanyId as string) : null
+    })
+    
+    if (watchedCompanyId && watchedCompanyId !== '' && parseInt(watchedCompanyId as string) > 0) {
+      // Reset staff preferences when company changes
+      const currentValues = watch()
+      reset({ ...currentValues, staffPreferences: [] })
+      
+      // Load staff for the selected company (same for all roles)
+      console.log('Dispatching getStaffByCompanyIdRequest for companyId:', parseInt(watchedCompanyId as string))
+      dispatch(getStaffByCompanyIdRequest(parseInt(watchedCompanyId as string)))
+    } else {
+      // Clear staff when no company is selected
+      console.log('Clearing staff data - no company selected')
+      dispatch(getStaffByCompanyIdSuccess([]))
+    }
+  }, [watchedCompanyId, dispatch, reset, watch])
+
+  // Debug staff data for role 3
+  useEffect(() => {
+    if (user && parseInt(user.role) === 3) {
+      console.log('Staff data for role 3:', { staff, staffLength: staff?.length, watchedCompanyId })
+    }
+  }, [staff, watchedCompanyId, user])
+
+  // Debug appointment data for role 1
+  useEffect(() => {
+    if (user && parseInt(user.role) === 1 && currentAppointment) {
+      console.log('Current appointment data for role 1:', {
+        appointment: currentAppointment,
+        staffPreferences: currentAppointment.staffPreferences,
+        staffId: currentAppointment.staffId
+      })
+    }
+  }, [currentAppointment, user])
+
   // Load appointment data if in edit mode
   useEffect(() => {
     if (isEditMode) {
@@ -226,6 +287,8 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
         userId: currentAppointment.userId || '',
         companyId: currentAppointment.companyId,
         serviceId: '', // Set to empty string initially
+        staffId: currentAppointment.staffId || '',
+        staffPreferences: currentAppointment.staffPreferences || [],
         appointmentDate: currentAppointment.appointmentDate ? new Date(currentAppointment.appointmentDate).toISOString().split('T')[0] : '',
         appointmentTime: currentAppointment.appointmentTime ? 
           (currentAppointment.appointmentTime.includes('T') ? 
@@ -268,6 +331,16 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
         updateData.status = data.status
       }
       
+      // Add staffId for company owners (role: 1)
+      if (user && parseInt(user.role) === 1 && data.staffId) {
+        updateData.staffId = parseInt(data.staffId as string)
+      }
+      
+      // Add staffPreferences for company owners (role: 1)
+      if (user && parseInt(user.role) === 1 && data.staffPreferences) {
+        updateData.staffPreferences = data.staffPreferences
+      }
+      
       dispatch(updateAppointmentRequest(updateData))
     } else {
       const createData: any = {
@@ -284,6 +357,16 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
       } else if (user && parseInt(user.role) !== 1) {
         // For regular users, use their own ID
         createData.userId = user.id
+      }
+      
+      // Add staffId for company owners (role: 1)
+      if (user && parseInt(user.role) === 1 && data.staffId) {
+        createData.staffId = parseInt(data.staffId as string)
+      }
+      
+      // Add staffPreferences for regular users (role: 3) or company owners (role: 1)
+      if (data.staffPreferences && data.staffPreferences.length > 0) {
+        createData.staffPreferences = data.staffPreferences
       }
       dispatch(createAppointmentRequest(createData))
     }
@@ -418,6 +501,119 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
               disabled={isEditMode || !watchedCompanyId || watchedCompanyId === '' || !services || services.length === 0}
             />
           </Grid>
+          
+          {/* Staff selection for company owners */}
+          {user && parseInt(user.role) === 1 && (
+            <Grid item xs={12}>
+              <FormSelect
+                name="staffId"
+                label={
+                  isEditMode && currentAppointment?.staffPreferences && currentAppointment.staffPreferences.length > 0
+                    ? "Assign to Staff Member (From Preferred Staff)"
+                    : "Assign to Staff Member (Optional)"
+                }
+                control={control}
+                options={(() => {
+                  if (!staff || staff.length === 0) {
+                    return watchedCompanyId && watchedCompanyId !== '' && parseInt(watchedCompanyId as string) > 0 
+                      ? [{ value: '', label: 'No staff members available for this company' }]
+                      : [{ value: '', label: 'Please select a company first' }]
+                  }
+
+                  // If editing and there are preferred staff, prioritize them
+                  if (isEditMode && currentAppointment?.staffPreferences && currentAppointment.staffPreferences.length > 0) {
+                    const preferredStaffIds = currentAppointment.staffPreferences
+                    const preferredStaff = staff.filter(s => preferredStaffIds.includes(s.id))
+                    const otherStaff = staff.filter(s => !preferredStaffIds.includes(s.id))
+                    
+                    const options = []
+                    
+                    // Add preferred staff first
+                    if (preferredStaff.length > 0) {
+                      options.push({ value: '', label: '--- Preferred Staff ---' })
+                      preferredStaff.forEach(staffMember => {
+                        options.push({
+                          value: staffMember.id,
+                          label: `⭐ ${staffMember.firstName} ${staffMember.lastName} (${staffMember.email})`
+                        })
+                      })
+                    }
+                    
+                    // Add other staff
+                    if (otherStaff.length > 0) {
+                      options.push({ value: '', label: '--- Other Staff ---' })
+                      otherStaff.forEach(staffMember => {
+                        options.push({
+                          value: staffMember.id,
+                          label: `${staffMember.firstName} ${staffMember.lastName} (${staffMember.email})`
+                        })
+                      })
+                    }
+                    
+                    return options
+                  }
+                  
+                  // Default: show all staff
+                  return staff.map(staffMember => ({
+                    value: staffMember.id,
+                    label: `${staffMember.firstName} ${staffMember.lastName} (${staffMember.email})`
+                  }))
+                })()}
+                error={errors.staffId}
+                disabled={!watchedCompanyId || watchedCompanyId === '' || !staff || staff.length === 0}
+              />
+              {isEditMode && currentAppointment?.staffPreferences && currentAppointment.staffPreferences.length > 0 && (
+                <Box sx={{ mt: 1, p: 2, backgroundColor: uiTheme.mode === 'dark' ? '#1e293b' : '#f8fafc', borderRadius: 1 }}>
+                  <Typography variant="body2" sx={{ color: uiTheme.textSecondary, mb: 1 }}>
+                    <strong>Preferred Staff by User:</strong>
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {currentAppointment.staffPreferences.map((staffId) => {
+                      const staffMember = staff?.find(s => s.id === staffId)
+                      return staffMember ? (
+                        <Box
+                          key={staffId}
+                          sx={{
+                            px: 2,
+                            py: 1,
+                            backgroundColor: uiTheme.primary,
+                            color: '#ffffff',
+                            borderRadius: 1,
+                            fontSize: '0.875rem'
+                          }}
+                        >
+                          {staffMember.firstName} {staffMember.lastName}
+                        </Box>
+                      ) : null
+                    })}
+                  </Box>
+                </Box>
+              )}
+            </Grid>
+          )}
+          
+          {/* Staff preferences for regular users */}
+          {user && parseInt(user.role) === 3 && (
+            <Grid item xs={12}>
+              <FormMultiSelect
+                name="staffPreferences"
+                label="Preferred Staff Members (Select up to 3)"
+                control={control}
+                options={staff && staff.length > 0 
+                  ? staff.map(staffMember => ({
+                      value: staffMember.id,
+                      label: `${staffMember.firstName} ${staffMember.lastName} (${staffMember.email})`
+                    }))
+                  : watchedCompanyId && watchedCompanyId !== '' && parseInt(watchedCompanyId as string) > 0 
+                    ? [{ value: '', label: 'No active staff members available for this company' }]
+                    : [{ value: '', label: 'Please select a company first' }]
+                }
+                error={errors.staffPreferences as any}
+                maxSelections={3}
+                disabled={!watchedCompanyId || watchedCompanyId === '' || !staff || staff.length === 0}
+              />
+            </Grid>
+          )}
           <Grid item xs={12} sm={6}>
             <FormInput
               name="appointmentDate"

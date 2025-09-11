@@ -6,6 +6,8 @@ export interface Appointment {
   userId: number
   companyId: number
   serviceId: number
+  staffId?: number
+  staffPreferences?: number[]
   appointmentDate: string
   appointmentTime: string
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
@@ -19,6 +21,9 @@ export interface Appointment {
   companyName?: string
   serviceName?: string
   servicePrice?: number
+  staffName?: string
+  staffEmail?: string
+  staffProfileImage?: string
 }
 
 // Create appointment

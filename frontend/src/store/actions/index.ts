@@ -2,3 +2,4 @@
 export * from './authActions'
 export * from './companyActions'
 export * from './logoutActions'
+export * from './staffActions'

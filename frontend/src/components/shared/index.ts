@@ -1,5 +1,6 @@
 export { default as FormInput } from './FormInput'
 export { default as FormSelect } from './FormSelect'
+export { default as FormMultiSelect } from './FormMultiSelect'
 export { default as FormButton } from './FormButton'
 export { default as CustomInput } from './CustomInput'
 export { default as CustomButton } from './CustomButton'

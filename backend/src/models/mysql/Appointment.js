@@ -9,6 +9,8 @@ export class Appointment {
       userId,
       companyId,
       serviceId,
+      staffId,
+      staffPreferences,
       appointmentDate,
       appointmentTime,
       status = APPOINTMENT_STATUS.PENDING,
@@ -17,11 +19,11 @@ export class Appointment {
 
     const query = `
       INSERT INTO ${this.tableName} 
-      (user_id, company_id, service_id, appointment_date, appointment_time, status, notes, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      (user_id, company_id, service_id, staff_id, staff_preferences, appointment_date, appointment_time, status, notes, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `
     
-    const values = [userId, companyId, serviceId, appointmentDate, appointmentTime, status, notes]
+    const values = [userId, companyId, serviceId, staffId, staffPreferences ? JSON.stringify(staffPreferences) : null, appointmentDate, appointmentTime, status, notes]
     
     try {
       const result = await executeQuery(query, values)
@@ -35,15 +37,18 @@ export class Appointment {
   static async findById(id) {
     const query = `
       SELECT 
-        a.id, a.user_id as userId, a.company_id as companyId, a.service_id as serviceId,
+        a.id, a.user_id as userId, a.company_id as companyId, a.service_id as serviceId, a.staff_id as staffId, a.staff_preferences as staffPreferences,
         a.appointment_date as appointmentDate, a.appointment_time as appointmentTime,
         a.status, a.notes, a.created_at as createdAt, a.updated_at as updatedAt,
         CONCAT(u.first_name, ' ', u.last_name) as userName, u.email as userEmail, u.profile_image as userProfileImage,
-        c.name as companyName, s.name as serviceName, s.price as servicePrice
+        c.name as companyName, s.name as serviceName, s.price as servicePrice,
+        CONCAT(st.first_name, ' ', st.last_name) as staffName, st.email as staffEmail, st.profile_image as staffProfileImage
       FROM ${this.tableName} a
       LEFT JOIN users u ON a.user_id = u.id
       LEFT JOIN companies c ON a.company_id = c.id
       LEFT JOIN services s ON a.service_id = s.id
+      LEFT JOIN staff stf ON a.staff_id = stf.id
+      LEFT JOIN users st ON stf.user_id = st.id
       WHERE a.id = ?
     `
     
@@ -186,7 +191,7 @@ export class Appointment {
   }
 
   static async update(id, appointmentData) {
-    const { appointmentDate, appointmentTime, status, notes } = appointmentData
+    const { appointmentDate, appointmentTime, status, notes, staffId, staffPreferences } = appointmentData
     
     // Convert status string to integer if provided
     const statusValue = status ? getStatusId(status) : null
@@ -197,11 +202,13 @@ export class Appointment {
           appointment_time = COALESCE(?, appointment_time),
           status = COALESCE(?, status),
           notes = COALESCE(?, notes),
+          staff_id = COALESCE(?, staff_id),
+          staff_preferences = COALESCE(?, staff_preferences),
           updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `
     
-    const values = [appointmentDate, appointmentTime, statusValue, notes, id]
+    const values = [appointmentDate, appointmentTime, statusValue, notes, staffId, staffPreferences ? JSON.stringify(staffPreferences) : null, id]
     
     try {
       const result = await executeQuery(query, values)

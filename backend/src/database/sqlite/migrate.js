@@ -104,6 +104,8 @@ const createTables = async () => {
         user_id INTEGER NOT NULL,
         company_id INTEGER NOT NULL,
         service_id INTEGER NOT NULL,
+        staff_id INTEGER NULL,
+        staff_preferences TEXT NULL,
         appointment_date DATE NOT NULL,
         appointment_time TIME NOT NULL,
         status TEXT CHECK(status IN ('pending', 'confirmed', 'completed', 'cancelled')) DEFAULT 'pending',
@@ -112,7 +114,8 @@ const createTables = async () => {
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
         FOREIGN KEY (company_id) REFERENCES companies (id) ON DELETE CASCADE,
-        FOREIGN KEY (service_id) REFERENCES services (id) ON DELETE CASCADE
+        FOREIGN KEY (service_id) REFERENCES services (id) ON DELETE CASCADE,
+        FOREIGN KEY (staff_id) REFERENCES staff (id) ON DELETE SET NULL
       )
     `)
 
@@ -130,11 +133,47 @@ const createTables = async () => {
     `)
 
     await db.exec(`
+      CREATE INDEX IF NOT EXISTS idx_appointments_staff_id ON appointments (staff_id)
+    `)
+
+    await db.exec(`
       CREATE INDEX IF NOT EXISTS idx_appointments_date_time ON appointments (appointment_date, appointment_time)
     `)
 
     await db.exec(`
       CREATE INDEX IF NOT EXISTS idx_appointments_status ON appointments (status)
+    `)
+
+    // Create staff table
+    await db.exec(`
+      CREATE TABLE IF NOT EXISTS staff (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        company_id INTEGER NOT NULL,
+        working_hours_start TIME,
+        working_hours_end TIME,
+        skills TEXT,
+        professional_qualifications TEXT,
+        status TEXT CHECK(status IN ('active', 'inactive')) DEFAULT 'active',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+        FOREIGN KEY (company_id) REFERENCES companies (id) ON DELETE CASCADE,
+        UNIQUE (user_id, company_id)
+      )
+    `)
+
+    // Create indexes for staff table
+    await db.exec(`
+      CREATE INDEX IF NOT EXISTS idx_staff_user_id ON staff (user_id)
+    `)
+
+    await db.exec(`
+      CREATE INDEX IF NOT EXISTS idx_staff_company_id ON staff (company_id)
+    `)
+
+    await db.exec(`
+      CREATE INDEX IF NOT EXISTS idx_staff_status ON staff (status)
     `)
 
     console.log('Database tables created successfully')

@@ -24,6 +24,42 @@ export interface User {
   updatedAt: string
 }
 
+export interface Staff {
+  id: number
+  userId: number
+  companyId: number
+  workingHoursStart?: string
+  workingHoursEnd?: string
+  skills?: string
+  professionalQualifications?: string
+  status: number
+  firstName?: string
+  lastName?: string
+  email?: string
+  phoneNumber?: string
+  profileImage?: string
+  companyName?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreateStaffRequest {
+  userId: number
+  workingHoursStart?: string
+  workingHoursEnd?: string
+  skills?: string
+  professionalQualifications?: string
+  status?: number
+}
+
+export interface UpdateStaffRequest {
+  workingHoursStart?: string
+  workingHoursEnd?: string
+  skills?: string
+  professionalQualifications?: string
+  status?: number
+}
+
 export interface RegisterRequest {
   firstName: string
   lastName: string
@@ -305,6 +341,43 @@ class ApiService {
 
   async getAppointmentStats(): Promise<ApiResponse<any>> {
     return this.request<any>('/appointments/stats')
+  }
+
+  // Staff API methods
+  async getStaff(): Promise<ApiResponse<Staff[]>> {
+    return this.request<Staff[]>('/staff')
+  }
+
+  async getStaffByCompanyId(companyId: number): Promise<ApiResponse<Staff[]>> {
+    return this.request<Staff[]>(`/staff/company/${companyId}`)
+  }
+
+  async getStaffById(staffId: number): Promise<ApiResponse<Staff>> {
+    return this.request<Staff>(`/staff/${staffId}`)
+  }
+
+  async createStaff(data: CreateStaffRequest): Promise<ApiResponse<Staff>> {
+    return this.request<Staff>('/staff', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+  }
+
+  async updateStaff(staffId: number, data: UpdateStaffRequest): Promise<ApiResponse<Staff>> {
+    return this.request<Staff>(`/staff/${staffId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    })
+  }
+
+  async deleteStaff(staffId: number): Promise<ApiResponse<any>> {
+    return this.request<any>(`/staff/${staffId}`, {
+      method: 'DELETE'
+    })
+  }
+
+  async getAvailableUsers(): Promise<ApiResponse<User[]>> {
+    return this.request<User[]>('/staff/available-users')
   }
 }
 
