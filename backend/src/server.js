@@ -35,25 +35,29 @@ const generalLimiter = rateLimit({
   }
 })
 
-// Rate limiting - Auth routes (more lenient for login attempts)
-const authLimiter = rateLimit({
-  windowMs: 5 * 60 * 1000, // 5 minutes
-  max: config.server.nodeEnv === 'development' ? 100 : 20, // More lenient in development
-  message: {
-    success: false,
-    message: 'Too many login attempts from this IP, please try again later.'
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-})
+// Rate limiting - Auth routes (disabled in development)
+const authLimiter = config.server.nodeEnv === 'development' 
+  ? (req, res, next) => next() // Skip rate limiting in development
+  : rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 20, // Allow 20 login attempts per 15 minutes
+      message: {
+        success: false,
+        message: 'Too many login attempts from this IP, please try again later.'
+      },
+      standardHeaders: true,
+      legacyHeaders: false,
+    })
 
-// Apply general rate limiting to all routes except auth
-app.use((req, res, next) => {
-  if (req.path.startsWith('/api/auth')) {
-    return next() // Skip general limiter for auth routes
-  }
-  generalLimiter(req, res, next)
-})
+// Apply general rate limiting to all routes except auth (disabled in development)
+if (config.server.nodeEnv !== 'development') {
+  app.use((req, res, next) => {
+    if (req.path.startsWith('/api/auth')) {
+      return next() // Skip general limiter for auth routes
+    }
+    generalLimiter(req, res, next)
+  })
+}
 
 // Logging middleware
 if (config.server.nodeEnv === 'development') {

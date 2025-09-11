@@ -79,7 +79,7 @@ export const getProfileEpic = (action$: any) =>
           } else {
             console.log('Profile request failed:', response.message, 'Status:', (response as any).status)
             // If profile request fails with 401/403, clear the token
-            if ((response as any).status === 401 || (response as any).status === 403 || (response as any).status === 429 || 
+            if ((response as any).status === 401 || (response as any).status === 403 || (response as any).status === 429 || (response as any).status === 0 ||
                 response.message?.includes('Token expired') || 
                 response.message?.includes('Invalid token') ||
                 response.message?.includes('Access token required') ||
