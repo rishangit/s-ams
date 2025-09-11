@@ -118,7 +118,7 @@ const UserProfile: React.FC = () => {
       const userImage = user.profileImage || ''
       setOriginalImage(userImage)
       setPreviewImage(userImage)
-      
+
       reset({
         firstName: user.firstName || '',
         lastName: user.lastName || '',
@@ -164,7 +164,7 @@ const UserProfile: React.FC = () => {
     setSuccessMessage('')
     setImageUploadMessage('')
     setPreviewImage(originalImage) // Reset preview to original
-    
+
     // Reset form data to original user data
     if (user) {
       reset({
@@ -181,10 +181,10 @@ const UserProfile: React.FC = () => {
   const handleFileUploaded = (filePath: string, _fileUrl: string) => {
     // Update the form value for profileImage
     setValue('profileImage', filePath, { shouldDirty: true, shouldValidate: true })
-    
+
     // Update preview image to show the uploaded image
     setPreviewImage(filePath)
-    
+
     // Show success message for image upload
     setImageUploadMessage('Profile image uploaded successfully! Click "Save Changes" to update your profile.')
     setTimeout(() => setImageUploadMessage(''), 5000)
@@ -193,10 +193,10 @@ const UserProfile: React.FC = () => {
   const handleFileDeleted = () => {
     // Update the form value for profileImage
     setValue('profileImage', '', { shouldDirty: true, shouldValidate: true })
-    
+
     // Clear preview image
     setPreviewImage('')
-    
+
     // Show success message for image deletion
     setImageUploadMessage('Profile image removed successfully! Click "Save Changes" to update your profile.')
     setTimeout(() => setImageUploadMessage(''), 5000)
@@ -226,13 +226,15 @@ const UserProfile: React.FC = () => {
 
   return (
     <Box className="mx-auto p-0 md:p-6">
-      <Typography
-        variant="h6"
-        className="mb-6 font-bold text-lg md:text-3xl"
-        style={{ color: uiTheme.text }}
-      >
-        User Profile
-      </Typography>
+      <Box className="flex items-center justify-between mb-4">
+        <Typography
+          variant="h6"
+          className="font-bold text-xl md:text-3xl"
+          style={{ color: uiTheme.text }}
+        >
+          User Profile
+        </Typography>
+      </Box>
 
       {successMessage && (
         <Alert severity="success" className="mb-4">
@@ -257,7 +259,7 @@ const UserProfile: React.FC = () => {
         <Grid item xs={12} md={4}>
           <Paper
             className="p-6"
-            style={{ 
+            style={{
               backgroundColor: uiTheme.surface,
               border: `1px solid ${uiTheme.mode === 'dark' ? '#334155' : '#e5e7eb'}`
             }}
@@ -277,7 +279,7 @@ const UserProfile: React.FC = () => {
                   {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
                 </span>
               </Avatar>
-              
+
               {/* Show file upload only in edit mode */}
               {isEditing && (
                 <FileUpload
@@ -290,7 +292,7 @@ const UserProfile: React.FC = () => {
                   className="mb-4"
                 />
               )}
-              
+
               <Typography
                 variant="h5"
                 className="font-semibold mb-2"
@@ -298,7 +300,7 @@ const UserProfile: React.FC = () => {
               >
                 {user.firstName} {user.lastName}
               </Typography>
-              
+
               <Typography
                 variant="body1"
                 className="mb-4"
@@ -306,7 +308,7 @@ const UserProfile: React.FC = () => {
               >
                 {isValidRole(parseInt(user.role)) ? getRoleDisplayName(parseInt(user.role) as any) : 'User'}
               </Typography>
-              
+
               <Typography
                 variant="body2"
                 style={{ color: uiTheme.textSecondary }}
@@ -321,7 +323,7 @@ const UserProfile: React.FC = () => {
         <Grid item xs={12} md={8}>
           <Paper
             className="p-6"
-            style={{ 
+            style={{
               backgroundColor: uiTheme.surface,
               border: `1px solid ${uiTheme.mode === 'dark' ? '#334155' : '#e5e7eb'}`
             }}
@@ -333,7 +335,7 @@ const UserProfile: React.FC = () => {
             >
               Profile Information
             </Typography>
-            
+
             <form onSubmit={handleSubmit(onSubmit)}>
               <Grid container spacing={3}>
                 <Grid item xs={12} sm={6}>
@@ -442,14 +444,14 @@ const UserProfile: React.FC = () => {
           <Grid item xs={12}>
             <Paper
               className="p-6"
-              style={{ 
+              style={{
                 backgroundColor: uiTheme.surface,
                 border: `1px solid ${uiTheme.mode === 'dark' ? '#334155' : '#e5e7eb'}`
               }}
             >
               <Box className="flex items-center mb-4">
-                <BusinessIcon 
-                  className="mr-3" 
+                <BusinessIcon
+                  className="mr-3"
                   style={{ color: uiTheme.primary, fontSize: '2rem' }}
                 />
                 <Typography
@@ -460,21 +462,21 @@ const UserProfile: React.FC = () => {
                   Company Registration Request
                 </Typography>
               </Box>
-              
+
               <Typography
                 variant="body1"
                 className="mb-4"
                 style={{ color: uiTheme.textSecondary }}
               >
-                {company ? 
+                {company ?
                   `Your company "${company.name}" is registered with status: ${company.status}. You can edit your company details or view the current status.` :
                   'You can request to register your company with our system. This will allow you to access additional features and manage your organization\'s data.'
                 }
               </Typography>
 
-              <Box 
+              <Box
                 className="p-4 rounded-lg mb-4"
-                style={{ 
+                style={{
                   backgroundColor: uiTheme.mode === 'dark' ? '#1e3a8a20' : '#dbeafe',
                   border: `1px solid ${uiTheme.mode === 'dark' ? '#3b82f620' : '#93c5fd'}`
                 }}

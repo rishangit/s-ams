@@ -12,7 +12,6 @@ import {
 } from '@mui/material'
 import {
   Add as AddIcon,
-  Refresh as RefreshIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
   CheckCircle,
@@ -44,7 +43,7 @@ const Appointments: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [editingAppointmentId, setEditingAppointmentId] = useState<number | null>(null)
-  
+
   // Load appointments when component mounts
   useEffect(() => {
     if (user) {
@@ -64,11 +63,6 @@ const Appointments: React.FC = () => {
   // Clear error and success messages after 3 seconds and refresh grid on success
   useEffect(() => {
     if (error || success) {
-      // If it's a success message, refresh the appointments list
-      if (success && success.includes('created successfully')) {
-        handleRefresh()
-      }
-      
       const timer = setTimeout(() => {
         dispatch(clearAppointmentsMessages())
       }, 3000)
@@ -86,17 +80,6 @@ const Appointments: React.FC = () => {
     }
   }
 
-  const handleRefresh = () => {
-    if (user) {
-      if (parseInt(user.role) === 0) {
-        dispatch(getAllAppointmentsRequest())
-      } else if (parseInt(user.role) === 1) {
-        dispatch(getAppointmentsByCompanyRequest())
-      } else if (parseInt(user.role) === 3) {
-        dispatch(getAppointmentsByUserRequest())
-      }
-    }
-  }
 
   const handleEditAppointment = (appointmentId: number) => {
     setEditingAppointmentId(appointmentId)
@@ -128,7 +111,7 @@ const Appointments: React.FC = () => {
   // Status Cell Renderer Component
   const StatusCellRenderer = (props: ICellRendererParams) => {
     const { value } = props
-    
+
     // Convert integer status to string if needed
     const getStatusString = (status: any) => {
       if (typeof status === 'number') {
@@ -142,9 +125,9 @@ const Appointments: React.FC = () => {
       }
       return status || 'pending'
     }
-    
+
     const statusString = getStatusString(value)
-    
+
     const getStatusColor = (status: string) => {
       switch (status) {
         case 'pending': return '#f59e0b'    // Orange
@@ -154,7 +137,7 @@ const Appointments: React.FC = () => {
         default: return '#6b7280'
       }
     }
-    
+
     return (
       <Chip
         label={statusString?.charAt(0).toUpperCase() + statusString?.slice(1)}
@@ -173,7 +156,7 @@ const Appointments: React.FC = () => {
     const { data } = props
     const isAdmin = user && parseInt(user.role) === 0
     const isOwner = user && parseInt(user.role) === 1
-    
+
     return (
       <Box className="flex gap-1">
         <Tooltip title="Edit Appointment">
@@ -339,9 +322,9 @@ const Appointments: React.FC = () => {
         width: 200,
         minWidth: 150,
         cellRenderer: (params: ICellRendererParams) => (
-          <span style={{ 
-            overflow: 'hidden', 
-            textOverflow: 'ellipsis', 
+          <span style={{
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
             display: 'block',
             maxWidth: '100%'
@@ -379,9 +362,9 @@ const Appointments: React.FC = () => {
   if (authLoading || !user) {
     return (
       <Box className="flex items-center justify-center h-64">
-        <Typography 
-          variant="h6" 
-          className="text-base md:text-xl" 
+        <Typography
+          variant="h6"
+          className="text-base md:text-xl"
           style={{ color: uiTheme.text }}
         >
           Loading user data...
@@ -391,23 +374,24 @@ const Appointments: React.FC = () => {
   }
 
   return (
-    <Box className="h-full p-0 md:p-6">
-      <Box className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-        <Box className="flex items-center gap-3">
-          <ScheduleIcon style={{ color: uiTheme.primary, fontSize: 32 }} />
-          <Typography 
-            variant="h6" 
-            className="text-lg md:text-3xl font-bold" 
-            style={{ color: uiTheme.text }}
-          >
-            Appointments
-          </Typography>
-        </Box>
+    <Box className="h-full md:p-6">
+      {/* Header Section */}
+      <Box className="flex items-center gap-3 mb-6">
+        <ScheduleIcon style={{ color: uiTheme.primary, fontSize: 32 }} />
+        <Typography
+          variant="h6"
+          className="text-xl md:text-3xl font-bold"
+          style={{ color: uiTheme.text }}
+        >
+          Appointments
+        </Typography>
+      </Box>
 
-        <Box className="flex flex-col gap-4">
-          {/* First row: Status filter and Add button */}
-          <Box className="flex items-center gap-4">
-            <FormControl size="small" style={{ minWidth: 120 }}>
+      {/* Controls Section - All on the right */}
+      <Box className="flex justify-end mb-6">
+        <Box className="flex flex-row items-center gap-4">
+          {/* Status Filter */}
+          <FormControl size="small" style={{ minWidth: 120 }}>
               <Select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
@@ -421,29 +405,18 @@ const Appointments: React.FC = () => {
               </Select>
             </FormControl>
 
-            {user && (parseInt(user.role) === 0 || parseInt(user.role) === 1 || parseInt(user.role) === 3) && (
-              <Button
-                variant="contained"
-                onClick={handleAddAppointment}
-                style={{ backgroundColor: uiTheme.primary, color: '#ffffff' }}
-                startIcon={<AddIcon />}
-              >
-                <span>Book Appointment</span>
-              </Button>
-            )}
-          </Box>
-
-          {/* Second row: Refresh button */}
-          <Box className="flex items-center">
-            <Tooltip title="Refresh Appointments">
-              <IconButton
-                onClick={handleRefresh}
-                style={{ color: uiTheme.primary }}
-              >
-                <RefreshIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
+          {/* Add Button */}
+          {user && (parseInt(user.role) === 0 || parseInt(user.role) === 1 || parseInt(user.role) === 3) && (
+            <Button
+              variant="contained"
+              onClick={handleAddAppointment}
+              style={{ backgroundColor: uiTheme.primary, color: '#ffffff' }}
+              startIcon={<AddIcon />}
+              className="w-auto"
+            >
+              <span>Book Appointment</span>
+            </Button>
+          )}
         </Box>
       </Box>
 
@@ -456,7 +429,7 @@ const Appointments: React.FC = () => {
         error={error}
         success={success}
         theme={uiTheme}
-        height="calc(100vh - 200px)"
+        height="calc(100vh - 280px)"
         showTitle={false}
         showAlerts={true}
       />

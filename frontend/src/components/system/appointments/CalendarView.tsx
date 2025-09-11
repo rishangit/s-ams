@@ -370,7 +370,7 @@ const CalendarView: React.FC = () => {
           <CalendarIcon style={{ fontSize: '2rem', color: theme.primary }} />
           <Typography 
             variant="h6" 
-            className="text-lg md:text-3xl"
+            className="text-xl md:text-3xl font-bold"
             style={{ color: theme.text }}
           >
             Appointment Calendar

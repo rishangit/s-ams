@@ -174,10 +174,10 @@ const CompanyDetail: React.FC = () => {
 
   return (
     <Box className="mx-auto p-0 md:p-6">
-      <Box className="flex items-center justify-between mb-6">
+      <Box className="flex items-center justify-between mb-4">
         <Typography
           variant="h6"
-          className="font-bold text-lg md:text-3xl"
+          className="font-bold text-xl md:text-3xl"
           style={{ color: uiTheme.text }}
         >
           Company Details

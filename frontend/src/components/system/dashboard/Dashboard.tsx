@@ -10,7 +10,7 @@ const Dashboard: React.FC = () => {
     <Box className="mx-auto p-0 md:p-6">
       <Typography
         variant="h6"
-        className="mb-6 font-bold text-lg md:text-3xl"
+        className="text-xl md:text-3xl font-bold"
         style={{ color: uiTheme.text }}
       >
         Dashboard

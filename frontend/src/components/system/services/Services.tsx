@@ -7,7 +7,8 @@ import {
   Select,
   MenuItem,
   FormControl,
-  InputLabel
+  Button,
+  Typography
 } from '@mui/material'
 import {
   Build as ServicesIcon,
@@ -244,46 +245,45 @@ const Services: React.FC = () => {
   }
 
   return (
-    <Box className="h-full p-0 md:p-6">
-      {/* Header with Add Button */}
-      <Box className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-        <Box className="flex items-center space-x-3">
-          <ServicesIcon style={{ color: uiTheme.primary, fontSize: '2rem' }} />
-          <h1 
-            className="text-lg md:text-3xl font-bold" 
-            style={{ color: uiTheme.text }}
-          >
-            Services Management
-          </h1>
-        </Box>
-        <Box className="flex items-center space-x-4">
+    <Box className="h-full md:p-6">
+      {/* Header Section */}
+      <Box className="flex items-center gap-3 mb-6">
+        <ServicesIcon style={{ color: uiTheme.primary, fontSize: 32 }} />
+        <Typography
+          variant="h6"
+          className="text-xl md:text-3xl font-bold"
+          style={{ color: uiTheme.text }}
+        >
+          Services
+        </Typography>
+      </Box>
+
+      {/* Controls Section - All on the right */}
+      <Box className="flex justify-end mb-6">
+        <Box className="flex flex-row items-center gap-4">
           {/* Status Filter */}
           <FormControl size="small" style={{ minWidth: 120 }}>
-            <InputLabel style={{ color: uiTheme.textSecondary }}>Status</InputLabel>
             <Select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               label="Status"
-              style={{ color: uiTheme.text }}
             >
               <MenuItem value="">All</MenuItem>
               <MenuItem value="active">Active</MenuItem>
               <MenuItem value="inactive">Inactive</MenuItem>
             </Select>
           </FormControl>
-          
-          {/* Add New Service Button */}
-          <button
+
+          {/* Add Button */}
+          <Button
+            variant="contained"
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors"
-            style={{
-              backgroundColor: uiTheme.primary,
-              color: '#ffffff'
-            }}
+            style={{ backgroundColor: uiTheme.primary, color: '#ffffff' }}
+            startIcon={<AddIcon />}
+            className="w-auto"
           >
-            <AddIcon />
-            <span>Add New Service</span>
-          </button>
+            <span>Add Service</span>
+          </Button>
         </Box>
       </Box>
 
@@ -295,7 +295,7 @@ const Services: React.FC = () => {
         error={error}
         success={success}
         theme={uiTheme}
-        height="calc(100vh - 200px)"
+        height="calc(100vh - 280px)"
         showTitle={false}
         showAlerts={true}
       />

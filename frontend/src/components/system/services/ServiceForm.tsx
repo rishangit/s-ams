@@ -187,8 +187,10 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
     )
   }
 
+  const isModal = isOpen && onClose
+  
   const formContent = (
-    <Box className="p-6">
+    <Box className={`${isModal ? 'p-4 px-0 sm:p-6 sm:px-0' : 'p-6'}`}>
       {success && (
         <Alert severity="success" className="mb-4">
           {success}
@@ -202,8 +204,8 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
       )}
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={6}>
+        <Grid container spacing={{ xs: 2, sm: 3 }}>
+          <Grid item xs={12}>
             <FormInput
               name="name"
               label="Service Name"
@@ -232,7 +234,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
               error={errors.description}
             />
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12}>
             <FormInput
               name="duration"
               label="Duration"
@@ -241,7 +243,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
               error={errors.duration}
             />
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12}>
             <FormSelect
               name="status"
               label="Status"
@@ -257,30 +259,36 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
         </Grid>
 
         {/* Action Buttons */}
-        <Box className="flex justify-end space-x-3 mt-6">
-          <FormButton
-            type="button"
-            variant="outlined"
-            onClick={handleCancel}
-          >
-            <Box className="flex items-center space-x-2">
-              <CancelIcon />
-              <span>Cancel</span>
-            </Box>
-          </FormButton>
-          <FormButton
-            type="submit"
-            disabled={createLoading || updateLoading || !isDirty}
-          >
-            {(createLoading || updateLoading) ? (
-              <CircularProgress size={20} style={{ color: '#fff' }} />
-            ) : (
-              <Box className="flex items-center space-x-2">
-                <SaveIcon />
-                <span>{isEditMode ? 'Update Service' : 'Create Service'}</span>
+        <Box className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 mt-6">
+          <Box className="w-full sm:w-auto">
+            <FormButton
+              type="button"
+              variant="outlined"
+              onClick={handleCancel}
+              fullWidth
+            >
+              <Box className="flex items-center justify-center space-x-2">
+                <CancelIcon />
+                <span>Cancel</span>
               </Box>
-            )}
-          </FormButton>
+            </FormButton>
+          </Box>
+          <Box className="w-full sm:w-auto">
+            <FormButton
+              type="submit"
+              disabled={createLoading || updateLoading || !isDirty}
+              fullWidth
+            >
+              {(createLoading || updateLoading) ? (
+                <CircularProgress size={20} style={{ color: '#fff' }} />
+              ) : (
+                <Box className="flex items-center justify-center space-x-2">
+                  <SaveIcon />
+                  <span>{isEditMode ? 'Update Service' : 'Create Service'}</span>
+                </Box>
+              )}
+            </FormButton>
+          </Box>
         </Box>
       </form>
     </Box>
@@ -295,10 +303,25 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
         onClose={onClose}
         maxWidth="md"
         fullWidth
-        PaperProps={{
-          style: {
+        sx={{
+          '& .MuiDialog-paper': {
             backgroundColor: uiTheme.surface,
-            color: uiTheme.text
+            color: uiTheme.text,
+            zIndex: 1300,
+            position: 'relative',
+            margin: { xs: '16px', sm: '32px' },
+            maxHeight: { xs: 'calc(100vh - 32px)', sm: 'calc(100vh - 64px)' }
+          },
+          '& .MuiBackdrop-root': {
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 1299
+          },
+          '& .MuiDialogTitle-root': {
+            padding: { xs: '16px 16px 8px 16px', sm: '24px 24px 16px 24px' },
+            borderBottom: `1px solid ${uiTheme.border || '#e0e0e0'}`
+          },
+          '& .MuiDialogContent-root': {
+            padding: { xs: '8px 16px 16px 16px', sm: '16px 24px 24px 24px' }
           }
         }}
       >

@@ -330,22 +330,22 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
   }, [success, onSuccess])
 
   const formContent = (
-    <Box className="p-6">
-      <Box className="flex items-center space-x-3 mb-6">
-        <AppointmentIcon style={{ color: uiTheme.primary, fontSize: '2rem' }} />
-        <Typography
-          variant="h4"
-          className="font-bold"
-          style={{ color: uiTheme.text }}
-        >
-          {isEditMode 
-            ? 'Edit Appointment' 
-            : user && parseInt(user.role) === 1 
-              ? 'Book Appointment for User' 
-              : 'Book New Appointment'
-          }
-        </Typography>
-      </Box>
+    <Box className={`${isModal ? 'p-4 px-0 sm:p-6 sm:px-0' : 'p-6'}`}>
+      {!isModal && (
+        <Box className="flex items-center space-x-3 mb-6">
+          <AppointmentIcon style={{ color: uiTheme.primary, fontSize: '2rem' }} />
+          <Typography
+            variant="h4"
+            className="font-bold"
+            style={{ color: uiTheme.text }}
+          >
+            {isEditMode 
+              ? 'Edit Appointment' 
+              : 'New Appointment'
+            }
+          </Typography>
+        </Box>
+      )}
 
       {error && (
         <Alert severity="error" className="mb-4">
@@ -367,10 +367,10 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
       )}
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Grid container spacing={3}>
+        <Grid container spacing={{ xs: 2, sm: 3 }}>
           {/* User selection for company owners when creating new appointments */}
           {user && parseInt(user.role) === 1 && !isEditMode && (
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12}>
               <FormSelect
                 name="userId"
                 label="Select User to Book For"
@@ -385,7 +385,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
             </Grid>
           )}
           
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12}>
             <FormSelect
               name="companyId"
               label="Company"
@@ -399,7 +399,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
               disabled={isEditMode || Boolean(user && parseInt(user.role) === 1 && company)}
             />
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12}>
             <FormSelect
               name="serviceId"
               label="Service"
@@ -450,7 +450,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
           
           {/* Status dropdown for company owners in edit mode */}
           {user && parseInt(user.role) === 1 && isEditMode && (
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12}>
               <FormSelect
                 name="status"
                 label="Status"
@@ -468,37 +468,41 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
         </Grid>
 
         {/* Action Buttons */}
-        <Box className="flex justify-end space-x-3 mt-6">
-          <FormButton
-            type="button"
-            variant="outlined"
-            onClick={handleCancel}
-          >
-            <Box className="flex items-center space-x-2">
-              <CancelIcon />
-              <span>Cancel</span>
-            </Box>
-          </FormButton>
-          <FormButton
-            type="submit"
-            disabled={createLoading || updateLoading || !isDirty}
-          >
-            {(createLoading || updateLoading) ? (
-              <CircularProgress size={20} style={{ color: '#fff' }} />
-            ) : (
-              <Box className="flex items-center space-x-2">
-                <SaveIcon />
-                <span>
-                  {isEditMode 
-                    ? 'Update Appointment' 
-                    : user && parseInt(user.role) === 1 
-                      ? 'Book Appointment for User' 
-                      : 'Book Appointment'
-                  }
-                </span>
+        <Box className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 mt-6">
+          <Box className="w-full sm:w-auto">
+            <FormButton
+              type="button"
+              variant="outlined"
+              onClick={handleCancel}
+              fullWidth
+            >
+              <Box className="flex items-center justify-center space-x-2">
+                <CancelIcon />
+                <span>Cancel</span>
               </Box>
-            )}
-          </FormButton>
+            </FormButton>
+          </Box>
+          <Box className="w-full sm:w-auto">
+            <FormButton
+              type="submit"
+              disabled={createLoading || updateLoading || !isDirty}
+              fullWidth
+            >
+              {(createLoading || updateLoading) ? (
+                <CircularProgress size={20} style={{ color: '#fff' }} />
+              ) : (
+                <Box className="flex items-center justify-center space-x-2">
+                  <SaveIcon />
+                  <span>
+                    {isEditMode 
+                      ? 'Update Appointment' 
+                      : 'Book Appointment'
+                    }
+                  </span>
+                </Box>
+              )}
+            </FormButton>
+          </Box>
         </Box>
       </form>
     </Box>
@@ -519,20 +523,27 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
             backgroundColor: uiTheme.surface,
             color: uiTheme.text,
             zIndex: 1300,
-            position: 'relative'
+            position: 'relative',
+            margin: { xs: '16px', sm: '32px' },
+            maxHeight: { xs: 'calc(100vh - 32px)', sm: 'calc(100vh - 64px)' }
           },
           '& .MuiBackdrop-root': {
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
             zIndex: 1299
+          },
+          '& .MuiDialogTitle-root': {
+            padding: { xs: '16px 16px 8px 16px', sm: '24px 24px 16px 24px' },
+            borderBottom: `1px solid ${uiTheme.border || '#e0e0e0'}`
+          },
+          '& .MuiDialogContent-root': {
+            padding: { xs: '8px 16px 16px 16px', sm: '16px 24px 24px 24px' }
           }
         }}
       >
         <DialogTitle style={{ color: uiTheme.text }}>
           {isEditMode 
             ? 'Edit Appointment' 
-            : user && parseInt(user.role) === 1 
-              ? 'Book Appointment for User' 
-              : 'Book New Appointment'
+            : 'New Appointment'
           }
         </DialogTitle>
         <DialogContent>
