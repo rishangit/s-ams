@@ -8,7 +8,8 @@ import {
   getCompanyByIdEpic,
   getAllCompaniesEpic,
   updateCompanyStatusEpic,
-  deleteCompanyEpic
+  deleteCompanyEpic,
+  getCompaniesByUserAppointmentsEpic
 } from './companyEpics'
 import {
   getStaffEpic,
@@ -35,6 +36,7 @@ export const rootEpic = combineEpics(
   getAllCompaniesEpic,
   updateCompanyStatusEpic,
   deleteCompanyEpic,
+  getCompaniesByUserAppointmentsEpic,
   getStaffEpic,
   getStaffByCompanyIdEpic,
   getStaffByIdEpic,

@@ -127,6 +127,47 @@ const Navigation: React.FC<NavigationProps> = ({
           </ListItemButton>
         </ListItem>
 
+        {/* Calendar - Owner (role 1) and User (role 3) */}
+        {user && [1, 3].includes(parseInt(user.role)) && (
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => handleNavigation('/system/calendar')}
+              style={{
+                backgroundColor: location.pathname === '/system/calendar'
+                  ? uiTheme.primary
+                  : 'transparent',
+                color: location.pathname === '/system/calendar'
+                  ? '#ffffff'
+                  : uiTheme.text,
+                borderRight: location.pathname === '/system/calendar'
+                  ? `2px solid ${uiTheme.primary}`
+                  : 'none',
+                margin: '0 8px',
+                borderRadius: '8px'
+              }}
+              className="hover:opacity-80 transition-all duration-200"
+            >
+              <ListItemIcon>
+                <CalendarIcon
+                  style={{
+                    color: location.pathname === '/system/calendar'
+                      ? '#ffffff'
+                      : uiTheme.textSecondary
+                  }}
+                />
+              </ListItemIcon>
+              <ListItemText
+                primary="Calendar"
+                style={{
+                  color: location.pathname === '/system/calendar'
+                    ? '#ffffff'
+                    : uiTheme.text
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+        )}
+
         {/* Users Management - Admin Only (excludes owners) */}
         {user && isAdminOnlyRole(user.role as any) && (
           <ListItem disablePadding>
@@ -332,19 +373,19 @@ const Navigation: React.FC<NavigationProps> = ({
           </ListItem>
         )}
 
-        {/* Calendar - Owner (role 1) and User (role 3) */}
-        {user && [1, 3].includes(parseInt(user.role)) && (
+        {/* My Companies - User (role 3) only */}
+        {user && parseInt(user.role) === 3 && (
           <ListItem disablePadding>
             <ListItemButton
-              onClick={() => handleNavigation('/system/calendar')}
+              onClick={() => handleNavigation('/system/my-companies')}
               style={{
-                backgroundColor: location.pathname === '/system/calendar'
+                backgroundColor: location.pathname === '/system/my-companies'
                   ? uiTheme.primary
                   : 'transparent',
-                color: location.pathname === '/system/calendar'
+                color: location.pathname === '/system/my-companies'
                   ? '#ffffff'
                   : uiTheme.text,
-                borderRight: location.pathname === '/system/calendar'
+                borderRight: location.pathname === '/system/my-companies'
                   ? `2px solid ${uiTheme.primary}`
                   : 'none',
                 margin: '0 8px',
@@ -353,18 +394,18 @@ const Navigation: React.FC<NavigationProps> = ({
               className="hover:opacity-80 transition-all duration-200"
             >
               <ListItemIcon>
-                <CalendarIcon
+                <BusinessIcon
                   style={{
-                    color: location.pathname === '/system/calendar'
+                    color: location.pathname === '/system/my-companies'
                       ? '#ffffff'
                       : uiTheme.textSecondary
                   }}
                 />
               </ListItemIcon>
               <ListItemText
-                primary="Calendar"
+                primary="My Companies"
                 style={{
-                  color: location.pathname === '/system/calendar'
+                  color: location.pathname === '/system/my-companies'
                     ? '#ffffff'
                     : uiTheme.text
                 }}

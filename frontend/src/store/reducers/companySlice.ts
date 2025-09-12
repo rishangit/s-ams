@@ -25,6 +25,9 @@ import {
   deleteCompanyRequest,
   deleteCompanySuccess,
   deleteCompanyFailure,
+  getCompaniesByUserAppointmentsRequest,
+  getCompaniesByUserAppointmentsSuccess,
+  getCompaniesByUserAppointmentsFailure,
   clearCompanyError,
   clearCompanySuccess,
   clearCompanyData
@@ -35,6 +38,7 @@ import { logout } from '../actions/authActions'
 interface CompanyState {
   company: Company | null
   companies: Company[] | null
+  userCompanies: any[] | null // Companies user has appointments with
   loading: boolean
   error: string | null
   success: string | null
@@ -46,6 +50,7 @@ interface CompanyState {
 const initialState: CompanyState = {
   company: null,
   companies: null,
+  userCompanies: null,
   loading: false,
   error: null,
   success: null,
@@ -227,6 +232,7 @@ const companySlice = createSlice({
               .addCase(logout, (state) => {
                 state.company = null
                 state.companies = null
+                state.userCompanies = null
                 state.loading = false
                 state.error = null
                 state.success = null
@@ -234,6 +240,25 @@ const companySlice = createSlice({
                 state.updateLoading = false
                 state.deleteLoading = false
               })
+
+    // Get companies by user appointments
+    builder
+      .addCase(getCompaniesByUserAppointmentsRequest, (state) => {
+        console.log('Company slice: getCompaniesByUserAppointmentsRequest received')
+        state.loading = true
+        state.error = null
+      })
+      .addCase(getCompaniesByUserAppointmentsSuccess, (state, action: PayloadAction<any[]>) => {
+        console.log('Company slice: getCompaniesByUserAppointmentsSuccess received, data:', action.payload)
+        state.loading = false
+        state.userCompanies = action.payload
+        state.error = null
+      })
+      .addCase(getCompaniesByUserAppointmentsFailure, (state, action: PayloadAction<string>) => {
+        console.log('Company slice: getCompaniesByUserAppointmentsFailure received, error:', action.payload)
+        state.loading = false
+        state.error = action.payload
+      })
   }
 })
 

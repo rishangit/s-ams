@@ -7,7 +7,8 @@ import {
   getAllCompanies, 
   getCompanyById, 
   updateCompanyStatus, 
-  deleteCompany 
+  deleteCompany,
+  getCompaniesByUserAppointments
 } from '../controllers/companyController.js'
 import { authenticateToken } from '../middleware/auth.js'
 import { requireAdmin, requireAdminOnly } from '../middleware/auth.js'
@@ -22,6 +23,7 @@ router.post('/', createCompany) // Create company
 router.get('/user/:userId', getCompanyByUser) // Get company by user ID
 router.put('/:id', updateCompany) // Update company
 router.get('/booking', getCompaniesForBooking) // Get companies for appointment booking (authenticated users)
+router.get('/user-appointments', getCompaniesByUserAppointments) // Get companies user has appointments with (role 3 only)
 
 // Admin-only routes
 router.get('/', requireAdminOnly, getAllCompanies) // Get all companies (admin only, excludes owners)

@@ -11,7 +11,8 @@ import {
   getCompaniesForBookingEpic,
   getAllCompaniesEpic,
   updateCompanyStatusEpic,
-  deleteCompanyEpic
+  deleteCompanyEpic,
+  getCompaniesByUserAppointmentsEpic
 } from './epics/companyEpics'
 import {
   createServiceEpic,
@@ -59,6 +60,7 @@ const rootEpic = combineEpics(
   getAllCompaniesEpic,
   updateCompanyStatusEpic,
   deleteCompanyEpic,
+  getCompaniesByUserAppointmentsEpic,
   createServiceEpic,
   getServicesEpic,
   getServicesByCompanyIdEpic,

@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import Register from '../auth/register'
 import Login from '../auth/login'
 import { Dashboard, UserProfile, SystemLayout, Users, Companies, Appointments, Staff } from '../'
+import UserCompanies from '../companies/UserCompanies'
 import AppointmentForm from '../appointments/AppointmentForm'
 import CalendarView from '../appointments/CalendarView'
 import CompanyRouteWrapper from '../company/CompanyRouteWrapper'
@@ -100,6 +101,13 @@ const SystemRoutes: React.FC = () => {
         <ProtectedRoute>
           <SystemLayout title="Appointment Calendar">
             <CalendarView />
+          </SystemLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="my-companies" element={
+        <ProtectedRoute>
+          <SystemLayout title="My Companies">
+            <UserCompanies />
           </SystemLayout>
         </ProtectedRoute>
       } />

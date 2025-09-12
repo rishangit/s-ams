@@ -24,7 +24,10 @@ import {
   updateCompanyStatusFailure,
   deleteCompanyRequest,
   deleteCompanySuccess,
-  deleteCompanyFailure
+  deleteCompanyFailure,
+  getCompaniesByUserAppointmentsRequest,
+  getCompaniesByUserAppointmentsSuccess,
+  getCompaniesByUserAppointmentsFailure
 } from '../actions/companyActions'
 import { apiService } from '../../services/api'
 
@@ -192,3 +195,28 @@ export const deleteCompanyEpic = (action$: any) =>
       )
     })
   )
+
+
+// Get companies by user appointments epic
+export const getCompaniesByUserAppointmentsEpic = (action$: any) =>
+  action$.pipe(
+    ofType(getCompaniesByUserAppointmentsRequest.type),
+    switchMap(() => {
+      console.log('getCompaniesByUserAppointmentsEpic: API call starting')
+      return from(apiService.getCompaniesByUserAppointments()).pipe(
+        map((response) => {
+          console.log('getCompaniesByUserAppointmentsEpic: API response:', response)
+          if (response.success && response.data) {
+            return getCompaniesByUserAppointmentsSuccess(response.data)
+          } else {
+            return getCompaniesByUserAppointmentsFailure(response.error || 'Failed to fetch companies')
+          }
+        }),
+        catchError((error) => {
+          console.error('getCompaniesByUserAppointmentsEpic: API error:', error)
+          return of(getCompaniesByUserAppointmentsFailure(error.message || 'Failed to fetch companies'))
+        })
+      )
+    })
+  )
+

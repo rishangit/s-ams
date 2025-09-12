@@ -8,13 +8,10 @@ import {
   Typography,
   Paper,
   Alert,
-  CircularProgress,
-  Chip,
-  Tooltip
+  CircularProgress
 } from '@mui/material'
 import {
-  CalendarToday as CalendarIcon,
-  Event as EventIcon
+  CalendarToday as CalendarIcon
 } from '@mui/icons-material'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '../../../store'
@@ -57,7 +54,7 @@ const CalendarView: React.FC = () => {
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<number | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
 
-  // Add custom CSS for mobile calendar toolbar
+  // Add custom CSS for mobile calendar toolbar and full height
   useEffect(() => {
     const style = document.createElement('style')
     style.textContent = `
@@ -90,6 +87,24 @@ const CalendarView: React.FC = () => {
           font-size: 0.875rem !important;
           padding: 6px 12px !important;
         }
+      }
+      
+      /* Full height calendar */
+      .fc {
+        height: 100% !important;
+        min-height: 600px !important;
+      }
+      
+      .fc-view-harness {
+        height: 100% !important;
+      }
+      
+      .fc-daygrid-body {
+        height: 100% !important;
+      }
+      
+      .fc-timegrid-body {
+        height: 100% !important;
       }
     `
     document.head.appendChild(style)
@@ -321,28 +336,6 @@ const CalendarView: React.FC = () => {
   }
 
 
-  // Calculate status counts
-  const statusCounts = useMemo(() => {
-    if (!appointments) return { pending: 0, confirmed: 0, completed: 0, cancelled: 0 }
-    
-    return appointments.reduce((counts, appointment) => {
-      switch (appointment.status) {
-        case 'pending':
-          counts.pending++
-          break
-        case 'confirmed':
-          counts.confirmed++
-          break
-        case 'completed':
-          counts.completed++
-          break
-        case 'cancelled':
-          counts.cancelled++
-          break
-      }
-      return counts
-    }, { pending: 0, confirmed: 0, completed: 0, cancelled: 0 })
-  }, [appointments])
 
   if (loading) {
     return (
@@ -363,9 +356,9 @@ const CalendarView: React.FC = () => {
   }
 
   return (
-    <Box className="p-0 md:p-6">
+    <Box className="h-full flex flex-col p-0 md:p-6">
       {/* Header */}
-      <Box className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+      <Box className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4 flex-shrink-0">
         <Box className="flex items-center space-x-3">
           <CalendarIcon style={{ fontSize: '2rem', color: theme.primary }} />
           <Typography 
@@ -378,51 +371,10 @@ const CalendarView: React.FC = () => {
         </Box>
       </Box>
 
-      {/* Status Summary */}
-      <Paper className="p-4 mb-6" style={{ backgroundColor: theme.surface }}>
-        <Typography 
-          variant="h6" 
-          className="mb-3 text-base md:text-xl" 
-          style={{ color: theme.text }}
-        >
-          Appointment Summary
-        </Typography>
-        <Box className="flex flex-wrap gap-3">
-          <Tooltip title="Pending appointments">
-            <Chip
-              icon={<EventIcon />}
-              label={`Pending: ${statusCounts.pending}`}
-              style={{ backgroundColor: '#f59e0b', color: '#ffffff' }}
-            />
-          </Tooltip>
-          <Tooltip title="Confirmed appointments">
-            <Chip
-              icon={<EventIcon />}
-              label={`Confirmed: ${statusCounts.confirmed}`}
-              style={{ backgroundColor: '#3b82f6', color: '#ffffff' }}
-            />
-          </Tooltip>
-          <Tooltip title="Completed appointments">
-            <Chip
-              icon={<EventIcon />}
-              label={`Completed: ${statusCounts.completed}`}
-              style={{ backgroundColor: '#10b981', color: '#ffffff' }}
-            />
-          </Tooltip>
-          <Tooltip title="Cancelled appointments">
-            <Chip
-              icon={<EventIcon />}
-              label={`Cancelled: ${statusCounts.cancelled}`}
-              style={{ backgroundColor: '#ef4444', color: '#ffffff' }}
-            />
-          </Tooltip>
-        </Box>
-      </Paper>
-
       {/* Calendar */}
-      <Paper className="p-4" style={{ backgroundColor: theme.surface }}>
+      <Paper className="p-4 flex-1 flex flex-col" style={{ backgroundColor: theme.surface }}>
         {calendarEvents.length === 0 ? (
-          <Box className="flex flex-col items-center justify-center py-12">
+          <Box className="flex flex-col items-center justify-center flex-1">
             <CalendarIcon style={{ fontSize: '4rem', color: theme.textSecondary, marginBottom: '1rem' }} />
             <Typography 
               variant="h6" 
@@ -439,7 +391,7 @@ const CalendarView: React.FC = () => {
             </Typography>
           </Box>
         ) : (
-          <Box className={isDarkMode ? 'dark-calendar' : 'light-calendar'}>
+          <Box className={`flex-1 ${isDarkMode ? 'dark-calendar' : 'light-calendar'}`}>
             {/* @ts-ignore */}
             <FullCalendar
               ref={calendarRef}
@@ -453,7 +405,7 @@ const CalendarView: React.FC = () => {
               }}
               events={calendarEvents}
               eventClick={handleEventClick}
-              height="auto"
+              height="100%"
               themeSystem="standard"
               eventDisplay="block"
               dayMaxEvents={3}

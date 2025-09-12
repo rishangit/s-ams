@@ -177,6 +177,44 @@ export class Company {
       throw new Error('Failed to check company existence')
     }
   }
+
+  static async findByUserAppointments(userId) {
+    console.log('Company.findByUserAppointments called with userId:', userId)
+    
+    const query = `
+      SELECT DISTINCT
+        c.id,
+        c.name,
+        c.address,
+        c.phone_number as phoneNumber,
+        c.land_phone as landPhone,
+        c.geo_location as geoLocation,
+        c.status,
+        c.created_at as createdAt,
+        c.updated_at as updatedAt,
+        COUNT(a.id) as totalAppointments,
+        COUNT(CASE WHEN a.status = 'pending' THEN 1 END) as pendingAppointments,
+        COUNT(CASE WHEN a.status = 'confirmed' THEN 1 END) as confirmedAppointments,
+        COUNT(CASE WHEN a.status = 'completed' THEN 1 END) as completedAppointments,
+        COUNT(CASE WHEN a.status = 'cancelled' THEN 1 END) as cancelledAppointments,
+        MAX(a.appointment_date) as lastAppointmentDate
+      FROM ${this.tableName} c
+      INNER JOIN appointments a ON c.id = a.company_id
+      WHERE a.user_id = ?
+      GROUP BY c.id, c.name, c.address, c.phone_number, c.land_phone, c.geo_location, c.status, c.created_at, c.updated_at
+      ORDER BY lastAppointmentDate DESC
+    `
+    
+    try {
+      console.log('Executing query with userId:', userId)
+      const rows = await executeQuery(query, [userId])
+      console.log('Query result:', rows.length, 'companies found')
+      return rows
+    } catch (error) {
+      console.error('Error finding companies by user appointments:', error)
+      throw new Error('Failed to find companies')
+    }
+  }
 }
 
 

@@ -404,3 +404,41 @@ export const deleteCompany = async (req, res) => {
     })
   }
 }
+
+// Get companies that a user has appointments with
+export const getCompaniesByUserAppointments = async (req, res) => {
+  try {
+    console.log('getCompaniesByUserAppointments called:', {
+      userId: req.user?.id,
+      userRole: req.user?.role,
+      userRoleType: typeof req.user?.role
+    })
+    
+    const userId = req.user.id
+    const userRole = req.user.role
+
+    // Only allow role 3 users to access this endpoint
+    if (parseInt(userRole) !== 3) {
+      console.log('Access denied - user role is not 3:', userRole, 'parsed:', parseInt(userRole))
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Only regular users can access this endpoint.'
+      })
+    }
+
+    console.log('Fetching companies for user:', userId)
+    // Get companies with appointment statistics
+    const companies = await Company.findByUserAppointments(userId)
+    console.log('Companies found:', companies.length)
+    console.log('First company data:', companies[0])
+
+    res.json({
+      success: true,
+      message: 'Companies retrieved successfully',
+      data: companies
+    })
+  } catch (error) {
+    console.error('Error getting companies by user appointments:', error)
+    res.status(500).json({ error: error.message || 'Internal server error' })
+  }
+}

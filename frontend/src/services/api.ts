@@ -255,6 +255,10 @@ class ApiService {
     })
   }
 
+  async getCompaniesByUserAppointments(): Promise<ApiResponse<any>> {
+    return this.request<any>('/company/user-appointments')
+  }
+
   // Services endpoints
   async createService(serviceData: any): Promise<ApiResponse<any>> {
     return this.request<any>('/services', {

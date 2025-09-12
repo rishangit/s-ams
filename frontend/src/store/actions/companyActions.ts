@@ -41,6 +41,11 @@ export const deleteCompanyRequest = createAction<number>('company/deleteCompanyR
 export const deleteCompanySuccess = createAction<number>('company/deleteCompanySuccess')
 export const deleteCompanyFailure = createAction<string>('company/deleteCompanyFailure')
 
+// Get companies by user appointments request (role 3 only)
+export const getCompaniesByUserAppointmentsRequest = createAction('company/getCompaniesByUserAppointmentsRequest')
+export const getCompaniesByUserAppointmentsSuccess = createAction<any[]>('company/getCompaniesByUserAppointmentsSuccess')
+export const getCompaniesByUserAppointmentsFailure = createAction<string>('company/getCompaniesByUserAppointmentsFailure')
+
 // Clear company state
 export const clearCompanyError = createAction('company/clearCompanyError')
 export const clearCompanySuccess = createAction('company/clearCompanySuccess')
