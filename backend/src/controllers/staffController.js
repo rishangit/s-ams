@@ -46,6 +46,10 @@ export const createStaff = async (req, res) => {
     }
 
     const staff = await Staff.create(staffData)
+    
+    // Update user role to STAFF (2) when assigned as staff
+    await User.updateRole(userId, 'staff')
+    
     const staffWithDetails = await Staff.findById(staff.id)
 
     res.status(201).json({
@@ -196,7 +200,13 @@ export const deleteStaff = async (req, res) => {
       return res.status(403).json({ error: 'Access denied' })
     }
 
+    // Get the user ID before deleting staff record
+    const userId = existingStaff.userId
+    
     await Staff.delete(id)
+    
+    // Revert user role back to USER (3) when removed as staff
+    await User.updateRole(userId, 'user')
 
     res.json({
       success: true,
