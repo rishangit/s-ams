@@ -168,6 +168,47 @@ const Navigation: React.FC<NavigationProps> = ({
           </ListItem>
         )}
 
+        {/* Appointments - Owner (role 1) and User (role 3) */}
+        {user && [1, 3].includes(parseInt(user.role)) && (
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => handleNavigation('/system/appointments')}
+              style={{
+                backgroundColor: location.pathname === '/system/appointments'
+                  ? uiTheme.primary
+                  : 'transparent',
+                color: location.pathname === '/system/appointments'
+                  ? '#ffffff'
+                  : uiTheme.text,
+                borderRight: location.pathname === '/system/appointments'
+                  ? `2px solid ${uiTheme.primary}`
+                  : 'none',
+                margin: '0 8px',
+                borderRadius: '8px'
+              }}
+              className="hover:opacity-80 transition-all duration-200"
+            >
+              <ListItemIcon>
+                <EventIcon
+                  style={{
+                    color: location.pathname === '/system/appointments'
+                      ? '#ffffff'
+                      : uiTheme.textSecondary
+                  }}
+                />
+              </ListItemIcon>
+              <ListItemText
+                primary="Appointments"
+                style={{
+                  color: location.pathname === '/system/appointments'
+                    ? '#ffffff'
+                    : uiTheme.text
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+        )}
+
         {/* Users Management - Admin Only (excludes owners) */}
         {user && isAdminOnlyRole(user.role as any) && (
           <ListItem disablePadding>
@@ -324,47 +365,6 @@ const Navigation: React.FC<NavigationProps> = ({
                 primary="Staff"
                 style={{
                   color: location.pathname === '/system/staff'
-                    ? '#ffffff'
-                    : uiTheme.text
-                }}
-              />
-            </ListItemButton>
-          </ListItem>
-        )}
-
-        {/* Appointments - Owner (role 1) and User (role 3) */}
-        {user && [1, 3].includes(parseInt(user.role)) && (
-          <ListItem disablePadding>
-            <ListItemButton
-              onClick={() => handleNavigation('/system/appointments')}
-              style={{
-                backgroundColor: location.pathname === '/system/appointments'
-                  ? uiTheme.primary
-                  : 'transparent',
-                color: location.pathname === '/system/appointments'
-                  ? '#ffffff'
-                  : uiTheme.text,
-                borderRight: location.pathname === '/system/appointments'
-                  ? `2px solid ${uiTheme.primary}`
-                  : 'none',
-                margin: '0 8px',
-                borderRadius: '8px'
-              }}
-              className="hover:opacity-80 transition-all duration-200"
-            >
-              <ListItemIcon>
-                <EventIcon
-                  style={{
-                    color: location.pathname === '/system/appointments'
-                      ? '#ffffff'
-                      : uiTheme.textSecondary
-                  }}
-                />
-              </ListItemIcon>
-              <ListItemText
-                primary="Appointments"
-                style={{
-                  color: location.pathname === '/system/appointments'
                     ? '#ffffff'
                     : uiTheme.text
                 }}
