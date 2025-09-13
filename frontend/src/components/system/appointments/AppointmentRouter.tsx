@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux'
 import { RootState } from '../../../store'
 import Appointments from './Appointments'
 import AppointmentForm from './AppointmentForm'
+import { isRoleInList } from '../../../utils/roleUtils'
 
 const AppointmentRouter: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -12,7 +13,7 @@ const AppointmentRouter: React.FC = () => {
 
   useEffect(() => {
     // Check if user has access to appointments (roles 0, 1, 3)
-    if (!user || ![0, 1, 3].includes(parseInt(user.role))) {
+    if (!user || !isRoleInList(user.role, [0, 1, 3])) {
       navigate('/system/dashboard', { replace: true })
       return
     }
@@ -29,7 +30,7 @@ const AppointmentRouter: React.FC = () => {
   }, [id, navigate, user])
 
   // Check if user has access to appointments (roles 0, 1, 3)
-  if (!user || ![0, 1, 3].includes(parseInt(user.role))) {
+  if (!user || !isRoleInList(user.role, [0, 1, 3])) {
     return null // Will be redirected by useEffect
   }
 

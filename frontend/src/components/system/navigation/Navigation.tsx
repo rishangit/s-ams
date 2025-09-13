@@ -29,6 +29,7 @@ import { RootState } from '../../../store'
 import { getProfileImageUrl } from '../../../utils/fileUtils'
 import { logoutAndClearData } from '../../../store/actions/logoutActions'
 import { setSidebarOpen } from '../../../store/reducers/uiSlice'
+import { isRoleInList, isOwner, isUser } from '../../../utils/roleHelpers'
 import { isAdminOnlyRole, getRoleDisplayName } from '../../../constants/roles'
 
 interface NavigationProps {
@@ -128,7 +129,7 @@ const Navigation: React.FC<NavigationProps> = ({
         </ListItem>
 
         {/* Calendar - Owner (role 1) and User (role 3) */}
-        {user && [1, 3].includes(parseInt(user.role)) && (
+        {user && isRoleInList(user.role, [1, 3]) && (
           <ListItem disablePadding>
             <ListItemButton
               onClick={() => handleNavigation('/system/calendar')}
@@ -169,7 +170,7 @@ const Navigation: React.FC<NavigationProps> = ({
         )}
 
         {/* Appointments - Owner (role 1) and User (role 3) */}
-        {user && [1, 3].includes(parseInt(user.role)) && (
+        {user && isRoleInList(user.role, [1, 3]) && (
           <ListItem disablePadding>
             <ListItemButton
               onClick={() => handleNavigation('/system/appointments')}
@@ -292,7 +293,7 @@ const Navigation: React.FC<NavigationProps> = ({
         )}
 
         {/* Services Management - Owner Only (role 1) */}
-        {user && parseInt(user.role) === 1 && (
+        {user && isOwner(user.role) && (
           <ListItem disablePadding>
             <ListItemButton
               onClick={() => handleNavigation('/system/services')}
@@ -333,7 +334,7 @@ const Navigation: React.FC<NavigationProps> = ({
         )}
 
         {/* Staff Management - Owner Only (role 1) */}
-        {user && parseInt(user.role) === 1 && (
+        {user && isOwner(user.role) && (
           <ListItem disablePadding>
             <ListItemButton
               onClick={() => handleNavigation('/system/staff')}
@@ -374,7 +375,7 @@ const Navigation: React.FC<NavigationProps> = ({
         )}
 
         {/* My Companies - User (role 3) only */}
-        {user && parseInt(user.role) === 3 && (
+        {user && isUser(user.role) && (
           <ListItem disablePadding>
             <ListItemButton
               onClick={() => handleNavigation('/system/my-companies')}

@@ -27,6 +27,22 @@ export type RoleId = typeof ROLES[keyof typeof ROLES]
 export type RoleName = typeof ROLE_NAMES[RoleId]
 export type RoleDisplayName = typeof ROLE_DISPLAY_NAMES[RoleId]
 
+// Role switching helper functions
+export const canSwitchToRole = (currentRole: RoleId, targetRole: RoleId): boolean => {
+  // Higher roles (lower numbers) can switch to lower roles (higher numbers)
+  return currentRole < targetRole
+}
+
+export const getAvailableRolesForSwitch = (currentRole: RoleId): RoleId[] => {
+  // Return all roles that the current role can switch to
+  return Object.values(ROLES).filter(role => canSwitchToRole(currentRole, role as RoleId)) as RoleId[]
+}
+
+export const getRoleHierarchy = (): RoleId[] => {
+  // Return roles in hierarchy order (highest to lowest)
+  return [ROLES.ADMIN, ROLES.OWNER, ROLES.STAFF, ROLES.USER]
+}
+
 // Helper functions
 export const getRoleName = (roleId: RoleId): RoleName => {
   return ROLE_NAMES[roleId] || 'user'

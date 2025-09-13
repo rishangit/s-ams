@@ -44,6 +44,22 @@ export const isValidRoleName = (roleName) => {
   return Object.values(ROLE_NAMES).includes(roleName)
 }
 
+// Role switching helper functions
+export const canSwitchToRole = (currentRole, targetRole) => {
+  // Higher roles (lower numbers) can switch to lower roles (higher numbers)
+  return currentRole < targetRole
+}
+
+export const getAvailableRolesForSwitch = (currentRole) => {
+  // Return all roles that the current role can switch to
+  return Object.values(ROLES).filter(role => canSwitchToRole(currentRole, role))
+}
+
+export const getRoleHierarchy = () => {
+  // Return roles in hierarchy order (highest to lowest)
+  return [ROLES.ADMIN, ROLES.OWNER, ROLES.STAFF, ROLES.USER]
+}
+
 // Admin role checks
 export const isAdminRole = (roleId) => {
   return roleId === ROLES.ADMIN

@@ -18,7 +18,9 @@ export interface User {
   phone?: string
   department?: string
   position?: string
-  role: string
+  role: string | number
+  originalRole?: number
+  isRoleSwitched?: boolean
   profileImage?: string
   createdAt: string
   updatedAt: string
@@ -201,6 +203,24 @@ class ApiService {
     return this.request<{ user: User }>(`/auth/users/${userId}/role`, {
       method: 'PUT',
       body: JSON.stringify({ role }),
+    })
+  }
+
+  // Role switching endpoints
+  async getAvailableRoles(): Promise<ApiResponse<{ currentRole: any, availableRoles: any[] }>> {
+    return this.request<{ currentRole: any, availableRoles: any[] }>('/auth/available-roles')
+  }
+
+  async switchRole(targetRole: number): Promise<ApiResponse<AuthResponse>> {
+    return this.request<AuthResponse>('/auth/switch-role', {
+      method: 'POST',
+      body: JSON.stringify({ targetRole }),
+    })
+  }
+
+  async switchBackToOriginalRole(): Promise<ApiResponse<AuthResponse>> {
+    return this.request<AuthResponse>('/auth/switch-back', {
+      method: 'POST',
     })
   }
 

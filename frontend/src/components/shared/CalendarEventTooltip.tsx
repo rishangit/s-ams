@@ -26,7 +26,7 @@ interface CalendarEventTooltipProps {
     notes?: string
     profilePicture?: string
   }
-  userRole?: string
+  userRole?: string | number
 }
 
 const CalendarEventTooltip: React.FC<CalendarEventTooltipProps> = ({

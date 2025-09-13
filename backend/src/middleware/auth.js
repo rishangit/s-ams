@@ -26,6 +26,16 @@ export const authenticateToken = async (req, res, next) => {
       })
     }
 
+    // Handle role switching
+    if (decoded.switchedRole !== undefined) {
+      // User is temporarily using a different role
+      user.originalRole = user.role
+      user.role = decoded.switchedRole
+      user.isRoleSwitched = true
+    } else {
+      user.isRoleSwitched = false
+    }
+
     req.user = user
     next()
   } catch (error) {
@@ -43,8 +53,12 @@ export const authenticateToken = async (req, res, next) => {
   }
 }
 
-export const generateToken = (userId) => {
-  return jwt.sign({ userId }, config.jwt.secret, { 
+export const generateToken = (userId, switchedRole = null) => {
+  const payload = { userId }
+  if (switchedRole !== null) {
+    payload.switchedRole = switchedRole
+  }
+  return jwt.sign(payload, config.jwt.secret, { 
     expiresIn: config.jwt.expiresIn 
   })
 }

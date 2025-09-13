@@ -18,6 +18,9 @@ import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '../../../store'
 import { setSettingsOpen } from '../../../store/reducers/uiSlice'
 import { getProfileImageUrl } from '../../../utils/fileUtils'
+import { getRoleDisplayName, RoleId } from '../../../constants/roles'
+import { useAuth } from '../../../hooks/useAuth'
+import { parseUserRole } from '../../../utils/roleUtils'
 
 interface HeaderProps {
   title: string
@@ -36,6 +39,7 @@ const Header: React.FC<HeaderProps> = ({
   const { user } = useSelector((state: RootState) => state.auth)
   const uiTheme = useSelector((state: RootState) => state.ui.theme)
   const { settingsOpen } = useSelector((state: RootState) => state.ui)
+  const { switchBack } = useAuth()
 
   const handleSettingsToggle = () => {
     dispatch(setSettingsOpen(!settingsOpen))
@@ -93,12 +97,28 @@ const Header: React.FC<HeaderProps> = ({
 
         <Box className="flex items-center space-x-3">
           {!isMobile && (
-            <Typography
-              variant="body2"
-              style={{ color: uiTheme.textSecondary }}
-            >
-              Welcome, {user ? `${user.firstName} ${user.lastName}` : 'User'}
-            </Typography>
+            <Box className="flex items-center space-x-2">
+              <Typography
+                variant="body2"
+                style={{ color: uiTheme.textSecondary }}
+              >
+                Welcome, {user ? `${user.firstName} ${user.lastName}` : 'User'}
+              </Typography>
+              {user && user.isRoleSwitched && (
+                <Box
+                  className="px-2 py-1 rounded-full text-xs font-medium cursor-pointer hover:bg-yellow-100"
+                  style={{ 
+                    backgroundColor: '#fff3cd',
+                    color: '#856404',
+                    border: '1px solid #ffc107'
+                  }}
+                  onClick={switchBack}
+                  title={`Currently in ${getRoleDisplayName(parseUserRole(user.role))} role. Click to switch back to ${getRoleDisplayName((user.originalRole || 0) as RoleId)}`}
+                >
+                  {getRoleDisplayName(parseUserRole(user.role))} (Switch Back)
+                </Box>
+              )}
+            </Box>
           )}
           
           {/* Settings Icon */}

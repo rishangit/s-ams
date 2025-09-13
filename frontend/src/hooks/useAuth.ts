@@ -5,7 +5,10 @@ import {
   loginRequest, 
   logout, 
   getProfileRequest, 
-  updateProfileRequest 
+  updateProfileRequest,
+  getAvailableRolesRequest,
+  switchRoleRequest,
+  switchBackRequest
 } from '../store/actions'
 import { clearError } from '../store/reducers/authSlice'
 import { RegisterRequest, LoginRequest, User } from '../services/api'
@@ -21,6 +24,9 @@ export const useAuth = () => {
     isAuthenticated: auth.isAuthenticated,
     loading: auth.loading,
     error: auth.error,
+    availableRoles: auth.availableRoles,
+    currentRole: auth.currentRole,
+    roleSwitching: auth.roleSwitching,
 
     // Actions
     register: (data: RegisterRequest) => dispatch(registerRequest(data)),
@@ -28,6 +34,9 @@ export const useAuth = () => {
     logout: () => dispatch(logout()),
     getProfile: () => dispatch(getProfileRequest()),
     updateProfile: (data: Partial<User>) => dispatch(updateProfileRequest(data)),
+    getAvailableRoles: () => dispatch(getAvailableRolesRequest()),
+    switchRole: (targetRole: number) => dispatch(switchRoleRequest(targetRole)),
+    switchBack: () => dispatch(switchBackRequest()),
     clearError: () => dispatch(clearError()),
   }
 }

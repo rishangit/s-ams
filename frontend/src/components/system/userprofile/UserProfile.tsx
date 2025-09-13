@@ -27,8 +27,10 @@ import FormInput from '../../shared/FormInput'
 import FormSelect from '../../shared/FormSelect'
 import FormButton from '../../shared/FormButton'
 import FileUpload from '../../shared/FileUpload'
+import RoleSwitcher from '../../shared/RoleSwitcher'
 import { getRoleDisplayName, isValidRole, ROLES, DEFAULT_USER_ROLE } from '../../../constants/roles'
 import { getProfileImageUrl } from '../../../utils/fileUtils'
+import { parseUserRole } from '../../../utils/roleUtils'
 
 // Validation schema
 const profileSchema = yup.object({
@@ -124,7 +126,7 @@ const UserProfile: React.FC = () => {
         lastName: user.lastName || '',
         email: user.email || '',
         phoneNumber: user.phoneNumber || user.phone || '',
-        role: parseInt(user.role) || DEFAULT_USER_ROLE,
+        role: parseUserRole(user.role),
         profileImage: userImage
       })
     }
@@ -172,7 +174,7 @@ const UserProfile: React.FC = () => {
         lastName: user.lastName || '',
         email: user.email || '',
         phoneNumber: user.phoneNumber || user.phone || '',
-        role: parseInt(user.role) || DEFAULT_USER_ROLE,
+        role: parseUserRole(user.role),
         profileImage: user.profileImage || ''
       })
     }
@@ -254,6 +256,9 @@ const UserProfile: React.FC = () => {
         </Alert>
       )}
 
+      {/* Role Switcher */}
+      <RoleSwitcher />
+
       <Grid container spacing={3}>
         {/* Profile Image Card */}
         <Grid item xs={12} md={4}>
@@ -306,7 +311,7 @@ const UserProfile: React.FC = () => {
                 className="mb-4"
                 style={{ color: uiTheme.textSecondary }}
               >
-                {isValidRole(parseInt(user.role)) ? getRoleDisplayName(parseInt(user.role) as any) : 'User'}
+                {isValidRole(parseUserRole(user.role)) ? getRoleDisplayName(parseUserRole(user.role)) : 'User'}
               </Typography>
 
               <Typography
@@ -440,7 +445,7 @@ const UserProfile: React.FC = () => {
         </Grid>
 
         {/* Company Registration Request Card - For Users and Owners (role USER and OWNER) */}
-        {(parseInt(user.role) === ROLES.USER || parseInt(user.role) === ROLES.OWNER) && (
+        {(parseUserRole(user.role) === ROLES.USER || parseUserRole(user.role) === ROLES.OWNER) && (
           <Grid item xs={12}>
             <Paper
               className="p-6"
