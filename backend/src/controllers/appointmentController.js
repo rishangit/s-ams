@@ -242,11 +242,20 @@ export const getAppointmentById = async (req, res) => {
       })
     }
 
-    // Allow access if user is admin, appointment owner, or company owner
+    // Allow access if user is admin, appointment owner, company owner, or assigned staff
     const company = await Company.findByUserId(userId)
-    const hasAccess = user.role === 0 || // Admin
-                     appointment.userId === userId || // Appointment owner
-                     (company && appointment.companyId === company.id) // Company owner
+    let hasAccess = user.role === 0 || // Admin
+                   appointment.userId === userId || // Appointment owner
+                   (company && appointment.companyId === company.id) // Company owner
+    
+    // Check if user is assigned staff member
+    if (!hasAccess && user.role === 2) {
+      const staffRecords = await Staff.findByUserId(userId)
+      if (staffRecords && staffRecords.length > 0) {
+        const staffIds = staffRecords.map(staff => staff.id)
+        hasAccess = staffIds.includes(appointment.staffId)
+      }
+    }
 
     if (!hasAccess) {
       return res.status(403).json({
@@ -293,11 +302,20 @@ export const updateAppointment = async (req, res) => {
       })
     }
 
-    // Allow update if user is admin, appointment owner, or company owner
+    // Allow update if user is admin, appointment owner, company owner, or assigned staff
     const company = await Company.findByUserId(userId)
-    const hasPermission = user.role === 0 || // Admin
-                         appointment.userId === userId || // Appointment owner
-                         (company && appointment.companyId === company.id) // Company owner
+    let hasPermission = user.role === 0 || // Admin
+                       appointment.userId === userId || // Appointment owner
+                       (company && appointment.companyId === company.id) // Company owner
+    
+    // Check if user is assigned staff member
+    if (!hasPermission && user.role === 2) {
+      const staffRecords = await Staff.findByUserId(userId)
+      if (staffRecords && staffRecords.length > 0) {
+        const staffIds = staffRecords.map(staff => staff.id)
+        hasPermission = staffIds.includes(appointment.staffId)
+      }
+    }
 
     if (!hasPermission) {
       return res.status(403).json({
@@ -458,11 +476,20 @@ export const deleteAppointment = async (req, res) => {
       })
     }
 
-    // Allow delete if user is admin, appointment owner, or company owner
+    // Allow delete if user is admin, appointment owner, company owner, or assigned staff
     const company = await Company.findByUserId(userId)
-    const hasPermission = user.role === 0 || // Admin
-                         appointment.userId === userId || // Appointment owner
-                         (company && appointment.companyId === company.id) // Company owner
+    let hasPermission = user.role === 0 || // Admin
+                       appointment.userId === userId || // Appointment owner
+                       (company && appointment.companyId === company.id) // Company owner
+    
+    // Check if user is assigned staff member
+    if (!hasPermission && user.role === 2) {
+      const staffRecords = await Staff.findByUserId(userId)
+      if (staffRecords && staffRecords.length > 0) {
+        const staffIds = staffRecords.map(staff => staff.id)
+        hasPermission = staffIds.includes(appointment.staffId)
+      }
+    }
 
     if (!hasPermission) {
       return res.status(403).json({
