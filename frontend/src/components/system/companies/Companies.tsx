@@ -2,11 +2,6 @@ import React, { useEffect, useMemo } from 'react'
 import {
   Box,
   Chip,
-  IconButton,
-  Tooltip,
-  Select,
-  MenuItem,
-  FormControl,
   Avatar
 } from '@mui/material'
 import {
@@ -27,8 +22,9 @@ import {
 } from '../../../store/actions/companyActions'
 import { CompanyStatus, getCompanyStatusDisplayName, getCompanyStatusColor } from '../../../constants/company'
 import { isAdminOnlyRole } from '../../../constants/roles'
-import { CustomGrid } from '../../../components/shared'
+import { CustomGrid, RowAction } from '../../../components/shared'
 import { ColDef, ICellRendererParams } from 'ag-grid-community'
+import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material'
 import { getProfileImageUrl } from '../../../utils/fileUtils'
 
 const Companies: React.FC = () => {
@@ -89,37 +85,6 @@ const Companies: React.FC = () => {
     )
   }
 
-  // Actions Cell Renderer Component
-  const ActionsCellRenderer = (props: ICellRendererParams) => {
-    const { data } = props
-    
-    return (
-      <Box className="flex gap-2">
-        <Tooltip title="View Details">
-          <IconButton
-            size="small"
-            onClick={() => navigate(`/system/companies/${data.id}`)}
-            style={{ color: uiTheme.primary }}
-          >
-            <VisibilityIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Edit Status">
-          <FormControl size="small" style={{ minWidth: 120 }}>
-            <Select
-              value={data.status}
-              onChange={(e) => handleStatusChange(data.id, e.target.value as CompanyStatus)}
-              style={{ fontSize: '0.875rem' }}
-            >
-              <MenuItem value="pending">Pending</MenuItem>
-              <MenuItem value="active">Active</MenuItem>
-              <MenuItem value="inactive">Inactive</MenuItem>
-            </Select>
-          </FormControl>
-        </Tooltip>
-      </Box>
-    )
-  }
 
   // Company Name Cell Renderer Component
   const CompanyNameCellRenderer = (props: ICellRendererParams) => {
@@ -268,18 +233,48 @@ const Companies: React.FC = () => {
       resizable: true,
       width: 200,
       minWidth: 150
-    },
-    {
-      headerName: 'Actions',
-      field: 'actions',
-      cellRenderer: ActionsCellRenderer,
-      sortable: false,
-      filter: false,
-      resizable: false,
-      width: 150,
-      minWidth: 120
     }
   ], [uiTheme])
+
+  // Row Actions Configuration
+  const rowActions = useMemo<RowAction[]>(() => {
+    const actions: RowAction[] = [
+      {
+        id: 'view',
+        label: 'View Company',
+        icon: <VisibilityIcon fontSize="small" />,
+        onClick: (rowData) => {
+          console.log('View company:', rowData)
+          // TODO: Implement view company functionality
+        },
+        color: 'primary'
+      },
+      {
+        id: 'edit',
+        label: 'Edit Company',
+        icon: <EditIcon fontSize="small" />,
+        onClick: (rowData) => {
+          console.log('Edit company:', rowData)
+          // TODO: Implement edit company functionality
+        },
+        color: 'info'
+      },
+      {
+        id: 'delete',
+        label: 'Delete Company',
+        icon: <DeleteIcon fontSize="small" />,
+        onClick: (rowData) => {
+          if (window.confirm(`Are you sure you want to delete company ${rowData.name}?`)) {
+            console.log('Delete company:', rowData)
+            // TODO: Implement delete company functionality
+          }
+        },
+        color: 'error'
+      }
+    ]
+
+    return actions
+  }, [])
 
   if (!user || !isAdminOnlyRole(parseInt(user.role) as any)) {
     return (
@@ -304,6 +299,7 @@ const Companies: React.FC = () => {
         height="calc(100vh - 120px)"
         showTitle={true}
         showAlerts={true}
+        rowActions={rowActions}
       />
     </Box>
   )

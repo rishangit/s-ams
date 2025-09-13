@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import {
     Box,
     Paper,
@@ -12,10 +12,12 @@ import {
     GridApi,
     GridReadyEvent,
     ModuleRegistry,
-    AllCommunityModule
+    AllCommunityModule,
+    ICellRendererParams
 } from 'ag-grid-community'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
+import RowActionsMenu, { RowAction } from './RowActionsMenu'
 
 // Register AG Grid modules
 ModuleRegistry.registerModules([AllCommunityModule])
@@ -38,6 +40,8 @@ interface CustomGridProps {
     height?: string | number
     showTitle?: boolean
     showAlerts?: boolean
+    rowActions?: RowAction[]
+    rowHeight?: number
 }
 
 const CustomGrid: React.FC<CustomGridProps> = ({
@@ -52,9 +56,12 @@ const CustomGrid: React.FC<CustomGridProps> = ({
     height = 'calc(100vh - 200px)',
     showTitle = true,
     showAlerts = true,
+    rowActions = [],
+    rowHeight = 60
 }) => {
-    const [, setGridApi] = useState<GridApi | null>(null)
+    const [gridApi, setGridApi] = useState<GridApi | null>(null)
     const [isMobile, setIsMobile] = useState(false)
+    const highlightTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
     // Check if screen is mobile size
     useEffect(() => {
@@ -68,6 +75,16 @@ const CustomGrid: React.FC<CustomGridProps> = ({
         return () => window.removeEventListener('resize', checkMobile)
     }, [])
 
+    // Cleanup timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (highlightTimeoutRef.current) {
+                clearTimeout(highlightTimeoutRef.current)
+            }
+        }
+    }, [])
+
+
     console.log('📊 CustomGrid Debug:', {
         title,
         dataLength: data ? data.length : 0,
@@ -75,7 +92,8 @@ const CustomGrid: React.FC<CustomGridProps> = ({
         loading,
         error,
         success,
-        columnDefsLength: columnDefs ? columnDefs.length : 0
+        columnDefsLength: columnDefs ? columnDefs.length : 0,
+        rowActionsLength: rowActions ? rowActions.length : 0
     })
 
     const handleGridReady = (params: GridReadyEvent) => {
@@ -90,6 +108,85 @@ const CustomGrid: React.FC<CustomGridProps> = ({
         }
     }
 
+    // Function to highlight a row when menu action is clicked
+    const handleRowHighlight = (rowData: any) => {
+        const rowId = rowData.id || rowData.appointmentId || rowData.userId || rowData.companyId || rowData.staffId || rowData.serviceId
+        if (rowId && gridApi) {
+            console.log('🎯 Handle Row Highlight:', {
+                rowId,
+                isMobile,
+                rowData
+            })
+            
+            // Clear any existing timeout
+            if (highlightTimeoutRef.current) {
+                clearTimeout(highlightTimeoutRef.current)
+                highlightTimeoutRef.current = null
+            }
+            
+            // STEP 1: Clear ALL existing highlights immediately
+            gridApi.forEachNode((node) => {
+                if (node.data && node.id) {
+                    const rowNode = gridApi.getRowNode(node.id)
+                    const rowElement = (rowNode as any)?.rowElement
+                    if (rowElement) {
+                        rowElement.classList.remove('row-highlighted')
+                    }
+                }
+            })
+            
+            // STEP 2: Find and highlight the specific row
+            gridApi.forEachNode((node) => {
+                if (node.data && node.id) {
+                    const currentRowId = node.data.id || node.data.appointmentId || node.data.userId || node.data.companyId || node.data.staffId || node.data.serviceId
+                    if (String(currentRowId) === String(rowId)) {
+                        const rowNode = gridApi.getRowNode(node.id)
+                        const rowElement = (rowNode as any)?.rowElement
+                        if (rowElement) {
+                            rowElement.classList.add('row-highlighted')
+                            console.log('🎯 Highlighted row:', rowId)
+                        }
+                    }
+                }
+            })
+            
+            // STEP 3: Auto-remove highlight after 2 seconds
+            highlightTimeoutRef.current = setTimeout(() => {
+                console.log('🎯 Removing highlight for row:', rowId)
+                gridApi.forEachNode((node) => {
+                    if (node.data && node.id) {
+                        const currentRowId = node.data.id || node.data.appointmentId || node.data.userId || node.data.companyId || node.data.staffId || node.data.serviceId
+                        if (String(currentRowId) === String(rowId)) {
+                            const rowNode = gridApi.getRowNode(node.id)
+                            const rowElement = (rowNode as any)?.rowElement
+                            if (rowElement) {
+                                rowElement.classList.remove('row-highlighted')
+                            }
+                        }
+                    }
+                })
+                highlightTimeoutRef.current = null
+            }, 2000)
+        }
+    }
+
+    // Actions column renderer
+    const ActionsCellRenderer = (params: ICellRendererParams) => {
+        if (!rowActions || rowActions.length === 0) return null
+        
+        // Use original actions - highlighting is handled by RowActionsMenu
+        const wrappedActions = rowActions
+        
+        return (
+            <RowActionsMenu
+                rowData={params.data}
+                actions={wrappedActions}
+                theme={theme}
+                onMenuClick={handleRowHighlight}
+            />
+        )
+    }
+
     const defaultColDef = useMemo(() => ({
         sortable: true,
         filter: true,
@@ -98,6 +195,41 @@ const CustomGrid: React.FC<CustomGridProps> = ({
         flex: 1,
         minWidth: 100
     }), [])
+
+
+    // Add actions column if rowActions are provided
+    const finalColumnDefs = useMemo(() => {
+        if (!rowActions || rowActions.length === 0) {
+            return columnDefs
+        }
+
+        const actionsColumn: ColDef = {
+            headerName: '',
+            field: 'actions',
+            width: 80,
+            minWidth: 80,
+            maxWidth: 80,
+            sortable: false,
+            filter: false,
+            resizable: false,
+            floatingFilter: false,
+            cellRenderer: ActionsCellRenderer,
+            cellStyle: {
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '8px'
+            }
+        }
+
+        return [...columnDefs, actionsColumn]
+    }, [columnDefs, rowActions, theme])
+
+    // Debug final column definitions
+    console.log('📊 CustomGrid Final Column Defs:', {
+        finalColumnDefsLength: finalColumnDefs ? finalColumnDefs.length : 0,
+        hasActionsColumn: rowActions && rowActions.length > 0
+    })
 
     const gridStyle = useMemo(() => {
         const isDark = theme.mode === 'dark'
@@ -131,6 +263,28 @@ const CustomGrid: React.FC<CustomGridProps> = ({
 
     return (
         <Box className="h-full flex flex-col">
+            {/* CSS for row highlighting */}
+            <style>
+                {`
+                    .row-highlighted {
+                        background-color: ${theme.mode === 'dark' ? '#1e40af40' : '#3b82f640'} !important;
+                        transition: background-color 0.3s ease !important;
+                    }
+                    .row-highlighted .ag-cell {
+                        background-color: transparent !important;
+                    }
+                    /* Mobile-specific overrides */
+                    @media (max-width: 768px) {
+                        .row-highlighted {
+                            background-color: ${theme.mode === 'dark' ? '#1e40af40' : '#3b82f640'} !important;
+                        }
+                        .row-highlighted .ag-cell {
+                            background-color: transparent !important;
+                        }
+                    }
+                `}
+            </style>
+            
             {/* Title Section */}
             {showTitle && title && (
                 <Box className="mb-4">
@@ -176,7 +330,7 @@ const CustomGrid: React.FC<CustomGridProps> = ({
                     <AgGridReact
                         theme="legacy"
                         rowData={data || []}
-                        columnDefs={columnDefs}
+                        columnDefs={finalColumnDefs}
                         onGridReady={handleGridReady}
                         pagination={true}
                         paginationPageSize={20}
@@ -189,7 +343,7 @@ const CustomGrid: React.FC<CustomGridProps> = ({
                         suppressRowHoverHighlight={false}
                         suppressColumnVirtualisation={false}
                         suppressRowVirtualisation={false}
-                        rowHeight={60}
+                        rowHeight={rowHeight}
                         headerHeight={50}
                         suppressColumnMoveAnimation={false}
                     />

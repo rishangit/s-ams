@@ -12,8 +12,8 @@ const AppointmentRouter: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth)
 
   useEffect(() => {
-    // Check if user has access to appointments (roles 0, 1, 3)
-    if (!user || !isRoleInList(user.role, [0, 1, 3])) {
+    // Check if user has access to appointments (roles 0, 1, 2, 3)
+    if (!user || !isRoleInList(user.role, [0, 1, 2, 3])) {
       navigate('/system/dashboard', { replace: true })
       return
     }
@@ -29,8 +29,8 @@ const AppointmentRouter: React.FC = () => {
     }
   }, [id, navigate, user])
 
-  // Check if user has access to appointments (roles 0, 1, 3)
-  if (!user || !isRoleInList(user.role, [0, 1, 3])) {
+  // Check if user has access to appointments (roles 0, 1, 2, 3)
+  if (!user || !isRoleInList(user.role, [0, 1, 2, 3])) {
     return null // Will be redirected by useEffect
   }
 

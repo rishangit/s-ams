@@ -2,13 +2,12 @@ import React, { useEffect, useState, useMemo } from 'react'
 import {
   Box,
   Chip,
-  IconButton,
-  Tooltip,
   Select,
   MenuItem,
   FormControl,
   Button,
-  Typography
+  Typography,
+  Avatar
 } from '@mui/material'
 import {
   Add as AddIcon,
@@ -25,9 +24,18 @@ import {
   deleteAppointmentRequest,
   clearAppointmentsMessages
 } from '../../../store/actions/appointmentsActions'
-import { CustomGrid } from '../../../components/shared'
+import { CustomGrid, RowAction } from '../../../components/shared'
 import { ColDef, ICellRendererParams } from 'ag-grid-community'
 import AppointmentForm from './AppointmentForm'
+import { 
+  APPOINTMENT_STATUS, 
+  getStatusDisplayName, 
+  getStatusColor, 
+  getNextStatus, 
+  getNextStatusLabel, 
+  getNextStatusColor 
+} from '../../../constants/appointmentStatus'
+import { getProfileImageUrl } from '../../../utils/fileUtils'
 
 const Appointments: React.FC = () => {
   const dispatch = useDispatch()
@@ -91,6 +99,46 @@ const Appointments: React.FC = () => {
     // No need to refresh - Redux automatically updates the state
   }
 
+  // Helper function to convert status to number
+  const getStatusId = (status: string | number): number => {
+    if (typeof status === 'number') return status
+    switch (status) {
+      case 'pending': return APPOINTMENT_STATUS.PENDING
+      case 'confirmed': return APPOINTMENT_STATUS.CONFIRMED
+      case 'completed': return APPOINTMENT_STATUS.COMPLETED
+      case 'cancelled': return APPOINTMENT_STATUS.CANCELLED
+      default: return APPOINTMENT_STATUS.PENDING
+    }
+  }
+
+  // User Avatar Cell Renderer
+  const UserAvatarCellRenderer = (props: ICellRendererParams) => {
+    const { data } = props
+    const userName = data?.userName || 'Unknown User'
+    const userProfileImage = data?.userProfileImage
+    
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, padding: '12px 0', height: '100%' }}>
+        <Avatar
+          sx={{ width: 32, height: 32, backgroundColor: '#1976d2' }}
+          src={getProfileImageUrl(userProfileImage)}
+          onError={(e) => {
+            const target = e.currentTarget as HTMLImageElement
+            console.error('User Avatar image failed to load:', target.src)
+          }}
+        >
+          <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'white' }}>
+            {userName.split(' ').map((n: string) => n.charAt(0)).join('').substring(0, 2)}
+          </span>
+        </Avatar>
+        <Typography variant="body2" sx={{ fontWeight: '500' }}>
+          {userName}
+        </Typography>
+      </Box>
+    )
+  }
+
+
   // Filter appointments based on status
   const filteredAppointments = useMemo(() => {
     if (!appointments) return []
@@ -102,99 +150,79 @@ const Appointments: React.FC = () => {
   const StatusCellRenderer = (props: ICellRendererParams) => {
     const { value } = props
 
-    // Convert integer status to string if needed
-    const getStatusString = (status: any) => {
-      if (typeof status === 'number') {
-        switch (status) {
-          case 0: return 'pending'
-          case 1: return 'confirmed'
-          case 2: return 'completed'
-          case 3: return 'cancelled'
-          default: return 'pending'
-        }
-      }
-      return status || 'pending'
-    }
-
-    const statusString = getStatusString(value)
-
-    const getStatusColor = (status: string) => {
-      switch (status) {
-        case 'pending': return '#f59e0b'    // Orange
-        case 'confirmed': return '#3b82f6'  // Blue
-        case 'completed': return '#10b981'  // Green
-        case 'cancelled': return '#ef4444'  // Red
-        default: return '#6b7280'
-      }
-    }
+    const statusId = getStatusId(value)
+    const displayName = getStatusDisplayName(statusId)
+    const statusColor = getStatusColor(statusId)
 
     return (
-      <Chip
-        label={statusString?.charAt(0).toUpperCase() + statusString?.slice(1)}
-        size="small"
-        style={{
-          backgroundColor: getStatusColor(statusString),
-          color: '#fff',
-          fontWeight: 'bold'
-        }}
-      />
-    )
-  }
-
-  // Actions Cell Renderer Component
-  const ActionsCellRenderer = (props: ICellRendererParams) => {
-    const { data } = props
-    const isAdmin = user && parseInt(user.role) === 0
-    const isOwner = user && parseInt(user.role) === 1
-
-    return (
-      <Box className="flex gap-1">
-        <Tooltip title="Edit Appointment">
-          <IconButton
-            size="small"
-            onClick={() => handleEditAppointment(data.id)}
-            style={{ color: uiTheme.primary }}
-          >
-            <EditIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-
-        {(isAdmin || isOwner) && data.status === 'pending' && (
-          <Tooltip title="Confirm Appointment">
-            <IconButton
-              size="small"
-              onClick={() => handleStatusChange(data.id, 'confirmed')}
-              style={{ color: '#10b981' }}
-            >
-              <CheckCircle fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        )}
-
-        {(isAdmin || isOwner) && data.status === 'confirmed' && (
-          <Tooltip title="Mark as Completed">
-            <IconButton
-              size="small"
-              onClick={() => handleStatusChange(data.id, 'completed')}
-              style={{ color: '#3b82f6' }}
-            >
-              <CheckCircle fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        )}
-
-        <Tooltip title="Delete Appointment">
-          <IconButton
-            size="small"
-            onClick={() => handleDeleteAppointment(data.id)}
-            style={{ color: '#ef4444' }}
-          >
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
+      <Box sx={{ padding: '12px 0', height: '100%', display: 'flex', alignItems: 'center' }}>
+        <Chip
+          label={displayName}
+          size="small"
+          style={{
+            backgroundColor: statusColor,
+            color: '#fff',
+            fontWeight: 'bold'
+          }}
+        />
       </Box>
     )
   }
+
+  // Row Actions Configuration
+  const rowActions = useMemo<RowAction[]>(() => {
+    const isAdmin = user && parseInt(String(user.role)) === 0
+    const isOwner = user && parseInt(String(user.role)) === 1
+
+    const actions: RowAction[] = []
+
+    // Add dynamic next status action for admin/owner (first)
+    if (isAdmin || isOwner) {
+      actions.push({
+        id: 'nextStatus',
+        label: (rowData) => {
+          const statusId = getStatusId(rowData.status)
+          return getNextStatusLabel(statusId)
+        },
+        icon: <CheckCircle fontSize="small" />,
+        onClick: (rowData) => {
+          const statusId = getStatusId(rowData.status)
+          const nextStatus = getNextStatus(statusId)
+          if (nextStatus !== null) {
+            const nextStatusName = nextStatus === APPOINTMENT_STATUS.CONFIRMED ? 'confirmed' : 'completed'
+            handleStatusChange(rowData.id, nextStatusName as 'confirmed' | 'completed')
+          }
+        },
+        color: (rowData) => {
+          const statusId = getStatusId(rowData.status)
+          return getNextStatusColor(statusId)
+        },
+        disabled: (rowData) => {
+          const statusId = getStatusId(rowData.status)
+          return statusId === APPOINTMENT_STATUS.COMPLETED || statusId === APPOINTMENT_STATUS.CANCELLED
+        }
+      })
+    }
+
+    // Add Edit Appointment (second)
+    actions.push({
+      id: 'edit',
+      label: 'Edit Appointment',
+      icon: <EditIcon fontSize="small" />,
+      onClick: (rowData) => handleEditAppointment(rowData.id),
+      color: 'primary'
+    })
+
+    actions.push({
+      id: 'delete',
+      label: 'Delete Appointment',
+      icon: <DeleteIcon fontSize="small" />,
+      onClick: (rowData) => handleDeleteAppointment(rowData.id),
+      color: 'error'
+    })
+
+    return actions
+  }, [user])
 
   // Column Definitions
   const columnDefs = useMemo<ColDef[]>(() => {
@@ -229,12 +257,12 @@ const Appointments: React.FC = () => {
           const serviceName = params.value || 'Unknown Service'
           const servicePrice = params.data?.servicePrice
           return (
-            <Box>
-              <Typography variant="body2" style={{ fontWeight: 'bold' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', padding: '12px 0', height: '100%' }}>
+              <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
                 {serviceName}
               </Typography>
               {servicePrice && (
-                <Typography variant="caption" style={{ color: '#666' }}>
+                <Typography variant="caption" sx={{ color: '#666' }}>
                   ${servicePrice}
                 </Typography>
               )}
@@ -260,13 +288,25 @@ const Appointments: React.FC = () => {
           const staffId = data?.staffId
           const staffPreferences = data?.staffPreferences
           const staffName = data?.staffName
+          const staffProfileImage = data?.staffProfileImage
           
           if (staffId && staffName) {
-            // Staff is assigned
+            // Staff is assigned - show avatar
             return (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <CheckCircle sx={{ color: 'green', fontSize: 16 }} />
-                <Typography variant="body2" sx={{ color: 'green' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, padding: '12px 0', height: '100%' }}>
+                <Avatar
+                  sx={{ width: 32, height: 32, backgroundColor: '#10b981' }}
+                  src={getProfileImageUrl(staffProfileImage)}
+                  onError={(e) => {
+                    const target = e.currentTarget as HTMLImageElement
+                    console.error('Staff Avatar image failed to load:', target.src)
+                  }}
+                >
+                  <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'white' }}>
+                    {staffName.split(' ').map((n: string) => n.charAt(0)).join('').substring(0, 2)}
+                  </span>
+                </Avatar>
+                <Typography variant="body2" sx={{ fontWeight: '500' }}>
                   {staffName}
                 </Typography>
               </Box>
@@ -274,7 +314,7 @@ const Appointments: React.FC = () => {
           } else if (staffPreferences && staffPreferences.length > 0) {
             // Has preferred staff but not assigned
             return (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, padding: '12px 0', height: '100%' }}>
                 <ScheduleIcon sx={{ color: 'orange', fontSize: 16 }} />
                 <Typography variant="body2" sx={{ color: 'orange' }}>
                   {staffPreferences.length} preferred
@@ -284,7 +324,7 @@ const Appointments: React.FC = () => {
           } else {
             // No staff preferences
             return (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, padding: '12px 0', height: '100%' }}>
                 <Typography variant="body2" sx={{ color: '#666' }}>
                   No staff
                 </Typography>
@@ -295,23 +335,24 @@ const Appointments: React.FC = () => {
         sortable: true,
         filter: true,
         resizable: true,
-        width: 150,
-        minWidth: 120
+        width: 200,
+        minWidth: 180
       }
     ]
 
     // Add role-specific columns
-    if (user && parseInt(user.role) === 0) {
+    if (user && parseInt(String(user.role)) === 0) {
       // Admin sees all columns
       baseColumns.unshift(
         {
-          headerName: 'User',
+          headerName: 'Customer',
           field: 'userName',
+          cellRenderer: UserAvatarCellRenderer,
           sortable: true,
           filter: true,
           resizable: true,
-          width: 150,
-          minWidth: 120
+          width: 200,
+          minWidth: 180
         },
         {
           headerName: 'Company',
@@ -323,28 +364,30 @@ const Appointments: React.FC = () => {
           minWidth: 120
         }
       )
-    } else if (user && parseInt(user.role) === 1) {
+    } else if (user && parseInt(String(user.role)) === 1) {
       // Company owner sees user column
       baseColumns.unshift({
         headerName: 'Customer',
         field: 'userName',
+        cellRenderer: UserAvatarCellRenderer,
         sortable: true,
         filter: true,
         resizable: true,
-        width: 150,
-        minWidth: 120
+        width: 200,
+        minWidth: 180
       })
-    } else if (user && parseInt(user.role) === 2) {
+    } else if (user && parseInt(String(user.role)) === 2) {
       // Staff member sees customer and company columns
       baseColumns.unshift(
         {
           headerName: 'Customer',
           field: 'userName',
+          cellRenderer: UserAvatarCellRenderer,
           sortable: true,
           filter: true,
           resizable: true,
-          width: 150,
-          minWidth: 120
+          width: 200,
+          minWidth: 180
         },
         {
           headerName: 'Company',
@@ -356,7 +399,7 @@ const Appointments: React.FC = () => {
           minWidth: 120
         }
       )
-    } else if (user && parseInt(user.role) === 3) {
+    } else if (user && parseInt(String(user.role)) === 3) {
       // Regular user sees company column
       baseColumns.unshift({
         headerName: 'Company',
@@ -380,15 +423,17 @@ const Appointments: React.FC = () => {
         width: 200,
         minWidth: 150,
         cellRenderer: (params: ICellRendererParams) => (
-          <span style={{
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            display: 'block',
-            maxWidth: '100%'
-          }}>
-            {params.value || 'No notes'}
-          </span>
+          <Box sx={{ padding: '12px 0', height: '100%', display: 'flex', alignItems: 'center' }}>
+            <span style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              display: 'block',
+              maxWidth: '100%'
+            }}>
+              {params.value || 'No notes'}
+            </span>
+          </Box>
         )
       },
       {
@@ -400,16 +445,6 @@ const Appointments: React.FC = () => {
         width: 120,
         minWidth: 100,
         valueGetter: (params) => new Date(params.data.createdAt).toLocaleDateString()
-      },
-      {
-        headerName: 'Actions',
-        field: 'actions',
-        cellRenderer: ActionsCellRenderer,
-        sortable: false,
-        filter: false,
-        resizable: false,
-        width: 150,
-        minWidth: 150
       }
     )
 
@@ -464,7 +499,7 @@ const Appointments: React.FC = () => {
             </FormControl>
 
           {/* Add Button */}
-          {user && (parseInt(user.role) === 0 || parseInt(user.role) === 1 || parseInt(user.role) === 2 || parseInt(user.role) === 3) && (
+          {user && (parseInt(String(user.role)) === 0 || parseInt(String(user.role)) === 1 || parseInt(String(user.role)) === 2 || parseInt(String(user.role)) === 3) && (
             <Button
               variant="contained"
               onClick={handleAddAppointment}
@@ -490,6 +525,8 @@ const Appointments: React.FC = () => {
         height="calc(100vh - 280px)"
         showTitle={false}
         showAlerts={true}
+        rowActions={rowActions}
+        rowHeight={70}
       />
 
       {/* Add Appointment Modal */}

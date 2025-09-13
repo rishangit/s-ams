@@ -326,18 +326,18 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
         notes: data.notes
       }
       
-      // Add status field for company owners (role: 1)
-      if (user && parseInt(user.role) === 1 && data.status) {
+      // Add status field for admins (role: 0) and company owners (role: 1)
+      if (user && (parseInt(user.role) === 0 || parseInt(user.role) === 1) && data.status) {
         updateData.status = data.status
       }
       
-      // Add staffId for company owners (role: 1)
-      if (user && parseInt(user.role) === 1 && data.staffId) {
+      // Add staffId for admins (role: 0) and company owners (role: 1)
+      if (user && (parseInt(user.role) === 0 || parseInt(user.role) === 1) && data.staffId) {
         updateData.staffId = parseInt(data.staffId as string)
       }
       
-      // Add staffPreferences for company owners (role: 1)
-      if (user && parseInt(user.role) === 1 && data.staffPreferences) {
+      // Add staffPreferences for admins (role: 0) and company owners (role: 1)
+      if (user && (parseInt(user.role) === 0 || parseInt(user.role) === 1) && data.staffPreferences) {
         updateData.staffPreferences = data.staffPreferences
       }
       

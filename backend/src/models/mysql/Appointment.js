@@ -74,15 +74,18 @@ export class Appointment {
   static async findByUserId(userId) {
     const query = `
       SELECT 
-        a.id, a.user_id as userId, a.company_id as companyId, a.service_id as serviceId,
+        a.id, a.user_id as userId, a.company_id as companyId, a.service_id as serviceId, a.staff_id as staffId, a.staff_preferences as staffPreferences,
         a.appointment_date as appointmentDate, a.appointment_time as appointmentTime,
         a.status, a.notes, a.created_at as createdAt, a.updated_at as updatedAt,
         CONCAT(u.first_name, ' ', u.last_name) as userName, u.email as userEmail, u.profile_image as userProfileImage,
-        c.name as companyName, s.name as serviceName, s.price as servicePrice
+        c.name as companyName, s.name as serviceName, s.price as servicePrice,
+        CONCAT(st.first_name, ' ', st.last_name) as staffName, st.email as staffEmail, st.profile_image as staffProfileImage
       FROM ${this.tableName} a
       LEFT JOIN users u ON a.user_id = u.id
       LEFT JOIN companies c ON a.company_id = c.id
       LEFT JOIN services s ON a.service_id = s.id
+      LEFT JOIN staff stf ON a.staff_id = stf.id
+      LEFT JOIN users st ON stf.user_id = st.id
       WHERE a.user_id = ?
       ORDER BY a.appointment_date DESC, a.appointment_time DESC
     `
@@ -105,15 +108,18 @@ export class Appointment {
   static async findByCompanyId(companyId) {
     const query = `
       SELECT 
-        a.id, a.user_id as userId, a.company_id as companyId, a.service_id as serviceId,
+        a.id, a.user_id as userId, a.company_id as companyId, a.service_id as serviceId, a.staff_id as staffId, a.staff_preferences as staffPreferences,
         a.appointment_date as appointmentDate, a.appointment_time as appointmentTime,
         a.status, a.notes, a.created_at as createdAt, a.updated_at as updatedAt,
         CONCAT(u.first_name, ' ', u.last_name) as userName, u.email as userEmail, u.profile_image as userProfileImage,
-        c.name as companyName, s.name as serviceName, s.price as servicePrice
+        c.name as companyName, s.name as serviceName, s.price as servicePrice,
+        CONCAT(st.first_name, ' ', st.last_name) as staffName, st.email as staffEmail, st.profile_image as staffProfileImage
       FROM ${this.tableName} a
       LEFT JOIN users u ON a.user_id = u.id
       LEFT JOIN companies c ON a.company_id = c.id
       LEFT JOIN services s ON a.service_id = s.id
+      LEFT JOIN staff stf ON a.staff_id = stf.id
+      LEFT JOIN users st ON stf.user_id = st.id
       WHERE a.company_id = ?
       ORDER BY a.appointment_date DESC, a.appointment_time DESC
     `
@@ -136,25 +142,31 @@ export class Appointment {
   static async findByStaffId(staffId) {
     const query = `
       SELECT 
-        a.id, a.user_id as userId, a.company_id as companyId, a.service_id as serviceId,
+        a.id, a.user_id as userId, a.company_id as companyId, a.service_id as serviceId, a.staff_id as staffId, a.staff_preferences as staffPreferences,
         a.appointment_date as appointmentDate, a.appointment_time as appointmentTime,
         a.status, a.notes, a.created_at as createdAt, a.updated_at as updatedAt,
         CONCAT(u.first_name, ' ', u.last_name) as userName, u.email as userEmail, u.profile_image as userProfileImage,
-        c.name as companyName, s.name as serviceName, s.price as servicePrice
+        c.name as companyName, s.name as serviceName, s.price as servicePrice,
+        CONCAT(st.first_name, ' ', st.last_name) as staffName, st.email as staffEmail, st.profile_image as staffProfileImage
       FROM ${this.tableName} a
       LEFT JOIN users u ON a.user_id = u.id
       LEFT JOIN companies c ON a.company_id = c.id
       LEFT JOIN services s ON a.service_id = s.id
+      LEFT JOIN staff stf ON a.staff_id = stf.id
+      LEFT JOIN users st ON stf.user_id = st.id
       WHERE a.staff_id = ?
       ORDER BY a.appointment_date DESC, a.appointment_time DESC
     `
     
     try {
       const rows = await executeQuery(query, [staffId])
-      return rows.map(row => ({
-        ...row,
-        staffPreferences: row.staffPreferences ? JSON.parse(row.staffPreferences) : null
-      }))
+      return rows.map(appointment => {
+        const convertedStatus = getStatusName(appointment.status)
+        return {
+          ...appointment,
+          status: convertedStatus
+        }
+      })
     } catch (error) {
       console.error('Error finding appointments by staff ID:', error)
       throw new Error('Failed to find appointments by staff')
@@ -164,15 +176,18 @@ export class Appointment {
   static async findAll(options = {}) {
     let query = `
       SELECT 
-        a.id, a.user_id as userId, a.company_id as companyId, a.service_id as serviceId,
+        a.id, a.user_id as userId, a.company_id as companyId, a.service_id as serviceId, a.staff_id as staffId, a.staff_preferences as staffPreferences,
         a.appointment_date as appointmentDate, a.appointment_time as appointmentTime,
         a.status, a.notes, a.created_at as createdAt, a.updated_at as updatedAt,
         CONCAT(u.first_name, ' ', u.last_name) as userName, u.email as userEmail, u.profile_image as userProfileImage,
-        c.name as companyName, s.name as serviceName, s.price as servicePrice
+        c.name as companyName, s.name as serviceName, s.price as servicePrice,
+        CONCAT(st.first_name, ' ', st.last_name) as staffName, st.email as staffEmail, st.profile_image as staffProfileImage
       FROM ${this.tableName} a
       LEFT JOIN users u ON a.user_id = u.id
       LEFT JOIN companies c ON a.company_id = c.id
       LEFT JOIN services s ON a.service_id = s.id
+      LEFT JOIN staff stf ON a.staff_id = stf.id
+      LEFT JOIN users st ON stf.user_id = st.id
     `
     
     const values = []
@@ -236,7 +251,16 @@ export class Appointment {
       WHERE id = ?
     `
     
-    const values = [appointmentDate, appointmentTime, statusValue, notes, staffId, staffPreferences ? JSON.stringify(staffPreferences) : null, id]
+    // Convert undefined values to null for MySQL compatibility
+    const values = [
+      appointmentDate || null, 
+      appointmentTime || null, 
+      statusValue, 
+      notes || null, 
+      staffId || null, 
+      staffPreferences ? JSON.stringify(staffPreferences) : null, 
+      id
+    ]
     
     try {
       const result = await executeQuery(query, values)

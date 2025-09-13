@@ -2,8 +2,6 @@ import React, { useEffect, useState, useMemo, useRef } from 'react'
 import {
   Box,
   Chip,
-  IconButton,
-  Tooltip,
   Select,
   MenuItem,
   FormControl,
@@ -18,7 +16,7 @@ import {
 } from '@mui/icons-material'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '../../../store'
-import { CustomGrid } from '../../../components/shared'
+import { CustomGrid, RowAction } from '../../../components/shared'
 import { ColDef, ICellRendererParams } from 'ag-grid-community'
 import ServiceForm from './ServiceForm'
 import { 
@@ -125,31 +123,24 @@ const Services: React.FC = () => {
     )
   }
 
-  const ActionsCellRenderer = (props: ICellRendererParams) => {
-    const { data } = props
-    return (
-      <Box className="flex items-center space-x-1">
-        <Tooltip title="Edit Service">
-          <IconButton
-            size="small"
-            onClick={() => handleEditService(data)}
-            style={{ color: uiTheme.primary }}
-          >
-            <EditIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Delete Service">
-          <IconButton
-            size="small"
-            onClick={() => handleDeleteService(data.id)}
-            style={{ color: '#ef4444' }}
-          >
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      </Box>
-    )
-  }
+
+  // Row Actions Configuration
+  const rowActions: RowAction[] = [
+    {
+      id: 'edit',
+      label: 'Edit Service',
+      icon: <EditIcon fontSize="small" />,
+      onClick: (rowData) => handleEditService(rowData.id),
+      color: 'primary'
+    },
+    {
+      id: 'delete',
+      label: 'Delete Service',
+      icon: <DeleteIcon fontSize="small" />,
+      onClick: (rowData) => handleDeleteService(rowData.id),
+      color: 'error'
+    }
+  ]
 
   const columnDefs: ColDef[] = useMemo(() => [
     {
@@ -220,16 +211,6 @@ const Services: React.FC = () => {
       width: 120,
       minWidth: 100,
       valueGetter: (params) => new Date(params.data.createdAt).toLocaleDateString()
-    },
-    {
-      headerName: 'Actions',
-      field: 'actions',
-      sortable: false,
-      filter: false,
-      resizable: false,
-      width: 100,
-      minWidth: 100,
-      cellRenderer: ActionsCellRenderer
     }
   ], [uiTheme])
 
@@ -298,6 +279,7 @@ const Services: React.FC = () => {
         height="calc(100vh - 280px)"
         showTitle={false}
         showAlerts={true}
+        rowActions={rowActions}
       />
 
       {/* Add Service Modal */}

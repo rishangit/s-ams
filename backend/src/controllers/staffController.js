@@ -47,8 +47,10 @@ export const createStaff = async (req, res) => {
 
     const staff = await Staff.create(staffData)
     
-    // Update user role to STAFF (2) when assigned as staff
-    await User.updateRole(userId, 'staff')
+    // Update user role to STAFF (2) when assigned as staff, but only if current role is USER (3)
+    if (user.role === ROLES.USER) {
+      await User.updateRole(userId, 'staff')
+    }
     
     const staffWithDetails = await Staff.findById(staff.id)
 
@@ -205,8 +207,13 @@ export const deleteStaff = async (req, res) => {
     
     await Staff.delete(id)
     
-    // Revert user role back to USER (3) when removed as staff
-    await User.updateRole(userId, 'user')
+    // Check if user has any other staff positions
+    const remainingStaffPositions = await Staff.findByUserId(userId)
+    
+    // Only revert user role back to USER (3) if they have no other staff positions
+    if (!remainingStaffPositions || remainingStaffPositions.length === 0) {
+      await User.updateRole(userId, 'user')
+    }
 
     res.json({
       success: true,

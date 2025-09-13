@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '../../../store'
 import { ColDef, ICellRendererParams } from 'ag-grid-community'
-import { CustomGrid } from '../../../components/shared'
+import { CustomGrid, RowAction } from '../../../components/shared'
 import { getCompaniesByUserAppointmentsRequest } from '../../../store/actions/companyActions'
 import { 
   Box, 
@@ -13,7 +13,8 @@ import {
   Business as BusinessIcon,
   Phone as PhoneIcon,
   LocationOn as LocationIcon,
-  CalendarToday as CalendarIcon
+  CalendarToday as CalendarIcon,
+  Visibility as VisibilityIcon
 } from '@mui/icons-material'
 
 const UserCompanies: React.FC = () => {
@@ -44,11 +45,11 @@ const UserCompanies: React.FC = () => {
 
   // Load companies when component mounts
   useEffect(() => {
-    if (user && parseInt(user.role) === 3) {
+    if (user && parseInt(String(user.role)) === 3) {
       console.log('UserCompanies: Dispatching getCompaniesByUserAppointmentsRequest for role 3 user')
       dispatch(getCompaniesByUserAppointmentsRequest())
     }
-  }, [user?.role])
+  }, [user?.role, dispatch])
 
   // Company Name Cell Renderer Component
   const CompanyNameCellRenderer = (props: ICellRendererParams) => {
@@ -165,6 +166,30 @@ const UserCompanies: React.FC = () => {
     )
   }
 
+  // Row Actions Configuration
+  const rowActions: RowAction[] = [
+    {
+      id: 'view',
+      label: 'View Company',
+      icon: <VisibilityIcon fontSize="small" />,
+      onClick: (rowData) => {
+        console.log('View company:', rowData)
+        // TODO: Implement view company functionality
+      },
+      color: 'primary'
+    },
+    {
+      id: 'book',
+      label: 'Book Appointment',
+      icon: <CalendarIcon fontSize="small" />,
+      onClick: (rowData) => {
+        console.log('Book appointment for company:', rowData)
+        // TODO: Implement book appointment functionality
+      },
+      color: 'success'
+    }
+  ]
+
   const columnDefs = useMemo<ColDef[]>(() => [
     {
       headerName: 'Company',
@@ -261,6 +286,7 @@ const UserCompanies: React.FC = () => {
         height="calc(100vh - 120px)"
         showTitle={true}
         showAlerts={true}
+        rowActions={rowActions}
         onGridReady={(params) => {
           console.log('UserCompanies Grid Ready:', {
             rowCount: params.api.getDisplayedRowCount(),

@@ -14,8 +14,9 @@ import { RootState } from '../../../store'
 import { getRoleDisplayName, isAdminOnlyRole } from '../../../constants/roles'
 import { getProfileImageUrl } from '../../../utils/fileUtils'
 import { useUsers } from '../../../hooks/useUsers'
-import { CustomGrid } from '../../../components/shared'
+import { CustomGrid, RowAction } from '../../../components/shared'
 import { ColDef, ICellRendererParams } from 'ag-grid-community'
+import { Edit as EditIcon, Delete as DeleteIcon, Visibility as ViewIcon } from '@mui/icons-material'
 
 // interface User {
 //   id: number
@@ -137,6 +138,47 @@ const Users: React.FC = () => {
     )
   }
 
+  // Row Actions Configuration
+  const rowActions = useMemo<RowAction[]>(() => {
+    const actions: RowAction[] = [
+      {
+        id: 'view',
+        label: 'View User',
+        icon: <ViewIcon fontSize="small" />,
+        onClick: (rowData) => {
+          console.log('View user:', rowData)
+          // TODO: Implement view user functionality
+        },
+        color: 'primary'
+      },
+      {
+        id: 'edit',
+        label: 'Edit User',
+        icon: <EditIcon fontSize="small" />,
+        onClick: (rowData) => {
+          console.log('Edit user:', rowData)
+          // TODO: Implement edit user functionality
+        },
+        color: 'info'
+      },
+      {
+        id: 'delete',
+        label: 'Delete User',
+        icon: <DeleteIcon fontSize="small" />,
+        onClick: (rowData) => {
+          if (window.confirm(`Are you sure you want to delete user ${rowData.firstName} ${rowData.lastName}?`)) {
+            console.log('Delete user:', rowData)
+            // TODO: Implement delete user functionality
+          }
+        },
+        color: 'error',
+        disabled: (rowData) => rowData.id === currentUser?.id // Can't delete self
+      }
+    ]
+
+    return actions
+  }, [currentUser])
+
 
 
   // Column Definitions
@@ -217,6 +259,7 @@ const Users: React.FC = () => {
         height="calc(100vh - 120px)"
         showTitle={true}
         showAlerts={true}
+        rowActions={rowActions}
       />
     </Box>
   )

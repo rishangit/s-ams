@@ -157,23 +157,38 @@ export const getAppointments = async (req, res) => {
       appointments = await Appointment.findByCompanyId(company.id)
     } else if (userRole === 2) {
       // Staff member - get staff appointments
-      const staffRecords = await Staff.findByUserId(userId)
-      
-      if (!staffRecords || staffRecords.length === 0) {
-        return res.json({
-          success: true,
-          data: [],
-          message: 'No staff records found for this user'
-        })
-      }
-      
-      // Get all staff IDs for this user (in case they work for multiple companies)
-      const staffIds = staffRecords.map(staff => staff.id)
-      
-      // Get appointments for all staff IDs
-      for (const staffId of staffIds) {
-        const staffAppointments = await Appointment.findByStaffId(staffId)
-        appointments = appointments.concat(staffAppointments)
+      try {
+        console.log('Fetching staff records for user ID:', userId)
+        const staffRecords = await Staff.findByUserId(userId)
+        console.log('Staff records found:', staffRecords)
+        
+        if (!staffRecords || staffRecords.length === 0) {
+          return res.json({
+            success: true,
+            data: [],
+            message: 'No staff records found for this user'
+          })
+        }
+        
+        // Get all staff IDs for this user (in case they work for multiple companies)
+        const staffIds = staffRecords.map(staff => staff.id)
+        console.log('Staff IDs:', staffIds)
+        
+        // Get appointments for all staff IDs
+        for (const staffId of staffIds) {
+          try {
+            console.log('Fetching appointments for staff ID:', staffId)
+            const staffAppointments = await Appointment.findByStaffId(staffId)
+            console.log('Appointments found for staff ID', staffId, ':', staffAppointments.length)
+            appointments = appointments.concat(staffAppointments)
+          } catch (staffError) {
+            console.error('Error fetching appointments for staff ID', staffId, ':', staffError)
+            throw staffError
+          }
+        }
+      } catch (staffRecordsError) {
+        console.error('Error fetching staff records:', staffRecordsError)
+        throw staffRecordsError
       }
     } else if (userRole === 3) {
       // Regular user - get user appointments

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '../../../store'
-import { ColDef } from 'ag-grid-community'
-import CustomGrid from '../../shared/CustomGrid'
+import { ColDef, ICellRendererParams } from 'ag-grid-community'
+import { CustomGrid, RowAction } from '../../shared'
 import StaffForm from './StaffForm'
 import {
   getStaffRequest,
@@ -11,8 +11,9 @@ import {
 } from '../../../store/actions/staffActions'
 import { useTheme } from '../../../hooks/useTheme'
 import { Edit, Delete, Add, People as PeopleIcon } from '@mui/icons-material'
-import { Button, Box, Dialog, DialogTitle, DialogContent, IconButton, Tooltip, Typography } from '@mui/material'
+import { Button, Box, Dialog, DialogTitle, DialogContent, Typography, Avatar } from '@mui/material'
 import { STAFF_STATUS, getStatusDisplayName } from '../../../constants/staffStatus'
+import { getProfileImageUrl } from '../../../utils/fileUtils'
 
 const Staff: React.FC = () => {
   const dispatch = useDispatch()
@@ -26,7 +27,7 @@ const Staff: React.FC = () => {
 
   // Load staff when component mounts
   useEffect(() => {
-    if (user && parseInt(user.role) === 1) {
+    if (user && parseInt(String(user.role)) === 1) {
       dispatch(getStaffRequest())
     }
   }, [user?.role, dispatch])
@@ -62,16 +63,62 @@ const Staff: React.FC = () => {
     setEditingStaffId(null)
   }
 
+  // Staff Cell Renderer Component
+  const StaffCellRenderer = (props: ICellRendererParams) => {
+    const { data } = props
+    return (
+      <Box className="flex items-center gap-3">
+        <Avatar
+          className="w-10 h-10 border-2 border-white shadow-sm"
+          style={{ backgroundColor: theme.primary }}
+          src={getProfileImageUrl(data.profileImage)}
+          onError={(e) => {
+            const target = e.currentTarget as HTMLImageElement
+            console.error('Staff Avatar image failed to load:', target.src)
+            console.error('Staff profile image path:', data.profileImage)
+          }}
+        >
+          <span className="text-white font-semibold text-sm">
+            {data.firstName?.charAt(0)}{data.lastName?.charAt(0)}
+          </span>
+        </Avatar>
+        <Box>
+          <div className="font-semibold text-sm" style={{ color: theme.text }}>
+            {data.firstName} {data.lastName}
+          </div>
+          <div className="text-xs" style={{ color: theme.textSecondary }}>
+            ID: {data.id}
+          </div>
+        </Box>
+      </Box>
+    )
+  }
+
+  // Row Actions Configuration
+  const rowActions: RowAction[] = [
+    {
+      id: 'edit',
+      label: 'Edit Staff',
+      icon: <Edit fontSize="small" />,
+      onClick: (rowData) => handleEditStaff(rowData.id),
+      color: 'primary'
+    },
+    {
+      id: 'delete',
+      label: 'Delete Staff',
+      icon: <Delete fontSize="small" />,
+      onClick: (rowData) => handleDeleteStaff(rowData.id),
+      color: 'error'
+    }
+  ]
+
   const columnDefs: ColDef[] = [
     {
-      headerName: 'Name',
+      headerName: 'Staff Member',
       field: 'firstName',
-      valueGetter: (params) => {
-        const data = params.data
-        return data ? `${data.firstName || ''} ${data.lastName || ''}`.trim() : ''
-      },
+      cellRenderer: StaffCellRenderer,
       flex: 1,
-      minWidth: 150
+      minWidth: 200
     },
     {
       headerName: 'Email',
@@ -120,7 +167,6 @@ const Staff: React.FC = () => {
       field: 'status',
       cellRenderer: (params: any) => {
         const status = params.value
-        const isActive = status === STAFF_STATUS.ACTIVE
         const displayName = getStatusDisplayName(status)
         
         // Color mapping for different statuses
@@ -156,40 +202,6 @@ const Staff: React.FC = () => {
       },
       flex: 0.8,
       minWidth: 100
-    },
-    {
-      headerName: 'Actions',
-      field: 'actions',
-      cellRenderer: (params: any) => {
-        const staffId = params.data?.id
-        return (
-          <Box className="flex gap-1">
-            <Tooltip title="Edit Staff Member">
-              <IconButton
-                size="small"
-                onClick={() => handleEditStaff(staffId)}
-                style={{ color: theme.primary }}
-              >
-                <Edit fontSize="small" />
-              </IconButton>
-            </Tooltip>
-
-            <Tooltip title="Remove Staff Member">
-              <IconButton
-                size="small"
-                onClick={() => handleDeleteStaff(staffId)}
-                style={{ color: '#ef4444' }}
-              >
-                <Delete fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        )
-      },
-      flex: 0.8,
-      minWidth: 100,
-      sortable: false,
-      filter: false
     }
   ]
 
@@ -226,7 +238,7 @@ const Staff: React.FC = () => {
       <Box className="flex justify-end mb-6">
         <Box className="flex flex-row items-center gap-4">
           {/* Add Button */}
-          {user && parseInt(user.role) === 1 && (
+          {user && parseInt(String(user.role)) === 1 && (
             <Button
               variant="contained"
               onClick={handleAddStaff}
@@ -252,6 +264,7 @@ const Staff: React.FC = () => {
         height="calc(100vh - 280px)"
         showTitle={false}
         showAlerts={true}
+        rowActions={rowActions}
       />
 
       {/* Add Staff Modal */}
