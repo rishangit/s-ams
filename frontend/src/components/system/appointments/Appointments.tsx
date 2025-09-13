@@ -20,9 +20,7 @@ import {
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '../../../store'
 import {
-  getAppointmentsByUserRequest,
-  getAppointmentsByCompanyRequest,
-  getAllAppointmentsRequest,
+  getAppointmentsRequest,
   updateAppointmentStatusRequest,
   deleteAppointmentRequest,
   clearAppointmentsMessages
@@ -47,16 +45,8 @@ const Appointments: React.FC = () => {
   // Load appointments when component mounts
   useEffect(() => {
     if (user) {
-      if (parseInt(user.role) === 0) {
-        // Admin - get all appointments
-        dispatch(getAllAppointmentsRequest())
-      } else if (parseInt(user.role) === 1) {
-        // Company owner - get company appointments
-        dispatch(getAppointmentsByCompanyRequest())
-      } else if (parseInt(user.role) === 3) {
-        // Regular user - get user appointments
-        dispatch(getAppointmentsByUserRequest())
-      }
+      // Use unified appointments endpoint for all roles
+      dispatch(getAppointmentsRequest())
     }
   }, [user?.role, dispatch])
 
@@ -344,6 +334,28 @@ const Appointments: React.FC = () => {
         width: 150,
         minWidth: 120
       })
+    } else if (user && parseInt(user.role) === 2) {
+      // Staff member sees customer and company columns
+      baseColumns.unshift(
+        {
+          headerName: 'Customer',
+          field: 'userName',
+          sortable: true,
+          filter: true,
+          resizable: true,
+          width: 150,
+          minWidth: 120
+        },
+        {
+          headerName: 'Company',
+          field: 'companyName',
+          sortable: true,
+          filter: true,
+          resizable: true,
+          width: 150,
+          minWidth: 120
+        }
+      )
     } else if (user && parseInt(user.role) === 3) {
       // Regular user sees company column
       baseColumns.unshift({
@@ -452,7 +464,7 @@ const Appointments: React.FC = () => {
             </FormControl>
 
           {/* Add Button */}
-          {user && (parseInt(user.role) === 0 || parseInt(user.role) === 1 || parseInt(user.role) === 3) && (
+          {user && (parseInt(user.role) === 0 || parseInt(user.role) === 1 || parseInt(user.role) === 2 || parseInt(user.role) === 3) && (
             <Button
               variant="contained"
               onClick={handleAddAppointment}

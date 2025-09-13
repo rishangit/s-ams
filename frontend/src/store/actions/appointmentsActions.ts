@@ -38,15 +38,11 @@ export const createAppointmentRequest = createAction<{
 export const createAppointmentSuccess = createAction<Appointment>('appointments/createAppointmentSuccess')
 export const createAppointmentFailure = createAction<string>('appointments/createAppointmentFailure')
 
-// Get appointments by user
-export const getAppointmentsByUserRequest = createAction('appointments/getAppointmentsByUserRequest')
-export const getAppointmentsByUserSuccess = createAction<Appointment[]>('appointments/getAppointmentsByUserSuccess')
-export const getAppointmentsByUserFailure = createAction<string>('appointments/getAppointmentsByUserFailure')
 
-// Get appointments by company
-export const getAppointmentsByCompanyRequest = createAction('appointments/getAppointmentsByCompanyRequest')
-export const getAppointmentsByCompanySuccess = createAction<Appointment[]>('appointments/getAppointmentsByCompanySuccess')
-export const getAppointmentsByCompanyFailure = createAction<string>('appointments/getAppointmentsByCompanyFailure')
+// Unified appointments endpoint
+export const getAppointmentsRequest = createAction('appointments/getAppointmentsRequest')
+export const getAppointmentsSuccess = createAction<Appointment[]>('appointments/getAppointmentsSuccess')
+export const getAppointmentsFailure = createAction<string>('appointments/getAppointmentsFailure')
 
 // Get all appointments (admin)
 export const getAllAppointmentsRequest = createAction('appointments/getAllAppointmentsRequest')

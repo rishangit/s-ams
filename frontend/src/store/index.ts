@@ -25,8 +25,7 @@ import {
 } from './epics/servicesEpics'
 import {
   createAppointmentEpic,
-  getAppointmentsByUserEpic,
-  getAppointmentsByCompanyEpic,
+  getAppointmentsEpic,
   getAllAppointmentsEpic,
   getAppointmentByIdEpic,
   updateAppointmentEpic,
@@ -76,8 +75,7 @@ const rootEpic = combineEpics(
   deleteStaffEpic,
   getAvailableUsersEpic,
   createAppointmentEpic,
-  getAppointmentsByUserEpic,
-  getAppointmentsByCompanyEpic,
+  getAppointmentsEpic,
   getAllAppointmentsEpic,
   getAppointmentByIdEpic,
   updateAppointmentEpic,

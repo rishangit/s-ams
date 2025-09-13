@@ -13,9 +13,7 @@ export const config = {
     nodeEnv: process.env.NODE_ENV || 'development'
   },
   database: {
-    type: process.env.DB_TYPE || 'sqlite', // 'sqlite' or 'mysql'
-    // SQLite configuration
-    path: process.env.DB_PATH || './database/s-ams.db',
+    type: process.env.DB_TYPE || 'mysql', // 'mysql' only
     // MySQL configuration
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT) || 3306,

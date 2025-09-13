@@ -88,16 +88,18 @@ export const requireRole = (requiredRole) => {
 export const requireAnyRole = (roles) => {
   return (req, res, next) => {
     if (!req.user) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Authentication required' 
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
       })
     }
 
-    if (!User.hasAnyRole(req.user, roles)) {
-      return res.status(403).json({ 
-        success: false, 
-        message: `Access denied. One of the following roles required: ${roles.join(', ')}` 
+    const hasRole = User.hasAnyRole(req.user, roles)
+
+    if (!hasRole) {
+      return res.status(403).json({
+        success: false,
+        message: `Access denied. One of the following roles required: ${roles.join(', ')}`
       })
     }
 

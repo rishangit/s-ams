@@ -128,8 +128,8 @@ const Navigation: React.FC<NavigationProps> = ({
           </ListItemButton>
         </ListItem>
 
-        {/* Calendar - Owner (role 1) and User (role 3) */}
-        {user && isRoleInList(user.role, [1, 3]) && (
+        {/* Calendar - Owner (role 1), Staff (role 2), and User (role 3) */}
+        {user && isRoleInList(user.role, [1, 2, 3]) && (
           <ListItem disablePadding>
             <ListItemButton
               onClick={() => handleNavigation('/system/calendar')}
@@ -169,8 +169,8 @@ const Navigation: React.FC<NavigationProps> = ({
           </ListItem>
         )}
 
-        {/* Appointments - Owner (role 1) and User (role 3) */}
-        {user && isRoleInList(user.role, [1, 3]) && (
+        {/* Appointments - Owner (role 1), Staff (role 2), and User (role 3) */}
+        {user && isRoleInList(user.role, [1, 2, 3]) && (
           <ListItem disablePadding>
             <ListItemButton
               onClick={() => handleNavigation('/system/appointments')}

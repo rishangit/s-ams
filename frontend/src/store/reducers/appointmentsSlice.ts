@@ -3,12 +3,9 @@ import {
   createAppointmentRequest,
   createAppointmentSuccess,
   createAppointmentFailure,
-  getAppointmentsByUserRequest,
-  getAppointmentsByUserSuccess,
-  getAppointmentsByUserFailure,
-  getAppointmentsByCompanyRequest,
-  getAppointmentsByCompanySuccess,
-  getAppointmentsByCompanyFailure,
+  getAppointmentsRequest,
+  getAppointmentsSuccess,
+  getAppointmentsFailure,
   getAllAppointmentsRequest,
   getAllAppointmentsSuccess,
   getAllAppointmentsFailure,
@@ -88,35 +85,21 @@ const appointmentsSlice = createSlice({
         state.error = action.payload
       })
 
-    // Get appointments by user
+    // Unified appointments endpoint
     builder
-      .addCase(getAppointmentsByUserRequest, (state) => {
+      .addCase(getAppointmentsRequest, (state) => {
         state.loading = true
         state.error = null
       })
-      .addCase(getAppointmentsByUserSuccess, (state, action: PayloadAction<Appointment[]>) => {
+      .addCase(getAppointmentsSuccess, (state, action: PayloadAction<Appointment[]>) => {
         state.loading = false
         state.appointments = action.payload
       })
-      .addCase(getAppointmentsByUserFailure, (state, action: PayloadAction<string>) => {
+      .addCase(getAppointmentsFailure, (state, action: PayloadAction<string>) => {
         state.loading = false
         state.error = action.payload
       })
 
-    // Get appointments by company
-    builder
-      .addCase(getAppointmentsByCompanyRequest, (state) => {
-        state.loading = true
-        state.error = null
-      })
-      .addCase(getAppointmentsByCompanySuccess, (state, action: PayloadAction<Appointment[]>) => {
-        state.loading = false
-        state.appointments = action.payload
-      })
-      .addCase(getAppointmentsByCompanyFailure, (state, action: PayloadAction<string>) => {
-        state.loading = false
-        state.error = action.payload
-      })
 
     // Get all appointments
     builder

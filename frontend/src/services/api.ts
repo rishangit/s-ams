@@ -95,12 +95,12 @@ class ApiService {
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseURL}${endpoint}`
     const requestKey = `${options.method || 'GET'}:${endpoint}`
-    
+
     // Check if there's already a request in progress for this endpoint
     if (this.requestQueue.has(requestKey)) {
       return this.requestQueue.get(requestKey)!
     }
-    
+
     const defaultHeaders: Record<string, string> = {
       'Content-Type': 'application/json',
     }
@@ -121,7 +121,7 @@ class ApiService {
 
     const requestPromise = this.makeRequest<T>(url, config)
     this.requestQueue.set(requestKey, requestPromise)
-    
+
     try {
       const result = await requestPromise
       return result
@@ -327,12 +327,9 @@ class ApiService {
     })
   }
 
-  async getAppointmentsByUser(): Promise<ApiResponse<any>> {
-    return this.request<any>('/appointments/user')
-  }
 
-  async getAppointmentsByCompany(): Promise<ApiResponse<any>> {
-    return this.request<any>('/appointments/company')
+  async getAppointments(): Promise<ApiResponse<any>> {
+    return this.request<any>('/appointments')
   }
 
   async getAllAppointments(): Promise<ApiResponse<any>> {

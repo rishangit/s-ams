@@ -1,23 +1,20 @@
 import { config } from '../../config.js'
 
-// Import database implementations
-import * as sqliteDb from './sqlite/database.js'
+// Import MySQL database implementation
 import * as mysqlDb from './mysql/database.js'
 
 let currentDb = null
 
 export const initializeDatabase = async () => {
   try {
-    const dbType = config.database.type || 'sqlite'
+    const dbType = config.database.type || 'mysql'
     
     if (dbType === 'mysql') {
       console.log('Initializing MySQL database...')
       currentDb = mysqlDb
       await mysqlDb.initializeDatabase()
     } else {
-      console.log('Initializing SQLite database...')
-      currentDb = sqliteDb
-      await sqliteDb.initializeDatabase()
+      throw new Error('Only MySQL database is supported. Please set DB_TYPE=mysql in your environment variables.')
     }
     
     return currentDb
@@ -59,15 +56,10 @@ export const executeTransaction = async (queries) => {
 
 // Get current database type
 export const getDatabaseType = () => {
-  return config.database.type || 'sqlite'
+  return config.database.type || 'mysql'
 }
 
 // Check if using MySQL
 export const isMySQL = () => {
   return getDatabaseType() === 'mysql'
-}
-
-// Check if using SQLite
-export const isSQLite = () => {
-  return getDatabaseType() === 'sqlite'
 }

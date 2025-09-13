@@ -16,9 +16,7 @@ import {
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '../../../store'
 import {
-  getAppointmentsByUserRequest,
-  getAppointmentsByCompanyRequest,
-  getAllAppointmentsRequest
+  getAppointmentsRequest
 } from '../../../store/actions/appointmentsActions'
 import AppointmentForm from './AppointmentForm'
 import { CalendarEventTooltip } from '../../shared'
@@ -131,16 +129,8 @@ const CalendarView: React.FC = () => {
   // Load appointments based on user role
   useEffect(() => {
     if (user) {
-      if (parseInt(user.role) === 0) {
-        // Admin - get all appointments
-        dispatch(getAllAppointmentsRequest())
-      } else if (parseInt(user.role) === 1) {
-        // Company owner - get company appointments
-        dispatch(getAppointmentsByCompanyRequest())
-      } else if (parseInt(user.role) === 3) {
-        // Regular user - get user appointments
-        dispatch(getAppointmentsByUserRequest())
-      }
+      // Use unified appointments endpoint for all roles
+      dispatch(getAppointmentsRequest())
     }
   }, [user, dispatch])
 
@@ -273,6 +263,9 @@ const CalendarView: React.FC = () => {
           if (parseInt(user?.role || '3') === 1) {
             // Company owner sees: "Service - User Name"
             title = `${appointment.serviceName} - ${appointment.userName}`
+          } else if (parseInt(user?.role || '3') === 2) {
+            // Staff member sees: "Service - Customer Name"
+            title = `${appointment.serviceName} - ${appointment.userName}`
           } else {
             // Regular user sees: "Service - Company"
             title = `${appointment.serviceName} - ${appointment.companyName}`
@@ -325,13 +318,8 @@ const CalendarView: React.FC = () => {
   const handleFormSuccess = () => {
     // Refresh appointments data only when form is successfully saved
     if (user) {
-      if (parseInt(user.role) === 0) {
-        dispatch(getAllAppointmentsRequest())
-      } else if (parseInt(user.role) === 1) {
-        dispatch(getAppointmentsByCompanyRequest())
-      } else if (parseInt(user.role) === 3) {
-        dispatch(getAppointmentsByUserRequest())
-      }
+      // Use unified appointments endpoint for all roles
+      dispatch(getAppointmentsRequest())
     }
   }
 
@@ -386,6 +374,8 @@ const CalendarView: React.FC = () => {
             <Typography variant="body2" style={{ color: theme.textSecondary }}>
               {parseInt(user?.role || '3') === 1
                 ? 'No appointments have been booked for your company yet.'
+                : parseInt(user?.role || '3') === 2
+                ? 'You don\'t have any appointments assigned to you yet.'
                 : 'You don\'t have any appointments scheduled yet.'
               }
             </Typography>

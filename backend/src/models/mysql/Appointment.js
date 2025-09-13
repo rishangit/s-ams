@@ -133,6 +133,34 @@ export class Appointment {
     }
   }
 
+  static async findByStaffId(staffId) {
+    const query = `
+      SELECT 
+        a.id, a.user_id as userId, a.company_id as companyId, a.service_id as serviceId,
+        a.appointment_date as appointmentDate, a.appointment_time as appointmentTime,
+        a.status, a.notes, a.created_at as createdAt, a.updated_at as updatedAt,
+        CONCAT(u.first_name, ' ', u.last_name) as userName, u.email as userEmail, u.profile_image as userProfileImage,
+        c.name as companyName, s.name as serviceName, s.price as servicePrice
+      FROM ${this.tableName} a
+      LEFT JOIN users u ON a.user_id = u.id
+      LEFT JOIN companies c ON a.company_id = c.id
+      LEFT JOIN services s ON a.service_id = s.id
+      WHERE a.staff_id = ?
+      ORDER BY a.appointment_date DESC, a.appointment_time DESC
+    `
+    
+    try {
+      const rows = await executeQuery(query, [staffId])
+      return rows.map(row => ({
+        ...row,
+        staffPreferences: row.staffPreferences ? JSON.parse(row.staffPreferences) : null
+      }))
+    } catch (error) {
+      console.error('Error finding appointments by staff ID:', error)
+      throw new Error('Failed to find appointments by staff')
+    }
+  }
+
   static async findAll(options = {}) {
     let query = `
       SELECT 

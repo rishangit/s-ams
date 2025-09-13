@@ -4,12 +4,9 @@ import {
   createAppointmentRequest,
   createAppointmentSuccess,
   createAppointmentFailure,
-  getAppointmentsByUserRequest,
-  getAppointmentsByUserSuccess,
-  getAppointmentsByUserFailure,
-  getAppointmentsByCompanyRequest,
-  getAppointmentsByCompanySuccess,
-  getAppointmentsByCompanyFailure,
+  getAppointmentsRequest,
+  getAppointmentsSuccess,
+  getAppointmentsFailure,
   getAllAppointmentsRequest,
   getAllAppointmentsSuccess,
   getAllAppointmentsFailure,
@@ -51,41 +48,24 @@ export const createAppointmentEpic = (action$: any) =>
     })
   )
 
-// Get appointments by user epic
-export const getAppointmentsByUserEpic = (action$: any) =>
-  action$.pipe(
-    ofType(getAppointmentsByUserRequest.type),
-    switchMap(() => {
-      return from(apiService.getAppointmentsByUser()).pipe(
-        map((response) => {
-          if (response.success) {
-            return getAppointmentsByUserSuccess(response.data)
-          } else {
-            return getAppointmentsByUserFailure(response.message || 'Failed to fetch appointments')
-          }
-        }),
-        catchError((error) => {
-          return of(getAppointmentsByUserFailure(error.message || 'Failed to fetch appointments'))
-        })
-      )
-    })
-  )
 
-// Get appointments by company epic
-export const getAppointmentsByCompanyEpic = (action$: any) =>
+
+
+// Unified appointments epic
+export const getAppointmentsEpic = (action$: any) =>
   action$.pipe(
-    ofType(getAppointmentsByCompanyRequest.type),
+    ofType(getAppointmentsRequest.type),
     switchMap(() => {
-      return from(apiService.getAppointmentsByCompany()).pipe(
+      return from(apiService.getAppointments()).pipe(
         map((response) => {
           if (response.success) {
-            return getAppointmentsByCompanySuccess(response.data)
+            return getAppointmentsSuccess(response.data)
           } else {
-            return getAppointmentsByCompanyFailure(response.message || 'Failed to fetch appointments')
+            return getAppointmentsFailure(response.message || 'Failed to fetch appointments')
           }
         }),
         catchError((error) => {
-          return of(getAppointmentsByCompanyFailure(error.message || 'Failed to fetch appointments'))
+          return of(getAppointmentsFailure(error.message || 'Failed to fetch appointments'))
         })
       )
     })
@@ -214,3 +194,15 @@ export const getAppointmentStatsEpic = (action$: any) =>
       )
     })
   )
+
+// Export all appointment epics
+export const appointmentEpics = [
+  createAppointmentEpic,
+  getAppointmentsEpic,
+  getAllAppointmentsEpic,
+  getAppointmentByIdEpic,
+  updateAppointmentEpic,
+  updateAppointmentStatusEpic,
+  deleteAppointmentEpic,
+  getAppointmentStatsEpic
+]

@@ -1,4 +1,4 @@
-import { Appointment, User, Company, Service } from '../models/index.js'
+import { Appointment, User, Company, Service, Staff } from '../models/index.js'
 import { APPOINTMENT_STATUS, isValidStatusName } from '../constants/appointmentStatus.js'
 
 // Create a new appointment
@@ -128,57 +128,69 @@ export const createAppointment = async (req, res) => {
   }
 }
 
-// Get appointments by user ID
-export const getAppointmentsByUser = async (req, res) => {
+
+
+
+// Unified appointments endpoint - returns different data based on user role
+export const getAppointments = async (req, res) => {
   try {
     const userId = req.user.id
-    const appointments = await Appointment.findByUserId(userId)
-
-    res.json({
-      success: true,
-      data: appointments
-    })
-  } catch (error) {
-    console.error('Error fetching user appointments:', error)
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch appointments',
-      error: error.message
-    })
-  }
-}
-
-// Get appointments by company ID (for company owners)
-export const getAppointmentsByCompany = async (req, res) => {
-  try {
-    const userId = req.user.id
-    const user = await User.findById(userId)
-
-    if (!user) {
-      return res.status(404).json({
+    const userRole = req.user.role
+    
+    let appointments = []
+    
+    if (userRole === 0) {
+      // Admin - get all appointments
+      appointments = await Appointment.findAll()
+    } else if (userRole === 1) {
+      // Company owner - get company appointments
+      const company = await Company.findByUserId(userId)
+      
+      if (!company) {
+        return res.json({
+          success: true,
+          data: [],
+          message: 'No company found for this user'
+        })
+      }
+      
+      appointments = await Appointment.findByCompanyId(company.id)
+    } else if (userRole === 2) {
+      // Staff member - get staff appointments
+      const staffRecords = await Staff.findByUserId(userId)
+      
+      if (!staffRecords || staffRecords.length === 0) {
+        return res.json({
+          success: true,
+          data: [],
+          message: 'No staff records found for this user'
+        })
+      }
+      
+      // Get all staff IDs for this user (in case they work for multiple companies)
+      const staffIds = staffRecords.map(staff => staff.id)
+      
+      // Get appointments for all staff IDs
+      for (const staffId of staffIds) {
+        const staffAppointments = await Appointment.findByStaffId(staffId)
+        appointments = appointments.concat(staffAppointments)
+      }
+    } else if (userRole === 3) {
+      // Regular user - get user appointments
+      appointments = await Appointment.findByUserId(userId)
+    } else {
+      return res.status(400).json({
         success: false,
-        message: 'User not found'
+        message: 'Invalid user role'
       })
     }
-
-    // Get user's company
-    const company = await Company.findByUserId(userId)
-
-    if (!company) {
-      return res.json({
-        success: true,
-        data: []
-      })
-    }
-
-    const appointments = await Appointment.findByCompanyId(company.id)
 
     res.json({
       success: true,
       data: appointments
     })
   } catch (error) {
-    console.error('Error fetching company appointments:', error)
+    console.error('Error fetching appointments:', error)
     res.status(500).json({
       success: false,
       message: 'Failed to fetch appointments',

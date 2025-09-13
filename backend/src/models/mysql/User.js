@@ -189,8 +189,10 @@ export class User {
 
   // Helper method to check if a user has any of the specified roles
   static hasAnyRole(user, roles) {
-    if (!user) return false
-    
+    if (!user) {
+      return false
+    }
+
     // Convert string roles to numbers if needed
     const roleIds = roles.map(role => typeof role === 'string' ? getRoleId(role) : role)
     return roleIds.includes(user.role)
