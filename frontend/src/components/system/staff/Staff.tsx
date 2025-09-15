@@ -11,7 +11,7 @@ import {
 } from '../../../store/actions/staffActions'
 import { useTheme } from '../../../hooks/useTheme'
 import { Edit, Delete, Add, People as PeopleIcon } from '@mui/icons-material'
-import { Button, Box, Dialog, DialogTitle, DialogContent, Typography, Avatar } from '@mui/material'
+import { Button, Box, Dialog, DialogTitle, DialogContent, Typography, Avatar, Chip } from '@mui/material'
 import { STAFF_STATUS, getStatusDisplayName } from '../../../constants/staffStatus'
 import { getProfileImageUrl } from '../../../utils/fileUtils'
 
@@ -186,18 +186,15 @@ const Staff: React.FC = () => {
         }
         
         return (
-          <span
+          <Chip
+            label={displayName}
+            size="small"
             style={{
-              padding: '4px 8px',
-              borderRadius: '4px',
-              fontSize: '12px',
-              fontWeight: 'bold',
               backgroundColor: getStatusColor(status),
-              color: 'white'
+              color: '#fff',
+              fontWeight: 'bold'
             }}
-          >
-            {displayName}
-          </span>
+          />
         )
       },
       flex: 0.8,

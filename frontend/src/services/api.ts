@@ -400,6 +400,14 @@ class ApiService {
   async getAvailableUsers(): Promise<ApiResponse<User[]>> {
     return this.request<User[]>('/staff/available-users')
   }
+
+  async getCompanyUsers(): Promise<ApiResponse<any[]>> {
+    return this.request<any[]>('/company-users')
+  }
+
+  async getUserAppointments(userId: number): Promise<ApiResponse<any[]>> {
+    return this.request<any[]>(`/company-users/${userId}/appointments`)
+  }
 }
 
 // Export singleton instance

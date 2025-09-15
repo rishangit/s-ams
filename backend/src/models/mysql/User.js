@@ -220,4 +220,33 @@ export class User {
   static validateRole(role) {
     return isValidRole(role) || isValidRoleName(role)
   }
+
+  // Get all unique users who have appointments with a specific company
+  static async findUsersByCompanyId(companyId) {
+    const users = await executeQuery(`
+      SELECT DISTINCT 
+        u.id, 
+        u.first_name as firstName, 
+        u.last_name as lastName, 
+        u.email, 
+        u.phone_number as phoneNumber, 
+        u.role, 
+        u.profile_image as profileImage, 
+        u.created_at as createdAt, 
+        u.updated_at as updatedAt,
+        COUNT(a.id) as totalAppointments,
+        MAX(a.appointment_date) as lastAppointmentDate,
+        MIN(a.appointment_date) as firstAppointmentDate
+      FROM users u
+      INNER JOIN appointments a ON u.id = a.user_id
+      WHERE a.company_id = ?
+      GROUP BY u.id, u.first_name, u.last_name, u.email, u.phone_number, u.role, u.profile_image, u.created_at, u.updated_at
+      ORDER BY lastAppointmentDate DESC, u.first_name ASC
+    `, [companyId])
+
+    return users.map(user => ({
+      ...user,
+      role: user.role !== null ? user.role : ROLES.USER
+    }))
+  }
 }

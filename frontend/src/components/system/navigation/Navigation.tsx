@@ -374,6 +374,47 @@ const Navigation: React.FC<NavigationProps> = ({
           </ListItem>
         )}
 
+        {/* Company Users - Owner Only (role 1) */}
+        {user && isOwner(user.role) && (
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => handleNavigation('/system/company-users')}
+              style={{
+                backgroundColor: location.pathname === '/system/company-users'
+                  ? uiTheme.primary
+                  : 'transparent',
+                color: location.pathname === '/system/company-users'
+                  ? '#ffffff'
+                  : uiTheme.text,
+                borderRight: location.pathname === '/system/company-users'
+                  ? `2px solid ${uiTheme.primary}`
+                  : 'none',
+                margin: '0 8px',
+                borderRadius: '8px'
+              }}
+              className="hover:opacity-80 transition-all duration-200"
+            >
+              <ListItemIcon>
+                <PeopleIcon
+                  style={{
+                    color: location.pathname === '/system/company-users'
+                      ? '#ffffff'
+                      : uiTheme.textSecondary
+                  }}
+                />
+              </ListItemIcon>
+              <ListItemText
+                primary="Users"
+                style={{
+                  color: location.pathname === '/system/company-users'
+                    ? '#ffffff'
+                    : uiTheme.text
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+        )}
+
         {/* My Companies - User (role 3) only */}
         {user && isUser(user.role) && (
           <ListItem disablePadding>

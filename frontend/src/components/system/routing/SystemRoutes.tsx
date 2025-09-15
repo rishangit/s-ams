@@ -3,6 +3,8 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import Register from '../auth/register'
 import Login from '../auth/login'
 import { Dashboard, UserProfile, SystemLayout, Users, Companies, Appointments, Staff } from '../'
+import CompanyUsers from '../companyusers/CompanyUsers'
+import UserAppointments from '../companyusers/UserAppointments'
 import UserCompanies from '../companies/UserCompanies'
 import AppointmentForm from '../appointments/AppointmentForm'
 import CalendarView from '../appointments/CalendarView'
@@ -73,6 +75,20 @@ const SystemRoutes: React.FC = () => {
         <OwnerRoute>
           <SystemLayout title="Staff Management">
             <Staff />
+          </SystemLayout>
+        </OwnerRoute>
+      } />
+      <Route path="company-users" element={
+        <OwnerRoute>
+          <SystemLayout title="Company Users">
+            <CompanyUsers />
+          </SystemLayout>
+        </OwnerRoute>
+      } />
+      <Route path="company-users/:userId" element={
+        <OwnerRoute>
+          <SystemLayout title="User Appointments">
+            <UserAppointments />
           </SystemLayout>
         </OwnerRoute>
       } />
