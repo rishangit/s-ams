@@ -42,6 +42,17 @@ import {
   deleteStaffEpic,
   getAvailableUsersEpic
 } from './epics/staffEpics'
+import {
+  createProductEpic,
+  getProductsEpic,
+  getProductByIdEpic,
+  updateProductEpic,
+  updateProductQuantityEpic,
+  updateProductStatusEpic,
+  deleteProductEpic,
+  getLowStockProductsEpic,
+  getProductCategoriesEpic
+} from './epics/productsEpics'
 
 const epicMiddleware = createEpicMiddleware()
 
@@ -81,7 +92,16 @@ const rootEpic = combineEpics(
   updateAppointmentEpic,
   updateAppointmentStatusEpic,
   deleteAppointmentEpic,
-  getAppointmentStatsEpic
+  getAppointmentStatsEpic,
+  createProductEpic,
+  getProductsEpic,
+  getProductByIdEpic,
+  updateProductEpic,
+  updateProductQuantityEpic,
+  updateProductStatusEpic,
+  deleteProductEpic,
+  getLowStockProductsEpic,
+  getProductCategoriesEpic
 )
 
 export const store = configureStore({

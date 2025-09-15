@@ -408,6 +408,66 @@ class ApiService {
   async getUserAppointments(userId: number): Promise<ApiResponse<any[]>> {
     return this.request<any[]>(`/company-users/${userId}/appointments`)
   }
+
+  // Product API methods
+  async createProduct(productData: any): Promise<ApiResponse<any>> {
+    return this.request<any>('/products', {
+      method: 'POST',
+      body: JSON.stringify(productData)
+    })
+  }
+
+  async getProducts(filters?: any): Promise<ApiResponse<any>> {
+    const queryParams = new URLSearchParams()
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          queryParams.append(key, String(value))
+        }
+      })
+    }
+    const queryString = queryParams.toString()
+    return this.request<any>(`/products${queryString ? `?${queryString}` : ''}`)
+  }
+
+  async getProductById(id: number): Promise<ApiResponse<any>> {
+    return this.request<any>(`/products/${id}`)
+  }
+
+  async updateProduct(id: number, productData: any): Promise<ApiResponse<any>> {
+    return this.request<any>(`/products/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(productData)
+    })
+  }
+
+  async updateProductQuantity(id: number, quantity: number): Promise<ApiResponse<any>> {
+    return this.request<any>(`/products/${id}/quantity`, {
+      method: 'PUT',
+      body: JSON.stringify({ quantity })
+    })
+  }
+
+  async updateProductStatus(id: number, status: string): Promise<ApiResponse<any>> {
+    return this.request<any>(`/products/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status })
+    })
+  }
+
+  async deleteProduct(id: number): Promise<ApiResponse<any>> {
+    return this.request<any>(`/products/${id}`, {
+      method: 'DELETE'
+    })
+  }
+
+  async getLowStockProducts(): Promise<ApiResponse<any>> {
+    return this.request<any>('/products/low-stock')
+  }
+
+  async getProductCategories(): Promise<ApiResponse<any>> {
+    return this.request<any>('/products/categories')
+  }
 }
 
 // Export singleton instance
