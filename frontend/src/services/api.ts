@@ -347,10 +347,14 @@ class ApiService {
     })
   }
 
-  async updateAppointmentStatus(appointmentId: number, status: string): Promise<ApiResponse<any>> {
+  async updateAppointmentStatus(appointmentId: number, status: string, staffId?: number): Promise<ApiResponse<any>> {
+    const body: any = { status }
+    if (staffId) {
+      body.staffId = staffId
+    }
     return this.request<any>(`/appointments/${appointmentId}/status`, {
       method: 'PUT',
-      body: JSON.stringify({ status })
+      body: JSON.stringify(body)
     })
   }
 

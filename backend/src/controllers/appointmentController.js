@@ -158,9 +158,7 @@ export const getAppointments = async (req, res) => {
     } else if (userRole === 2) {
       // Staff member - get staff appointments
       try {
-        console.log('Fetching staff records for user ID:', userId)
         const staffRecords = await Staff.findByUserId(userId)
-        console.log('Staff records found:', staffRecords)
         
         if (!staffRecords || staffRecords.length === 0) {
           return res.json({
@@ -172,14 +170,11 @@ export const getAppointments = async (req, res) => {
         
         // Get all staff IDs for this user (in case they work for multiple companies)
         const staffIds = staffRecords.map(staff => staff.id)
-        console.log('Staff IDs:', staffIds)
         
         // Get appointments for all staff IDs
         for (const staffId of staffIds) {
           try {
-            console.log('Fetching appointments for staff ID:', staffId)
             const staffAppointments = await Appointment.findByStaffId(staffId)
-            console.log('Appointments found for staff ID', staffId, ':', staffAppointments.length)
             appointments = appointments.concat(staffAppointments)
           } catch (staffError) {
             console.error('Error fetching appointments for staff ID', staffId, ':', staffError)
@@ -410,7 +405,7 @@ export const updateAppointment = async (req, res) => {
 export const updateAppointmentStatus = async (req, res) => {
   try {
     const { id } = req.params
-    const { status } = req.body
+    const { status, staffId } = req.body
     const userId = req.user.id
 
     const appointment = await Appointment.findById(id)
@@ -450,8 +445,26 @@ export const updateAppointmentStatus = async (req, res) => {
       })
     }
 
-    // Update status
-    const updatedAppointment = await Appointment.updateStatus(appointment.id, status)
+    // If staffId is provided, validate that the staff member belongs to the company
+    if (staffId) {
+      const staff = await Staff.findById(staffId)
+      if (!staff) {
+        return res.status(404).json({
+          success: false,
+          message: 'Staff member not found'
+        })
+      }
+
+      if (staff.companyId !== appointment.companyId) {
+        return res.status(400).json({
+          success: false,
+          message: 'Staff member does not belong to this company'
+        })
+      }
+    }
+
+    // Update status and optionally staff assignment
+    const updatedAppointment = await Appointment.updateStatusAndStaff(appointment.id, status, staffId)
 
     res.json({
       success: true,

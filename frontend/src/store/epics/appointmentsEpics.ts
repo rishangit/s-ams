@@ -138,8 +138,8 @@ export const updateAppointmentStatusEpic = (action$: any) =>
   action$.pipe(
     ofType(updateAppointmentStatusRequest.type),
     switchMap((action: any) => {
-      const { id, status } = action.payload
-      return from(apiService.updateAppointmentStatus(id, status)).pipe(
+      const { id, status, staffId } = action.payload
+      return from(apiService.updateAppointmentStatus(id, status, staffId)).pipe(
         map((response) => {
           if (response.success) {
             return updateAppointmentStatusSuccess(response.data)

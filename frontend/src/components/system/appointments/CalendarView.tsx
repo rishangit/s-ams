@@ -104,6 +104,107 @@ const CalendarView: React.FC = () => {
       .fc-timegrid-body {
         height: 100% !important;
       }
+      
+      /* Ensure scrollable content maintains borders */
+      .fc-timegrid-body .fc-timegrid-slot-table {
+        border-collapse: separate !important;
+        border-spacing: 0 !important;
+      }
+      
+      .fc-timegrid-body .fc-timegrid-slot-table td {
+        border-right: 1px solid #e5e7eb !important;
+        vertical-align: top !important;
+      }
+      
+      .fc-timegrid-body .fc-timegrid-slot-table td:last-child {
+        border-right: none !important;
+      }
+      
+      /* Dark mode for scrollable content */
+      .dark-calendar .fc-timegrid-body .fc-timegrid-slot-table td {
+        border-right: 1px solid #374151 !important;
+      }
+      
+      /* Fix day separator lines to extend to full height */
+      .fc-timegrid-slot {
+        border-right: 1px solid #e5e7eb !important;
+        min-height: 2.5em !important;
+      }
+      
+      .fc-timegrid-slot:last-child {
+        border-right: none !important;
+      }
+      
+      /* Target all time slots including those below 11:00 AM */
+      .fc-timegrid-slot-lane {
+        border-right: 1px solid #e5e7eb !important;
+      }
+      
+      .fc-timegrid-slot-lane:last-child {
+        border-right: none !important;
+      }
+      
+      /* Ensure day columns have borders throughout */
+      .fc-timegrid-day {
+        border-right: 1px solid #d1d5db !important;
+        position: relative !important;
+      }
+      
+      .fc-timegrid-day:last-child {
+        border-right: none !important;
+      }
+      
+      /* Add borders to day column content */
+      .fc-timegrid-day-events {
+        border-right: 1px solid #d1d5db !important;
+      }
+      
+      .fc-timegrid-day-events:last-child {
+        border-right: none !important;
+      }
+      
+      /* Ensure day headers have proper borders */
+      .fc-col-header-cell {
+        border-right: 1px solid #d1d5db !important;
+      }
+      
+      .fc-col-header-cell:last-child {
+        border-right: none !important;
+      }
+      
+      /* Force borders on all time grid elements */
+      .fc-timegrid-body .fc-timegrid-slot {
+        border-right: 1px solid #e5e7eb !important;
+      }
+      
+      .fc-timegrid-body .fc-timegrid-slot:last-child {
+        border-right: none !important;
+      }
+      
+      /* Dark mode adjustments */
+      .dark-calendar .fc-timegrid-slot {
+        border-right: 1px solid #374151 !important;
+      }
+      
+      .dark-calendar .fc-timegrid-slot-lane {
+        border-right: 1px solid #374151 !important;
+      }
+      
+      .dark-calendar .fc-timegrid-day {
+        border-right: 1px solid #4b5563 !important;
+      }
+      
+      .dark-calendar .fc-timegrid-day-events {
+        border-right: 1px solid #4b5563 !important;
+      }
+      
+      .dark-calendar .fc-col-header-cell {
+        border-right: 1px solid #4b5563 !important;
+      }
+      
+      .dark-calendar .fc-timegrid-body .fc-timegrid-slot {
+        border-right: 1px solid #374151 !important;
+      }
     `
     document.head.appendChild(style)
     
@@ -260,10 +361,10 @@ const CalendarView: React.FC = () => {
 
           // Create event title based on user role
           let title = ''
-          if (parseInt(user?.role || '3') === 1) {
+          if (parseInt(String(user?.role || '3')) === 1) {
             // Company owner sees: "Service - User Name"
             title = `${appointment.serviceName} - ${appointment.userName}`
-          } else if (parseInt(user?.role || '3') === 2) {
+          } else if (parseInt(String(user?.role || '3')) === 2) {
             // Staff member sees: "Service - Customer Name"
             title = `${appointment.serviceName} - ${appointment.userName}`
           } else {
@@ -372,9 +473,9 @@ const CalendarView: React.FC = () => {
               No Appointments Found
             </Typography>
             <Typography variant="body2" style={{ color: theme.textSecondary }}>
-              {parseInt(user?.role || '3') === 1
+              {parseInt(String(user?.role || '3')) === 1
                 ? 'No appointments have been booked for your company yet.'
-                : parseInt(user?.role || '3') === 2
+                : parseInt(String(user?.role || '3')) === 2
                 ? 'You don\'t have any appointments assigned to you yet.'
                 : 'You don\'t have any appointments scheduled yet.'
               }

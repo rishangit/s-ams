@@ -27,6 +27,7 @@ import {
 import { CustomGrid, RowAction } from '../../../components/shared'
 import { ColDef, ICellRendererParams } from 'ag-grid-community'
 import AppointmentForm from './AppointmentForm'
+import StaffAssignmentPopup from './StaffAssignmentPopup'
 import { 
   APPOINTMENT_STATUS, 
   getStatusDisplayName, 
@@ -36,6 +37,7 @@ import {
   getNextStatusColor 
 } from '../../../constants/appointmentStatus'
 import { getProfileImageUrl } from '../../../utils/fileUtils'
+import { isOwnerRole, isAdminRole, isStaffRole, isUserRole } from '../../../constants/roles'
 
 const Appointments: React.FC = () => {
   const dispatch = useDispatch()
@@ -49,6 +51,8 @@ const Appointments: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [editingAppointmentId, setEditingAppointmentId] = useState<number | null>(null)
+  const [isStaffAssignmentOpen, setIsStaffAssignmentOpen] = useState(false)
+  const [selectedAppointmentForStaff, setSelectedAppointmentForStaff] = useState<any>(null)
 
   // Load appointments when component mounts
   useEffect(() => {
@@ -68,7 +72,20 @@ const Appointments: React.FC = () => {
     }
   }, [error, success, dispatch])
 
-  const handleStatusChange = (appointmentId: number, newStatus: 'pending' | 'confirmed' | 'completed' | 'cancelled') => {
+  const handleStatusChange = (appointmentId: number, newStatus: 'pending' | 'confirmed' | 'completed' | 'cancelled', appointmentData?: any) => {
+    // For company owners (role 1) confirming appointments, show staff assignment popup
+    if (user && isOwnerRole(user.role as any) && newStatus === 'confirmed') {
+      // Use the appointment data passed from the row action, or try to find it in state
+      const appointment = appointmentData || filteredAppointments?.find(apt => apt.id === appointmentId)
+      
+      if (appointment) {
+        setSelectedAppointmentForStaff(appointment)
+        setIsStaffAssignmentOpen(true)
+        return
+      }
+    }
+    
+    // For other cases, update status directly
     dispatch(updateAppointmentStatusRequest({ id: appointmentId, status: newStatus }))
   }
 
@@ -97,6 +114,16 @@ const Appointments: React.FC = () => {
   const handleCloseAddModal = () => {
     setIsAddModalOpen(false)
     // No need to refresh - Redux automatically updates the state
+  }
+
+  const handleCloseStaffAssignment = () => {
+    setIsStaffAssignmentOpen(false)
+    setSelectedAppointmentForStaff(null)
+  }
+
+  const handleStaffAssignmentSuccess = () => {
+    // No need to refresh - Redux epic and slice automatically update the appointment in state
+    // The appointment will be updated in the grid without a full page refresh
   }
 
   // Helper function to convert status to number
@@ -171,8 +198,8 @@ const Appointments: React.FC = () => {
 
   // Row Actions Configuration
   const rowActions = useMemo<RowAction[]>(() => {
-    const isAdmin = user && parseInt(String(user.role)) === 0
-    const isOwner = user && parseInt(String(user.role)) === 1
+    const isAdmin = user && isAdminRole(user.role as any)
+    const isOwner = user && isOwnerRole(user.role as any)
 
     const actions: RowAction[] = []
 
@@ -190,7 +217,7 @@ const Appointments: React.FC = () => {
           const nextStatus = getNextStatus(statusId)
           if (nextStatus !== null) {
             const nextStatusName = nextStatus === APPOINTMENT_STATUS.CONFIRMED ? 'confirmed' : 'completed'
-            handleStatusChange(rowData.id, nextStatusName as 'confirmed' | 'completed')
+            handleStatusChange(rowData.id, nextStatusName as 'confirmed' | 'completed', rowData)
           }
         },
         color: (rowData) => {
@@ -341,7 +368,7 @@ const Appointments: React.FC = () => {
     ]
 
     // Add role-specific columns
-    if (user && parseInt(String(user.role)) === 0) {
+    if (user && isAdminRole(user.role as any)) {
       // Admin sees all columns
       baseColumns.unshift(
         {
@@ -364,7 +391,7 @@ const Appointments: React.FC = () => {
           minWidth: 120
         }
       )
-    } else if (user && parseInt(String(user.role)) === 1) {
+    } else if (user && isOwnerRole(user.role as any)) {
       // Company owner sees user column
       baseColumns.unshift({
         headerName: 'Customer',
@@ -376,7 +403,7 @@ const Appointments: React.FC = () => {
         width: 200,
         minWidth: 180
       })
-    } else if (user && parseInt(String(user.role)) === 2) {
+    } else if (user && isStaffRole(user.role as any)) {
       // Staff member sees customer and company columns
       baseColumns.unshift(
         {
@@ -399,7 +426,7 @@ const Appointments: React.FC = () => {
           minWidth: 120
         }
       )
-    } else if (user && parseInt(String(user.role)) === 3) {
+    } else if (user && isUserRole(user.role as any)) {
       // Regular user sees company column
       baseColumns.unshift({
         headerName: 'Company',
@@ -499,7 +526,7 @@ const Appointments: React.FC = () => {
             </FormControl>
 
           {/* Add Button */}
-          {user && (parseInt(String(user.role)) === 0 || parseInt(String(user.role)) === 1 || parseInt(String(user.role)) === 2 || parseInt(String(user.role)) === 3) && (
+          {user && (isAdminRole(user.role as any) || isOwnerRole(user.role as any) || isStaffRole(user.role as any) || isUserRole(user.role as any)) && (
             <Button
               variant="contained"
               onClick={handleAddAppointment}
@@ -542,6 +569,16 @@ const Appointments: React.FC = () => {
         onClose={handleCloseEditModal}
         appointmentId={editingAppointmentId}
       />
+
+      {/* Staff Assignment Popup */}
+      {selectedAppointmentForStaff && (
+        <StaffAssignmentPopup
+          isOpen={isStaffAssignmentOpen}
+          onClose={handleCloseStaffAssignment}
+          appointment={selectedAppointmentForStaff}
+          onSuccess={handleStaffAssignmentSuccess}
+        />
+      )}
     </Box>
   )
 }

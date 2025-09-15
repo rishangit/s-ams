@@ -34,6 +34,7 @@ import { getServicesByCompanyIdRequest, getServicesByCompanyIdSuccess } from '..
 import { getCompaniesForBookingRequest, getCompanyByUserRequest } from '../../../store/actions/companyActions'
 import { getAllUsersRequest } from '../../../store/actions/userActions'
 import { getStaffByCompanyIdRequest, getStaffByCompanyIdSuccess } from '../../../store/actions/staffActions'
+import { ROLES, isOwnerRole, isUserRole } from '../../../constants/roles'
 
 // Validation schema
 const appointmentSchema = yup.object({
@@ -166,7 +167,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
 
   // Load users and company for company owners when creating new appointments
   useEffect(() => {
-    if (user && parseInt(user.role) === 1 && !isEditMode && isOpen) {
+    if (user && isOwnerRole(user.role as any) && !isEditMode && isOpen) {
       dispatch(getAllUsersRequest())
       // Load the company owner's company
       dispatch(getCompanyByUserRequest(user.id))
@@ -197,7 +198,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
 
   // Set company owner's company as default when loaded
   useEffect(() => {
-    if (user && parseInt(user.role) === 1 && !isEditMode && company && isOpen) {
+    if (user && isOwnerRole(user.role as any) && !isEditMode && company && isOpen) {
       const currentValues = watch()
       reset({
         ...currentValues,
@@ -208,44 +209,19 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
 
   // Load staff when company changes (same pattern as services)
   useEffect(() => {
-    console.log('Staff loading effect triggered:', {
-      watchedCompanyId,
-      userRole: user?.role,
-      companyIdParsed: watchedCompanyId ? parseInt(watchedCompanyId as string) : null
-    })
-    
     if (watchedCompanyId && watchedCompanyId !== '' && parseInt(watchedCompanyId as string) > 0) {
       // Reset staff preferences when company changes
       const currentValues = watch()
       reset({ ...currentValues, staffPreferences: [] })
       
       // Load staff for the selected company (same for all roles)
-      console.log('Dispatching getStaffByCompanyIdRequest for companyId:', parseInt(watchedCompanyId as string))
       dispatch(getStaffByCompanyIdRequest(parseInt(watchedCompanyId as string)))
     } else {
       // Clear staff when no company is selected
-      console.log('Clearing staff data - no company selected')
       dispatch(getStaffByCompanyIdSuccess([]))
     }
   }, [watchedCompanyId, dispatch, reset, watch])
 
-  // Debug staff data for role 3
-  useEffect(() => {
-    if (user && parseInt(user.role) === 3) {
-      console.log('Staff data for role 3:', { staff, staffLength: staff?.length, watchedCompanyId })
-    }
-  }, [staff, watchedCompanyId, user])
-
-  // Debug appointment data for role 1
-  useEffect(() => {
-    if (user && parseInt(user.role) === 1 && currentAppointment) {
-      console.log('Current appointment data for role 1:', {
-        appointment: currentAppointment,
-        staffPreferences: currentAppointment.staffPreferences,
-        staffId: currentAppointment.staffId
-      })
-    }
-  }, [currentAppointment, user])
 
   // Load appointment data if in edit mode
   useEffect(() => {
@@ -326,18 +302,18 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
         notes: data.notes
       }
       
-      // Add status field for admins (role: 0) and company owners (role: 1)
-      if (user && (parseInt(user.role) === 0 || parseInt(user.role) === 1) && data.status) {
+      // Add status field for admins and company owners
+      if (user && (user.role === ROLES.ADMIN || isOwnerRole(user.role as any)) && data.status) {
         updateData.status = data.status
       }
       
-      // Add staffId for admins (role: 0) and company owners (role: 1)
-      if (user && (parseInt(user.role) === 0 || parseInt(user.role) === 1) && data.staffId) {
+      // Add staffId for admins and company owners
+      if (user && (user.role === ROLES.ADMIN || isOwnerRole(user.role as any)) && data.staffId) {
         updateData.staffId = parseInt(data.staffId as string)
       }
       
-      // Add staffPreferences for admins (role: 0) and company owners (role: 1)
-      if (user && (parseInt(user.role) === 0 || parseInt(user.role) === 1) && data.staffPreferences) {
+      // Add staffPreferences for admins and company owners
+      if (user && (user.role === ROLES.ADMIN || isOwnerRole(user.role as any)) && data.staffPreferences) {
         updateData.staffPreferences = data.staffPreferences
       }
       
@@ -351,20 +327,20 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
         notes: data.notes
       }
       
-      // Add userId for company owners (role: 1) when creating appointments
-      if (user && parseInt(user.role) === 1 && data.userId) {
+      // Add userId for company owners when creating appointments
+      if (user && isOwnerRole(user.role as any) && data.userId) {
         createData.userId = parseInt(data.userId as string)
-      } else if (user && parseInt(user.role) !== 1) {
+      } else if (user && !isOwnerRole(user.role as any)) {
         // For regular users, use their own ID
         createData.userId = user.id
       }
       
-      // Add staffId for company owners (role: 1)
-      if (user && parseInt(user.role) === 1 && data.staffId) {
+      // Add staffId for company owners
+      if (user && isOwnerRole(user.role as any) && data.staffId) {
         createData.staffId = parseInt(data.staffId as string)
       }
       
-      // Add staffPreferences for regular users (role: 3) or company owners (role: 1)
+      // Add staffPreferences for regular users or company owners
       if (data.staffPreferences && data.staffPreferences.length > 0) {
         createData.staffPreferences = data.staffPreferences
       }
@@ -443,7 +419,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
       )}
 
       {/* Help text for company owners */}
-      {user && parseInt(user.role) === 1 && !isEditMode && (
+      {user && isOwnerRole(user.role as any) && !isEditMode && (
         <Alert severity="info" className="mb-4">
           As a company owner, you can book appointments for any user. Your company has been automatically selected. Choose the user, service, date, and time for the appointment.
         </Alert>
@@ -452,7 +428,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
       <form onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={{ xs: 2, sm: 3 }}>
           {/* User selection for company owners when creating new appointments */}
-          {user && parseInt(user.role) === 1 && !isEditMode && (
+          {user && isOwnerRole(user.role as any) && !isEditMode && (
             <Grid item xs={12}>
               <FormSelect
                 name="userId"
@@ -479,7 +455,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
               })) || []}
               error={errors.companyId}
               required
-              disabled={isEditMode || Boolean(user && parseInt(user.role) === 1 && company)}
+              disabled={isEditMode || Boolean(user && isOwnerRole(user.role as any) && company)}
             />
           </Grid>
           <Grid item xs={12}>
@@ -503,7 +479,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
           </Grid>
           
           {/* Staff selection for company owners */}
-          {user && parseInt(user.role) === 1 && (
+          {user && isOwnerRole(user.role as any) && (
             <Grid item xs={12}>
               <FormSelect
                 name="staffId"
@@ -593,7 +569,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
           )}
           
           {/* Staff preferences for regular users */}
-          {user && parseInt(user.role) === 3 && (
+          {user && isUserRole(user.role as any) && (
             <Grid item xs={12}>
               <FormMultiSelect
                 name="staffPreferences"
@@ -645,7 +621,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
           </Grid>
           
           {/* Status dropdown for company owners in edit mode */}
-          {user && parseInt(user.role) === 1 && isEditMode && (
+          {user && isOwnerRole(user.role as any) && isEditMode && (
             <Grid item xs={12}>
               <FormSelect
                 name="status"
@@ -685,7 +661,15 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
               fullWidth
             >
               {(createLoading || updateLoading) ? (
-                <CircularProgress size={20} style={{ color: '#fff' }} />
+                <Box className="flex items-center justify-center space-x-2">
+                  <CircularProgress size={20} style={{ color: '#fff' }} />
+                  <span>
+                    {isEditMode 
+                      ? 'Updating...' 
+                      : 'Creating...'
+                    }
+                  </span>
+                </Box>
               ) : (
                 <Box className="flex items-center justify-center space-x-2">
                   <SaveIcon />

@@ -61,9 +61,22 @@ export class Appointment {
       const appointment = rows[0]
       if (!appointment) return null
       const convertedStatus = getStatusName(appointment.status)
+      
+      // Parse staffPreferences JSON
+      let staffPreferences = null
+      if (appointment.staffPreferences) {
+        try {
+          staffPreferences = JSON.parse(appointment.staffPreferences)
+        } catch (parseError) {
+          console.warn('Failed to parse staffPreferences JSON:', appointment.staffPreferences)
+          staffPreferences = null
+        }
+      }
+      
       return {
         ...appointment,
-        status: convertedStatus
+        status: convertedStatus,
+        staffPreferences
       }
     } catch (error) {
       console.error('Error finding appointment by ID:', error)
@@ -94,9 +107,22 @@ export class Appointment {
       const rows = await executeQuery(query, [userId])
       return rows.map(appointment => {
         const convertedStatus = getStatusName(appointment.status)
+        
+        // Parse staffPreferences JSON
+        let staffPreferences = null
+        if (appointment.staffPreferences) {
+          try {
+            staffPreferences = JSON.parse(appointment.staffPreferences)
+          } catch (parseError) {
+            console.warn('Failed to parse staffPreferences JSON:', appointment.staffPreferences)
+            staffPreferences = null
+          }
+        }
+        
         return {
           ...appointment,
-          status: convertedStatus
+          status: convertedStatus,
+          staffPreferences
         }
       })
     } catch (error) {
@@ -128,9 +154,22 @@ export class Appointment {
       const rows = await executeQuery(query, [companyId])
       return rows.map(appointment => {
         const convertedStatus = getStatusName(appointment.status)
+        
+        // Parse staffPreferences JSON
+        let staffPreferences = null
+        if (appointment.staffPreferences) {
+          try {
+            staffPreferences = JSON.parse(appointment.staffPreferences)
+          } catch (parseError) {
+            console.warn('Failed to parse staffPreferences JSON:', appointment.staffPreferences)
+            staffPreferences = null
+          }
+        }
+        
         return {
           ...appointment,
-          status: convertedStatus
+          status: convertedStatus,
+          staffPreferences
         }
       })
     } catch (error) {
@@ -162,9 +201,22 @@ export class Appointment {
       const rows = await executeQuery(query, [staffId])
       return rows.map(appointment => {
         const convertedStatus = getStatusName(appointment.status)
+        
+        // Parse staffPreferences JSON
+        let staffPreferences = null
+        if (appointment.staffPreferences) {
+          try {
+            staffPreferences = JSON.parse(appointment.staffPreferences)
+          } catch (parseError) {
+            console.warn('Failed to parse staffPreferences JSON:', appointment.staffPreferences)
+            staffPreferences = null
+          }
+        }
+        
         return {
           ...appointment,
-          status: convertedStatus
+          status: convertedStatus,
+          staffPreferences
         }
       })
     } catch (error) {
@@ -222,9 +274,22 @@ export class Appointment {
       const rows = await executeQuery(query, values)
       return rows.map(appointment => {
         const convertedStatus = getStatusName(appointment.status)
+        
+        // Parse staffPreferences JSON
+        let staffPreferences = null
+        if (appointment.staffPreferences) {
+          try {
+            staffPreferences = JSON.parse(appointment.staffPreferences)
+          } catch (parseError) {
+            console.warn('Failed to parse staffPreferences JSON:', appointment.staffPreferences)
+            staffPreferences = null
+          }
+        }
+        
         return {
           ...appointment,
-          status: convertedStatus
+          status: convertedStatus,
+          staffPreferences
         }
       })
     } catch (error) {
@@ -295,6 +360,30 @@ export class Appointment {
     } catch (error) {
       console.error('Error updating appointment status:', error)
       throw new Error('Failed to update appointment status')
+    }
+  }
+
+  static async updateStatusAndStaff(id, status, staffId = null) {
+    const statusId = getStatusId(status)
+    if (statusId === null) {
+      throw new Error('Invalid status')
+    }
+    
+    const query = `
+      UPDATE ${this.tableName} 
+      SET status = ?, staff_id = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `
+    
+    try {
+      const result = await executeQuery(query, [statusId, staffId, id])
+      if (result.affectedRows === 0) {
+        throw new Error('Appointment not found')
+      }
+      return await this.findById(id)
+    } catch (error) {
+      console.error('Error updating appointment status and staff:', error)
+      throw new Error('Failed to update appointment status and staff')
     }
   }
 

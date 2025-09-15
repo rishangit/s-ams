@@ -69,6 +69,7 @@ export const updateAppointmentFailure = createAction<string>('appointments/updat
 export const updateAppointmentStatusRequest = createAction<{
   id: number
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
+  staffId?: number
 }>('appointments/updateAppointmentStatusRequest')
 
 export const updateAppointmentStatusSuccess = createAction<Appointment>('appointments/updateAppointmentStatusSuccess')
