@@ -4,8 +4,9 @@ import { useSelector } from 'react-redux'
 import { RootState } from '../../../store'
 import { ColDef } from 'ag-grid-community'
 import CustomGrid from '../../shared/CustomGrid'
+import { RowAction } from '../../shared/RowActionsMenu'
 import { Box, Typography, Avatar, Chip } from '@mui/material'
-import { ArrowBack as BackIcon } from '@mui/icons-material'
+import { ArrowBack as BackIcon, Visibility as ViewIcon } from '@mui/icons-material'
 import { getProfileImageUrl } from '../../../utils/fileUtils'
 import { format } from 'date-fns'
 import { apiService } from '../../../services/api'
@@ -13,6 +14,7 @@ import {
   getStatusDisplayName, 
   getStatusColor 
 } from '../../../constants/appointmentStatus'
+import AppointmentCompletionPopup from '../appointments/AppointmentCompletionPopup'
 
 interface UserAppointment {
   id: number
@@ -50,6 +52,9 @@ const UserAppointments: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [selectedAppointment, setSelectedAppointment] = useState<UserAppointment | null>(null)
+  const [isCompletionPopupOpen, setIsCompletionPopupOpen] = useState(false)
+  const [existingHistory, setExistingHistory] = useState<any>(null)
 
   // Fetch user appointments
   const fetchUserAppointments = async () => {
@@ -89,6 +94,54 @@ const UserAppointments: React.FC = () => {
       fetchUserAppointments()
     }
   }, [user, userId])
+
+  // Handle view details
+  const handleViewDetails = async (appointment: UserAppointment) => {
+    setSelectedAppointment(appointment)
+    
+    // Fetch existing history data if appointment is completed
+    if (appointment.status === 'completed') {
+      try {
+        const response = await apiService.getUserHistoryByAppointmentId(appointment.id)
+        if (response.success) {
+          setExistingHistory(response.data)
+        } else {
+          setExistingHistory(null)
+        }
+      } catch (error) {
+        console.error('Error fetching appointment history:', error)
+        setExistingHistory(null)
+      }
+    } else {
+      setExistingHistory(null)
+    }
+    
+    setIsCompletionPopupOpen(true)
+  }
+
+  // Handle close completion popup
+  const handleCloseCompletionPopup = () => {
+    setIsCompletionPopupOpen(false)
+    setSelectedAppointment(null)
+    setExistingHistory(null)
+  }
+
+  // Handle completion success
+  const handleCompletionSuccess = () => {
+    // Refresh appointments list to show updated status
+    fetchUserAppointments()
+    handleCloseCompletionPopup()
+  }
+
+  // Row actions for the grid
+  const rowActions: RowAction[] = [
+    {
+      id: 'view-details',
+      label: 'View Details',
+      icon: <ViewIcon />,
+      onClick: (appointment: UserAppointment) => handleViewDetails(appointment)
+    }
+  ]
 
   // Column definitions for the grid
   const columnDefs: ColDef[] = useMemo(() => [
@@ -297,8 +350,21 @@ const UserAppointments: React.FC = () => {
         height="calc(100vh - 280px)"
         showTitle={false}
         showAlerts={true}
+        rowActions={rowActions}
         rowHeight={70}
       />
+
+      {/* Appointment Completion Popup */}
+      {selectedAppointment && (
+        <AppointmentCompletionPopup
+          isOpen={isCompletionPopupOpen}
+          onClose={handleCloseCompletionPopup}
+          onSuccess={handleCompletionSuccess}
+          appointment={selectedAppointment}
+          mode={existingHistory ? 'view' : 'create'}
+          existingHistory={existingHistory}
+        />
+      )}
     </Box>
   )
 }

@@ -14,7 +14,8 @@ import {
   CircularProgress,
   IconButton,
   Divider,
-  Chip
+  Chip,
+  Button
 } from '@mui/material'
 import {
   Close as CloseIcon,
@@ -45,6 +46,8 @@ interface AppointmentCompletionPopupProps {
     serviceName?: string
     staffName?: string
   }
+  mode?: 'create' | 'view' | 'edit'
+  existingHistory?: any
 }
 
 // Validation schema for single product form
@@ -68,7 +71,9 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
   isOpen,
   onClose,
   onSuccess,
-  appointment
+  appointment,
+  mode = 'create',
+  existingHistory
 }) => {
   const dispatch = useDispatch()
   const { products, loading: productsLoading } = useSelector((state: RootState) => state.products)
@@ -78,6 +83,7 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
   // State for products grid
   const [productsUsed, setProductsUsed] = useState<ProductUsed[]>([])
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
+  const [isEditMode, setIsEditMode] = useState(false)
 
   // Form for adding/editing single product
   const { control, handleSubmit, formState: { errors }, setValue, watch, reset } = useForm<ProductUsed>({
@@ -108,6 +114,21 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
       dispatch(getProductsRequest())
     }
   }, [isOpen, appointment.companyId, dispatch])
+
+  // Initialize data based on mode
+  useEffect(() => {
+    if (isOpen && existingHistory && (mode === 'view' || mode === 'edit')) {
+      // Populate with existing history data
+      setProductsUsed(existingHistory.productsUsed || [])
+      setNotesValue('notes', existingHistory.notes || '')
+      setIsEditMode(mode === 'edit')
+    } else if (isOpen && mode === 'create') {
+      // Reset for new completion
+      setProductsUsed([])
+      setNotesValue('notes', '')
+      setIsEditMode(false)
+    }
+  }, [isOpen, existingHistory, mode])
 
   // Calculate total cost
   const totalCost = productsUsed.reduce((sum, product) => {
@@ -288,7 +309,7 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
   ]
 
   // Row actions
-  const rowActions: RowAction[] = [
+  const rowActions: RowAction[] = (mode === 'create' || isEditMode) ? [
     {
       id: 'edit',
       label: 'Edit',
@@ -308,7 +329,7 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
       },
       color: 'error'
     }
-  ]
+  ] : []
 
   return (
     <Dialog
@@ -326,12 +347,42 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
     >
       <DialogTitle sx={{ borderBottom: `1px solid ${theme.border}` }}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="h6" component="div">
-            Complete Appointment
-          </Typography>
-          <IconButton onClick={handleClose} size="small">
-            <CloseIcon />
-          </IconButton>
+          <Box display="flex" alignItems="center" gap={2}>
+            <Typography variant="h6" component="div">
+              {mode === 'view' ? 'View Appointment Details' : 
+               mode === 'edit' ? 'Edit Appointment Details' : 
+               'Complete Appointment'}
+            </Typography>
+            {mode === 'view' && existingHistory && (
+              <Chip
+                label="View Mode"
+                size="small"
+                color="info"
+              />
+            )}
+            {mode === 'edit' && (
+              <Chip
+                label="Edit Mode"
+                size="small"
+                color="warning"
+              />
+            )}
+          </Box>
+          <Box display="flex" gap={1}>
+            {mode === 'view' && existingHistory && (
+              <Button
+                startIcon={<EditIcon />}
+                onClick={() => setIsEditMode(true)}
+                variant="outlined"
+                size="small"
+              >
+                Edit
+              </Button>
+            )}
+            <IconButton onClick={handleClose} size="small">
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </Box>
       </DialogTitle>
 
@@ -371,7 +422,8 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
           <Typography variant="subtitle1" gutterBottom>
             {editingIndex !== null ? 'Edit Product' : 'Add Product (Optional)'}
           </Typography>
-          <form onSubmit={handleSubmit(onProductSubmit)}>
+          {(mode === 'create' || isEditMode) && (
+            <form onSubmit={handleSubmit(onProductSubmit)}>
             <Box display="flex" gap={2} flexWrap="wrap" alignItems="flex-end">
               {/* Product Selection */}
               <Box flex={1} minWidth={200}>
@@ -438,6 +490,7 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
               />
             </Box>
           </form>
+          )}
         </Box>
 
         <Divider sx={{ my: 2 }} />
@@ -481,47 +534,70 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
 
         {/* Completion Notes */}
         <Box mb={3}>
-          <form onSubmit={handleNotesSubmit(onCompletionSubmit)}>
-            <FormInput
-              name="notes"
-              label="Completion Notes (Optional)"
-              type="description"
-              control={notesControl}
-              multiline={true}
-              rows={3}
-              placeholder="Add any additional notes about the appointment completion (optional)..."
-            />
-          </form>
+          {(mode === 'create' || isEditMode) ? (
+            <form onSubmit={handleNotesSubmit(onCompletionSubmit)}>
+              <FormInput
+                name="notes"
+                label="Completion Notes (Optional)"
+                type="description"
+                control={notesControl}
+                multiline={true}
+                rows={3}
+                placeholder="Add any additional notes about the appointment completion (optional)..."
+              />
+            </form>
+          ) : (
+            <Box>
+              <Typography variant="subtitle1" gutterBottom>
+                Completion Notes
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {watchedNotes || 'No completion notes'}
+              </Typography>
+            </Box>
+          )}
         </Box>
       </DialogContent>
 
       <DialogActions sx={{ p: 2, borderTop: `1px solid ${theme.border}` }}>
-        <FormButton
-          type="button"
-          variant="outlined"
-          onClick={handleClose}
-          disabled={createLoading}
-        >
-          Cancel
-        </FormButton>
-        <FormButton
-          type="submit"
-          variant="contained"
-          onClick={handleNotesSubmit(onCompletionSubmit)}
-          disabled={createLoading}
-        >
-          {createLoading ? (
-            <>
-              <CircularProgress size={16} style={{ marginRight: 8 }} />
-              Completing...
-            </>
-          ) : (
-            <>
-              <CheckCircleIcon style={{ marginRight: 8 }} />
-              Complete Appointment
-            </>
-          )}
-        </FormButton>
+        {mode === 'view' ? (
+          <FormButton
+            type="button"
+            variant="contained"
+            onClick={handleClose}
+          >
+            Close
+          </FormButton>
+        ) : (
+          <>
+            <FormButton
+              type="button"
+              variant="outlined"
+              onClick={handleClose}
+              disabled={createLoading}
+            >
+              Cancel
+            </FormButton>
+            <FormButton
+              type="submit"
+              variant="contained"
+              onClick={handleNotesSubmit(onCompletionSubmit)}
+              disabled={createLoading}
+            >
+              {createLoading ? (
+                <>
+                  <CircularProgress size={16} style={{ marginRight: 8 }} />
+                  {mode === 'edit' ? 'Updating...' : 'Completing...'}
+                </>
+              ) : (
+                <>
+                  <CheckCircleIcon style={{ marginRight: 8 }} />
+                  {mode === 'edit' ? 'Update Appointment' : 'Complete Appointment'}
+                </>
+              )}
+            </FormButton>
+          </>
+        )}
       </DialogActions>
     </Dialog>
   )
