@@ -34,7 +34,7 @@ import { RowAction } from '../../shared/RowActionsMenu'
 interface AppointmentCompletionPopupProps {
   isOpen: boolean
   onClose: () => void
-  onSuccess: () => void
+  onSuccess: (appointment?: any) => void
   appointment: {
     id: number
     userId: number
@@ -148,7 +148,8 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
       notes: ''
     })
     setNotesValue('notes', '')
-    onSuccess()
+    // Pass the appointment data to the parent component
+    onSuccess(appointment)
   }
 
   const handleClose = () => {
@@ -218,15 +219,11 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
 
   // Handle completion
   const onCompletionSubmit = (data: { notes: string }) => {
-    if (productsUsed.length === 0) {
-      return
-    }
-
     const historyData = {
       appointmentId: appointment.id,
-      productsUsed: productsUsed,
-      totalCost: totalCost,
-      notes: data.notes
+      productsUsed: productsUsed, // Can be empty array
+      totalCost: totalCost, // Will be 0 if no products
+      notes: data.notes || '' // Can be empty string
     }
 
     dispatch(createUserHistoryRequest(historyData))
@@ -338,7 +335,7 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
         </Box>
       </DialogTitle>
 
-      <DialogContent sx={{ p: 3 }}>
+      <DialogContent sx={{ p: 3, overflow: 'auto', maxHeight: 'calc(100vh - 200px)' }}>
         {/* Appointment Info */}
         <Box mb={3}>
           <Typography variant="subtitle1" gutterBottom>
@@ -372,7 +369,7 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
         {/* Product Form */}
         <Box mb={3}>
           <Typography variant="subtitle1" gutterBottom>
-            {editingIndex !== null ? 'Edit Product' : 'Add Product'}
+            {editingIndex !== null ? 'Edit Product' : 'Add Product (Optional)'}
           </Typography>
           <form onSubmit={handleSubmit(onProductSubmit)}>
             <Box display="flex" gap={2} flexWrap="wrap" alignItems="flex-end">
@@ -446,26 +443,28 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
         <Divider sx={{ my: 2 }} />
 
         {/* Products Grid */}
-        <Box mb={3}>
+        <Box mb={3} sx={{ minHeight: '200px' }}>
           <Typography variant="subtitle1" gutterBottom>
-            Products Used ({productsUsed.length})
+            Products Used ({productsUsed.length}) - Optional
           </Typography>
           {productsUsed.length > 0 ? (
-            <CustomGrid
-              key={`products-grid-${productsUsed.length}`}
-              data={productsUsed}
-              columnDefs={columnDefs}
-              theme={theme}
-              height={400}
-              rowActions={rowActions}
-              showTitle={false}
-              showAlerts={false}
-              rowHeight={50}
-            />
+            <Box sx={{ height: '300px', width: '100%' }}>
+              <CustomGrid
+                key={`products-grid-${productsUsed.length}`}
+                data={productsUsed}
+                columnDefs={columnDefs}
+                theme={theme}
+                height="100%"
+                rowActions={rowActions}
+                showTitle={false}
+                showAlerts={false}
+                rowHeight={50}
+              />
+            </Box>
           ) : (
             <Box textAlign="center" py={3} color="text.secondary">
               <Typography variant="body2">
-                No products added yet. Use the form above to add products.
+                No products added yet. You can add products using the form above, or complete the appointment without products.
               </Typography>
             </Box>
           )}
@@ -485,12 +484,12 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
           <form onSubmit={handleNotesSubmit(onCompletionSubmit)}>
             <FormInput
               name="notes"
-              label="Completion Notes"
+              label="Completion Notes (Optional)"
               type="description"
               control={notesControl}
               multiline={true}
               rows={3}
-              placeholder="Add any additional notes about the appointment completion..."
+              placeholder="Add any additional notes about the appointment completion (optional)..."
             />
           </form>
         </Box>
@@ -509,7 +508,7 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
           type="submit"
           variant="contained"
           onClick={handleNotesSubmit(onCompletionSubmit)}
-          disabled={createLoading || productsUsed.length === 0}
+          disabled={createLoading}
         >
           {createLoading ? (
             <>

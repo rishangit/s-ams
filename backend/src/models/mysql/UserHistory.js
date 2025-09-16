@@ -51,14 +51,15 @@ export class UserHistory {
         uh.company_id as companyId, uh.staff_id as staffId, uh.service_id as serviceId,
         uh.products_used as productsUsed, uh.total_cost as totalCost, uh.notes,
         uh.completion_date as completionDate, uh.created_at as createdAt, uh.updated_at as updatedAt,
-        u.name as userName, u.email as userEmail,
+        CONCAT(u.first_name, ' ', u.last_name) as userName, u.email as userEmail,
         c.name as companyName,
-        s.name as staffName, s.email as staffEmail,
+        CONCAT(st.first_name, ' ', st.last_name) as staffName, st.email as staffEmail,
         sv.name as serviceName, sv.price as servicePrice
       FROM ${this.tableName} uh
       LEFT JOIN users u ON uh.user_id = u.id
       LEFT JOIN companies c ON uh.company_id = c.id
       LEFT JOIN staff s ON uh.staff_id = s.id
+      LEFT JOIN users st ON s.user_id = st.id
       LEFT JOIN services sv ON uh.service_id = sv.id
       WHERE uh.id = ?
     `
@@ -100,14 +101,15 @@ export class UserHistory {
         uh.company_id as companyId, uh.staff_id as staffId, uh.service_id as serviceId,
         uh.products_used as productsUsed, uh.total_cost as totalCost, uh.notes,
         uh.completion_date as completionDate, uh.created_at as createdAt, uh.updated_at as updatedAt,
-        u.name as userName, u.email as userEmail,
+        CONCAT(u.first_name, ' ', u.last_name) as userName, u.email as userEmail,
         c.name as companyName,
-        s.name as staffName, s.email as staffEmail,
+        CONCAT(st.first_name, ' ', st.last_name) as staffName, st.email as staffEmail,
         sv.name as serviceName, sv.price as servicePrice
       FROM ${this.tableName} uh
       LEFT JOIN users u ON uh.user_id = u.id
       LEFT JOIN companies c ON uh.company_id = c.id
       LEFT JOIN staff s ON uh.staff_id = s.id
+      LEFT JOIN users st ON s.user_id = st.id
       LEFT JOIN services sv ON uh.service_id = sv.id
       WHERE uh.appointment_id = ?
     `
@@ -149,14 +151,15 @@ export class UserHistory {
         uh.company_id as companyId, uh.staff_id as staffId, uh.service_id as serviceId,
         uh.products_used as productsUsed, uh.total_cost as totalCost, uh.notes,
         uh.completion_date as completionDate, uh.created_at as createdAt, uh.updated_at as updatedAt,
-        u.name as userName, u.email as userEmail,
+        CONCAT(u.first_name, ' ', u.last_name) as userName, u.email as userEmail,
         c.name as companyName,
-        s.name as staffName, s.email as staffEmail,
+        CONCAT(st.first_name, ' ', st.last_name) as staffName, st.email as staffEmail,
         sv.name as serviceName, sv.price as servicePrice
       FROM ${this.tableName} uh
       LEFT JOIN users u ON uh.user_id = u.id
       LEFT JOIN companies c ON uh.company_id = c.id
       LEFT JOIN staff s ON uh.staff_id = s.id
+      LEFT JOIN users st ON s.user_id = st.id
       LEFT JOIN services sv ON uh.service_id = sv.id
       WHERE uh.company_id = ?
       ORDER BY uh.completion_date DESC
@@ -199,14 +202,15 @@ export class UserHistory {
         uh.company_id as companyId, uh.staff_id as staffId, uh.service_id as serviceId,
         uh.products_used as productsUsed, uh.total_cost as totalCost, uh.notes,
         uh.completion_date as completionDate, uh.created_at as createdAt, uh.updated_at as updatedAt,
-        u.name as userName, u.email as userEmail,
+        CONCAT(u.first_name, ' ', u.last_name) as userName, u.email as userEmail,
         c.name as companyName,
-        s.name as staffName, s.email as staffEmail,
+        CONCAT(st.first_name, ' ', st.last_name) as staffName, st.email as staffEmail,
         sv.name as serviceName, sv.price as servicePrice
       FROM ${this.tableName} uh
       LEFT JOIN users u ON uh.user_id = u.id
       LEFT JOIN companies c ON uh.company_id = c.id
       LEFT JOIN staff s ON uh.staff_id = s.id
+      LEFT JOIN users st ON s.user_id = st.id
       LEFT JOIN services sv ON uh.service_id = sv.id
       WHERE uh.user_id = ?
       ORDER BY uh.completion_date DESC
@@ -249,14 +253,15 @@ export class UserHistory {
         uh.company_id as companyId, uh.staff_id as staffId, uh.service_id as serviceId,
         uh.products_used as productsUsed, uh.total_cost as totalCost, uh.notes,
         uh.completion_date as completionDate, uh.created_at as createdAt, uh.updated_at as updatedAt,
-        u.name as userName, u.email as userEmail,
+        CONCAT(u.first_name, ' ', u.last_name) as userName, u.email as userEmail,
         c.name as companyName,
-        s.name as staffName, s.email as staffEmail,
+        CONCAT(st.first_name, ' ', st.last_name) as staffName, st.email as staffEmail,
         sv.name as serviceName, sv.price as servicePrice
       FROM ${this.tableName} uh
       LEFT JOIN users u ON uh.user_id = u.id
       LEFT JOIN companies c ON uh.company_id = c.id
       LEFT JOIN staff s ON uh.staff_id = s.id
+      LEFT JOIN users st ON s.user_id = st.id
       LEFT JOIN services sv ON uh.service_id = sv.id
       ORDER BY uh.completion_date DESC
       LIMIT ? OFFSET ?

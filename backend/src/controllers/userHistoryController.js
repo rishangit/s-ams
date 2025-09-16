@@ -66,12 +66,21 @@ export const createUserHistory = async (req, res) => {
     const userHistory = await UserHistory.create(historyData)
 
     // Update appointment status to completed
-    await Appointment.updateStatusAndStaff(appointmentId, 'completed', appointment.staffId)
+    let updatedAppointment = null
+    try {
+      updatedAppointment = await Appointment.updateStatusAndStaff(appointmentId, 'completed', appointment.staffId)
+    } catch (statusError) {
+      console.error('Error updating appointment status:', statusError)
+      // Don't fail the entire request if status update fails, but log the error
+    }
 
     res.status(201).json({
       success: true,
       message: 'User history created successfully',
-      data: userHistory
+      data: {
+        userHistory,
+        appointment: updatedAppointment
+      }
     })
   } catch (error) {
     console.error('Error creating user history:', error)

@@ -21,6 +21,7 @@ import { RootState } from '../../../store'
 import {
   getAppointmentsRequest,
   updateAppointmentStatusRequest,
+  updateAppointmentStatusSuccess,
   deleteAppointmentRequest,
   clearAppointmentsMessages
 } from '../../../store/actions/appointmentsActions'
@@ -146,9 +147,17 @@ const Appointments: React.FC = () => {
     setSelectedAppointmentForCompletion(null)
   }
 
-  const handleCompletionSuccess = () => {
-    // No need to refresh - Redux epic and slice automatically update the appointment in state
-    // The appointment will be updated in the grid without a full page refresh
+  const handleCompletionSuccess = (appointment?: any) => {
+    // Update appointment status to completed in state without API call
+    const appointmentToUpdate = appointment || selectedAppointmentForCompletion
+    if (appointmentToUpdate) {
+      const updatedAppointment = {
+        ...appointmentToUpdate,
+        status: 'completed'
+      }
+      dispatch(updateAppointmentStatusSuccess(updatedAppointment))
+    }
+    handleCloseCompletionPopup()
   }
 
   // Helper function to convert status to number

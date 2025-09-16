@@ -33,7 +33,7 @@ export const getStatusDisplayName = (statusId) => {
 
 export const getStatusId = (statusName) => {
   const statusEntry = Object.entries(STATUS_NAMES).find(([id, name]) => name === statusName)
-  return statusEntry ? parseInt(statusEntry[0]) : APPOINTMENT_STATUS.PENDING
+  return statusEntry ? parseInt(statusEntry[0]) : null
 }
 
 export const isValidStatus = (statusId) => {

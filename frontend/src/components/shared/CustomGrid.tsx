@@ -263,7 +263,7 @@ const CustomGrid: React.FC<CustomGridProps> = ({
 
     return (
         <Box className="h-full flex flex-col">
-            {/* CSS for row highlighting */}
+            {/* CSS for row highlighting and grid visibility */}
             <style>
                 {`
                     .row-highlighted {
@@ -272,6 +272,19 @@ const CustomGrid: React.FC<CustomGridProps> = ({
                     }
                     .row-highlighted .ag-cell {
                         background-color: transparent !important;
+                    }
+                    /* Ensure grid is visible in dialogs */
+                    .ag-theme-alpine {
+                        height: 100% !important;
+                        min-height: 200px !important;
+                    }
+                    .ag-root-wrapper {
+                        height: 100% !important;
+                        min-height: 200px !important;
+                    }
+                    .ag-body-viewport {
+                        height: 100% !important;
+                        min-height: 200px !important;
                     }
                     /* Mobile-specific overrides */
                     @media (max-width: 768px) {
@@ -319,12 +332,18 @@ const CustomGrid: React.FC<CustomGridProps> = ({
                 className="flex-1 overflow-hidden rounded-lg shadow-sm"
                 style={{ 
                     backgroundColor: theme.surface,
-                    border: `1px solid ${theme.mode === 'dark' ? '#334155' : '#e5e7eb'}`
+                    border: `1px solid ${theme.mode === 'dark' ? '#334155' : '#e5e7eb'}`,
+                    height: height,
+                    minHeight: typeof height === 'string' && height.includes('%') ? '200px' : undefined
                 }}
             >
                 <Box
                     className="ag-theme-alpine h-full w-full"
-                    style={gridStyle}
+                    style={{
+                        ...gridStyle,
+                        height: '100%',
+                        minHeight: '200px'
+                    }}
                 >
                     {/* @ts-ignore */}
                     <AgGridReact

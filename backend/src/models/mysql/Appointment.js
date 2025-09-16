@@ -366,7 +366,7 @@ export class Appointment {
   static async updateStatusAndStaff(id, status, staffId = null) {
     const statusId = getStatusId(status)
     if (statusId === null) {
-      throw new Error('Invalid status')
+      throw new Error(`Invalid status: ${status}`)
     }
     
     const query = `

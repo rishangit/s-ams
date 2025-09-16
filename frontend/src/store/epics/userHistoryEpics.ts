@@ -1,4 +1,4 @@
-import { of } from 'rxjs'
+import { of, from } from 'rxjs'
 import { switchMap, map, catchError } from 'rxjs/operators'
 import { ofType } from 'redux-observable'
 import { apiService } from '../../services/api'
@@ -34,7 +34,7 @@ export const createUserHistoryEpic = (action$: any) =>
   action$.pipe(
     ofType(createUserHistoryRequest.type),
     switchMap((action: any) => {
-      return apiService.createUserHistory(action.payload).pipe(
+      return from(apiService.createUserHistory(action.payload)).pipe(
         map((response) => {
           if (response.success) {
             return createUserHistorySuccess(response.data)
@@ -55,7 +55,7 @@ export const getUserHistoryEpic = (action$: any) =>
     ofType(getUserHistoryRequest.type),
     switchMap((action: any) => {
       const { id } = action.payload
-      return apiService.getUserHistoryById(id).pipe(
+      return from(apiService.getUserHistoryById(id)).pipe(
         map((response) => {
           if (response.success) {
             return getUserHistorySuccess(response.data)
@@ -76,7 +76,7 @@ export const getUserHistoryByAppointmentIdEpic = (action$: any) =>
     ofType(getUserHistoryByAppointmentIdRequest.type),
     switchMap((action: any) => {
       const { appointmentId } = action.payload
-      return apiService.getUserHistoryByAppointmentId(appointmentId).pipe(
+      return from(apiService.getUserHistoryByAppointmentId(appointmentId)).pipe(
         map((response) => {
           if (response.success) {
             return getUserHistoryByAppointmentIdSuccess(response.data)
@@ -97,7 +97,7 @@ export const getCompanyUserHistoryEpic = (action$: any) =>
     ofType(getCompanyUserHistoryRequest.type),
     switchMap((action: any) => {
       const { limit, offset } = action.payload
-      return apiService.getCompanyUserHistory(limit, offset).pipe(
+      return from(apiService.getCompanyUserHistory(limit, offset)).pipe(
         map((response) => {
           if (response.success) {
             return getCompanyUserHistorySuccess(response.data)
@@ -118,7 +118,7 @@ export const getUserHistoryByUserIdEpic = (action$: any) =>
     ofType(getUserHistoryByUserIdRequest.type),
     switchMap((action: any) => {
       const { userId, limit, offset } = action.payload
-      return apiService.getUserHistoryByUserId(userId, limit, offset).pipe(
+      return from(apiService.getUserHistoryByUserId(userId, limit, offset)).pipe(
         map((response) => {
           if (response.success) {
             return getUserHistoryByUserIdSuccess(response.data)
@@ -139,7 +139,7 @@ export const updateUserHistoryEpic = (action$: any) =>
     ofType(updateUserHistoryRequest.type),
     switchMap((action: any) => {
       const { id, data } = action.payload
-      return apiService.updateUserHistory(id, data).pipe(
+      return from(apiService.updateUserHistory(id, data)).pipe(
         map((response) => {
           if (response.success) {
             return updateUserHistorySuccess(response.data)
@@ -160,7 +160,7 @@ export const deleteUserHistoryEpic = (action$: any) =>
     ofType(deleteUserHistoryRequest.type),
     switchMap((action: any) => {
       const { id } = action.payload
-      return apiService.deleteUserHistory(id).pipe(
+      return from(apiService.deleteUserHistory(id)).pipe(
         map((response) => {
           if (response.success) {
             return deleteUserHistorySuccess({ id })
@@ -180,7 +180,7 @@ export const getCompanyStatsEpic = (action$: any) =>
   action$.pipe(
     ofType(getCompanyStatsRequest.type),
     switchMap(() => {
-      return apiService.getCompanyStats().pipe(
+      return from(apiService.getCompanyStats()).pipe(
         map((response) => {
           if (response.success) {
             return getCompanyStatsSuccess(response.data)
