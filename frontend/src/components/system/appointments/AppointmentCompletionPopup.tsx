@@ -26,9 +26,8 @@ import {
 } from '@mui/icons-material'
 import { RootState } from '../../../store'
 import { getProductsRequest } from '../../../store/actions/productsActions'
-import { createUserHistoryRequest, updateUserHistoryRequest } from '../../../store/actions/userHistoryActions'
-import { Product } from '../../../types/product'
-import { UserHistoryFormData, ProductUsed } from '../../../types/userHistory'
+import { createUserHistoryRequest, updateUserHistoryRequest, clearUserHistoryMessages } from '../../../store/actions/userHistoryActions'
+import { ProductUsed } from '../../../types/userHistory'
 import { FormInput, FormSelect, FormButton, CustomGrid } from '../../shared'
 import { RowAction } from '../../shared/RowActionsMenu'
 
@@ -57,6 +56,7 @@ const productSchema = yup.object({
   }).test('min', 'Please select a product', (value) => {
     return value === '' || value === undefined || value === null || (typeof value === 'number' && value >= 1)
   }),
+  productName: yup.string().optional(),
   quantityUsed: yup.number().min(0.001, 'Quantity must be greater than 0').required('Quantity is required'),
   unitCost: yup.number().min(0, 'Unit cost must be 0 or greater').required('Unit cost is required'),
   notes: yup.string().optional()
@@ -86,7 +86,7 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
   const [isEditMode, setIsEditMode] = useState(false)
 
   // Form for adding/editing single product
-  const { control, handleSubmit, formState: { errors }, setValue, watch, reset } = useForm<ProductUsed>({
+  const { control, handleSubmit, formState: { errors }, setValue, watch, reset } = useForm({
     resolver: yupResolver(productSchema),
     defaultValues: {
       productId: '' as any, // Use empty string instead of undefined to keep it controlled
@@ -98,7 +98,7 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
   })
 
   // Form for completion notes
-  const { control: notesControl, handleSubmit: handleNotesSubmit, setValue: setNotesValue, watch: watchNotes } = useForm<{ notes: string }>({
+  const { control: notesControl, handleSubmit: handleNotesSubmit, setValue: setNotesValue, watch: watchNotes } = useForm({
     resolver: yupResolver(completionSchema),
     defaultValues: {
       notes: ''
@@ -117,46 +117,33 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
 
   // Initialize data based on mode
   useEffect(() => {
-    console.log('=== AppointmentCompletionPopup useEffect ===')
-    console.log('isOpen:', isOpen)
-    console.log('existingHistory:', existingHistory)
-    console.log('mode:', mode)
-    
     if (isOpen && existingHistory && (mode === 'view' || mode === 'edit')) {
-      console.log('Existing history data:', existingHistory)
-      console.log('ProductsUsed type:', typeof existingHistory.productsUsed)
-      console.log('ProductsUsed value:', existingHistory.productsUsed)
-      
       // Parse productsUsed if it's a string (from database JSON)
       let productsData = []
       if (existingHistory.productsUsed) {
         if (typeof existingHistory.productsUsed === 'string') {
           try {
             productsData = JSON.parse(existingHistory.productsUsed)
-            console.log('Parsed products data:', productsData)
           } catch (error) {
             console.error('Error parsing productsUsed JSON:', error)
             productsData = []
           }
         } else if (Array.isArray(existingHistory.productsUsed)) {
           productsData = existingHistory.productsUsed
-          console.log('Products data (array):', productsData)
         }
       }
-      
+
       // Ensure each product has the required fields and calculate total
-      productsData = productsData.map(product => ({
+      productsData = productsData.map((product: any) => ({
         ...product,
         total: (product.quantityUsed || 0) * (product.unitCost || 0)
       }))
-      
-      console.log('Final products data for grid:', productsData)
-      
+
       // Populate with existing history data
       setProductsUsed(productsData)
       setNotesValue('notes', existingHistory.notes || '')
       setIsEditMode(mode === 'edit')
-    } else if (isOpen && mode === 'create') {
+    } else if (isOpen && mode === 'create' && !existingHistory) {
       // Reset for new completion
       setProductsUsed([])
       setNotesValue('notes', '')
@@ -165,9 +152,6 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
   }, [isOpen, existingHistory, mode])
 
   // Debug productsUsed state changes
-  useEffect(() => {
-    console.log('ProductsUsed state changed:', productsUsed)
-  }, [productsUsed])
 
   // Calculate total cost
   const totalCost = productsUsed.reduce((sum, product) => {
@@ -181,7 +165,7 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
 
   // Handle product selection to auto-populate unit cost
   useEffect(() => {
-    if (watchedProduct.productId && watchedProduct.productId !== '') {
+    if (watchedProduct.productId && watchedProduct.productId !== '' && watchedProduct.productId !== 0) {
       const selectedProduct = availableProducts.find(p => p.id === watchedProduct.productId)
       if (selectedProduct) {
         setValue('unitCost', selectedProduct.unitPrice)
@@ -190,12 +174,31 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
     }
   }, [watchedProduct.productId, availableProducts, setValue])
 
+  // Clear success state when popup opens
+  useEffect(() => {
+    if (isOpen && success) {
+      // Clear success state to prevent handleSuccess from being called
+      dispatch(clearUserHistoryMessages())
+    }
+  }, [isOpen, success, dispatch])
+
   // Handle success
   useEffect(() => {
     if (success && createLoading === false && updateLoading === false) {
-      handleSuccess()
+      // Only call handleSuccess if we're in create mode, not in view/edit mode
+      if (mode === 'create') {
+        handleSuccess()
+      } else if (mode === 'view' && isEditMode) {
+        // Clear the success state
+        dispatch(clearUserHistoryMessages())
+        // Close the popup directly without calling onSuccess to avoid parent component re-renders
+        handleClose()
+      } else {
+        // Just clear the success state without closing the popup
+        dispatch(clearUserHistoryMessages())
+      }
     }
-  }, [success, createLoading, updateLoading])
+  }, [success, createLoading, updateLoading, mode, existingHistory, isEditMode, dispatch, appointment, onSuccess])
 
   const handleSuccess = () => {
     setProductsUsed([])
@@ -208,7 +211,7 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
       notes: ''
     })
     setNotesValue('notes', '')
-    // Pass the appointment data to the parent component
+    // Pass the appointment data to the parent component with grid refresh (create mode)
     onSuccess(appointment)
   }
 
@@ -227,9 +230,9 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
   }
 
   // Add or update product
-  const onProductSubmit = (data: ProductUsed) => {
+  const onProductSubmit = (data: any) => {
     // Convert empty string to undefined for productId
-    const productId = data.productId === '' ? undefined : data.productId
+    const productId = data.productId === '' || data.productId === 0 || data.productId === '0' ? undefined : data.productId
     
     if (!productId) {
       return // Don't submit if no product selected
@@ -264,7 +267,7 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
   // Handle edit
   const handleEdit = (rowData: ProductUsed, index: number) => {
     setEditingIndex(index)
-    setValue('productId', rowData.productId || '') // Ensure controlled value
+    setValue('productId', rowData.productId || '' as any) // Ensure controlled value
     setValue('productName', rowData.productName)
     setValue('quantityUsed', rowData.quantityUsed)
     setValue('unitCost', rowData.unitCost)
@@ -278,7 +281,7 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
   }
 
   // Handle completion
-  const onCompletionSubmit = (data: { notes: string }) => {
+  const onCompletionSubmit = (data: any) => {
     const historyData = {
       appointmentId: appointment.id,
       productsUsed: productsUsed, // Can be empty array
@@ -286,22 +289,14 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
       notes: data.notes || '' // Can be empty string
     }
 
-    console.log('=== onCompletionSubmit Debug ===')
-    console.log('mode:', mode)
-    console.log('isEditMode:', isEditMode)
-    console.log('existingHistory:', existingHistory)
-    console.log('historyData:', historyData)
-
     if ((mode === 'edit' || isEditMode) && existingHistory) {
       // Update existing history
-      console.log('Dispatching updateUserHistoryRequest with ID:', existingHistory.id)
-      dispatch(updateUserHistoryRequest({ 
-        id: existingHistory.id, 
-        data: historyData 
+      dispatch(updateUserHistoryRequest({
+        id: existingHistory.id,
+        data: historyData
       }))
     } else {
       // Create new history
-      console.log('Dispatching createUserHistoryRequest')
       dispatch(createUserHistoryRequest(historyData))
     }
   }
@@ -491,7 +486,6 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
                     value: product.id,
                     label: `${product.name} - $${product.unitPrice.toFixed(2)}/${product.unit}`
                   }))}
-                  error={errors.productId}
                   required
                 />
               </Box>
