@@ -472,6 +472,59 @@ class ApiService {
   async getProductCategories(): Promise<ApiResponse<any>> {
     return this.request<any>('/products/categories')
   }
+
+  // User History API methods
+  async createUserHistory(data: any): Promise<ApiResponse<any>> {
+    return this.request<any>('/user-history', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+  }
+
+  async getUserHistoryById(id: number): Promise<ApiResponse<any>> {
+    return this.request<any>(`/user-history/${id}`)
+  }
+
+  async getUserHistoryByAppointmentId(appointmentId: number): Promise<ApiResponse<any>> {
+    return this.request<any>(`/user-history/appointment/${appointmentId}`)
+  }
+
+  async getCompanyUserHistory(limit?: number, offset?: number): Promise<ApiResponse<any>> {
+    const params = new URLSearchParams()
+    if (limit) params.append('limit', limit.toString())
+    if (offset) params.append('offset', offset.toString())
+    
+    const queryString = params.toString()
+    const url = queryString ? `/user-history/company?${queryString}` : '/user-history/company'
+    return this.request<any>(url)
+  }
+
+  async getUserHistoryByUserId(userId: number, limit?: number, offset?: number): Promise<ApiResponse<any>> {
+    const params = new URLSearchParams()
+    if (limit) params.append('limit', limit.toString())
+    if (offset) params.append('offset', offset.toString())
+    
+    const queryString = params.toString()
+    const url = queryString ? `/user-history/user/${userId}?${queryString}` : `/user-history/user/${userId}`
+    return this.request<any>(url)
+  }
+
+  async updateUserHistory(id: number, data: any): Promise<ApiResponse<any>> {
+    return this.request<any>(`/user-history/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    })
+  }
+
+  async deleteUserHistory(id: number): Promise<ApiResponse<any>> {
+    return this.request<any>(`/user-history/${id}`, {
+      method: 'DELETE'
+    })
+  }
+
+  async getCompanyStats(): Promise<ApiResponse<any>> {
+    return this.request<any>('/user-history/company/stats')
+  }
 }
 
 // Export singleton instance

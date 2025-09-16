@@ -14,6 +14,7 @@ import appointmentRoutes from './routes/appointment.js'
 import staffRoutes from './routes/staff.js'
 import companyUsersRoutes from './routes/companyUsers.js'
 import productRoutes from './routes/product.js'
+import userHistoryRoutes from './routes/userHistory.js'
 
 const app = express()
 
@@ -119,6 +120,7 @@ app.use('/api/appointments', appointmentRoutes)
 app.use('/api/staff', staffRoutes)
 app.use('/api/company-users', companyUsersRoutes)
 app.use('/api/products', productRoutes)
+app.use('/api/user-history', userHistoryRoutes)
 
 // 404 handler
 app.use('*', (req, res) => {

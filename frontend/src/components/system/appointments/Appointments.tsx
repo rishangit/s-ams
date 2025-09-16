@@ -28,6 +28,7 @@ import { CustomGrid, RowAction } from '../../../components/shared'
 import { ColDef, ICellRendererParams } from 'ag-grid-community'
 import AppointmentForm from './AppointmentForm'
 import StaffAssignmentPopup from './StaffAssignmentPopup'
+import AppointmentCompletionPopup from './AppointmentCompletionPopup'
 import { 
   APPOINTMENT_STATUS, 
   getStatusDisplayName, 
@@ -53,6 +54,8 @@ const Appointments: React.FC = () => {
   const [editingAppointmentId, setEditingAppointmentId] = useState<number | null>(null)
   const [isStaffAssignmentOpen, setIsStaffAssignmentOpen] = useState(false)
   const [selectedAppointmentForStaff, setSelectedAppointmentForStaff] = useState<any>(null)
+  const [isCompletionPopupOpen, setIsCompletionPopupOpen] = useState(false)
+  const [selectedAppointmentForCompletion, setSelectedAppointmentForCompletion] = useState<any>(null)
 
   // Load appointments when component mounts
   useEffect(() => {
@@ -73,7 +76,7 @@ const Appointments: React.FC = () => {
   }, [error, success, dispatch])
 
   const handleStatusChange = (appointmentId: number, newStatus: 'pending' | 'confirmed' | 'completed' | 'cancelled', appointmentData?: any) => {
-    // For company owners (role 1) confirming appointments, show staff assignment popup
+    // For company owners confirming appointments, show staff assignment popup
     if (user && isOwnerRole(user.role as any) && newStatus === 'confirmed') {
       // Use the appointment data passed from the row action, or try to find it in state
       const appointment = appointmentData || filteredAppointments?.find(apt => apt.id === appointmentId)
@@ -81,6 +84,18 @@ const Appointments: React.FC = () => {
       if (appointment) {
         setSelectedAppointmentForStaff(appointment)
         setIsStaffAssignmentOpen(true)
+        return
+      }
+    }
+    
+    // For company owners completing appointments, show completion popup
+    if (user && isOwnerRole(user.role as any) && newStatus === 'completed') {
+      // Use the appointment data passed from the row action, or try to find it in state
+      const appointment = appointmentData || filteredAppointments?.find(apt => apt.id === appointmentId)
+      
+      if (appointment) {
+        setSelectedAppointmentForCompletion(appointment)
+        setIsCompletionPopupOpen(true)
         return
       }
     }
@@ -122,6 +137,16 @@ const Appointments: React.FC = () => {
   }
 
   const handleStaffAssignmentSuccess = () => {
+    // No need to refresh - Redux epic and slice automatically update the appointment in state
+    // The appointment will be updated in the grid without a full page refresh
+  }
+
+  const handleCloseCompletionPopup = () => {
+    setIsCompletionPopupOpen(false)
+    setSelectedAppointmentForCompletion(null)
+  }
+
+  const handleCompletionSuccess = () => {
     // No need to refresh - Redux epic and slice automatically update the appointment in state
     // The appointment will be updated in the grid without a full page refresh
   }
@@ -577,6 +602,16 @@ const Appointments: React.FC = () => {
           onClose={handleCloseStaffAssignment}
           appointment={selectedAppointmentForStaff}
           onSuccess={handleStaffAssignmentSuccess}
+        />
+      )}
+
+      {/* Appointment Completion Popup */}
+      {selectedAppointmentForCompletion && (
+        <AppointmentCompletionPopup
+          isOpen={isCompletionPopupOpen}
+          onClose={handleCloseCompletionPopup}
+          appointment={selectedAppointmentForCompletion}
+          onSuccess={handleCompletionSuccess}
         />
       )}
     </Box>
