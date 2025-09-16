@@ -14,7 +14,7 @@ const CompanyRouter: React.FC = () => {
   useEffect(() => {
     // If no ID is provided, redirect based on user role
     if (!id) {
-      if (user && isAdminOnlyRole(parseInt(user.role) as any)) {
+      if (user && isAdminOnlyRole(parseInt(String(user.role)) as any)) {
         // Admin users should see companies list
         navigate('/system/companies', { replace: true })
       } else {
@@ -33,7 +33,7 @@ const CompanyRouter: React.FC = () => {
     const numericId = parseInt(id)
     if (isNaN(numericId)) {
       // Invalid ID, redirect to companies list for admin, or new for regular users and owners
-      if (user && isAdminOnlyRole(parseInt(user.role) as any)) {
+      if (user && isAdminOnlyRole(parseInt(String(user.role)) as any)) {
         navigate('/system/companies', { replace: true })
       } else {
         navigate('/system/companies/new', { replace: true })

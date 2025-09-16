@@ -47,7 +47,7 @@ export const getStaffEpic = (action$: any) =>
 export const getStaffByCompanyIdEpic = (action$: any) =>
   action$.pipe(
     ofType(getStaffByCompanyIdRequest.type),
-    switchMap((action) => {
+    switchMap((action: any) => {
       console.log('getStaffByCompanyIdEpic triggered with companyId:', action.payload)
       return from(apiService.getStaffByCompanyId(action.payload)).pipe(
         map((response) => {

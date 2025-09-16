@@ -177,7 +177,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
   }
 
   // Access control check
-  if (!user || parseInt(user.role) !== 1) {
+  if (!user || parseInt(String(user.role)) !== 1) {
     return (
       <Box className="flex justify-center items-center h-64">
         <div className="text-lg font-semibold" style={{ color: uiTheme.text }}>

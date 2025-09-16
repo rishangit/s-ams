@@ -126,7 +126,7 @@ const StaffForm: React.FC<StaffFormProps> = ({ staffId, onClose, onSuccess }) =>
   useEffect(() => {
     if (!isEditing) {
       // Load all users for company owners (role 1) or available users for others
-      if (user && parseInt(user.role) === 1) {
+      if (user && parseInt(String(user.role)) === 1) {
         dispatch(getAllUsersRequest())
       } else {
         dispatch(getAvailableUsersRequest())
@@ -200,7 +200,7 @@ const StaffForm: React.FC<StaffFormProps> = ({ staffId, onClose, onSuccess }) =>
   }
 
   // Prepare user options for select - use all users for company owners, available users for others
-  const userOptions = (user && parseInt(user.role) === 1 ? users : availableUsers)
+  const userOptions = (user && parseInt(String(user.role)) === 1 ? users : availableUsers)
     ?.filter(userItem => userItem?.id)
     .map(userItem => ({
       value: userItem.id || '',
@@ -232,7 +232,7 @@ const StaffForm: React.FC<StaffFormProps> = ({ staffId, onClose, onSuccess }) =>
       )}
 
       {/* Help text for company owners */}
-      {user && parseInt(user.role) === 1 && !isEditing && (
+      {user && parseInt(String(user.role)) === 1 && !isEditing && (
         <Alert severity="info" className="mb-4">
           As a company owner, you can add any user as staff to your company. Select the user you want to add as a staff member.
         </Alert>

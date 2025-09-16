@@ -71,6 +71,15 @@ const FormMultiSelect: React.FC<FormMultiSelectProps> = ({
             input={<OutlinedInput label={label} />}
             renderValue={(selected) => {
               const selectedArray = Array.isArray(selected) ? selected : []
+              
+              if (selectedArray.length === 0) {
+                return (
+                  <Box sx={{ color: theme.textSecondary }}>
+                    {placeholder}
+                  </Box>
+                )
+              }
+              
               return (
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                   {selectedArray.map((value) => {

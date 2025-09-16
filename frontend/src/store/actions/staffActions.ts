@@ -1,6 +1,9 @@
 import { createAction } from '@reduxjs/toolkit'
 import { Staff, CreateStaffRequest, UpdateStaffRequest } from '../../services/api'
 
+// Re-export types for use in reducers
+export type { Staff }
+
 // Get staff
 export const getStaffRequest = createAction('staff/getStaffRequest')
 export const getStaffSuccess = createAction<Staff[]>('staff/getStaffSuccess')

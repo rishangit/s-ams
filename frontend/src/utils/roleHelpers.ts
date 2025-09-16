@@ -1,5 +1,5 @@
 // Helper functions to replace parseInt(user.role) calls throughout the application
-import { parseUserRole, hasRole, hasAnyRole, isRoleInList } from './roleUtils'
+import { parseUserRole, hasRole, hasAnyRole } from './roleUtils'
 import { ROLES } from '../constants/roles'
 
 // Re-export isRoleInList for convenience

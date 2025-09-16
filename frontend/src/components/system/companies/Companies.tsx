@@ -12,15 +12,13 @@ import {
   Visibility as VisibilityIcon
 } from '@mui/icons-material'
 import { useSelector, useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
 import { RootState } from '../../../store'
 import {
   getAllCompaniesRequest,
-  updateCompanyStatusRequest,
   clearCompanyError,
   clearCompanySuccess
 } from '../../../store/actions/companyActions'
-import { CompanyStatus, getCompanyStatusDisplayName, getCompanyStatusColor } from '../../../constants/company'
+import { getCompanyStatusDisplayName, getCompanyStatusColor } from '../../../constants/company'
 import { isAdminOnlyRole } from '../../../constants/roles'
 import { CustomGrid, RowAction } from '../../../components/shared'
 import { ColDef, ICellRendererParams } from 'ag-grid-community'
@@ -29,14 +27,13 @@ import { getProfileImageUrl } from '../../../utils/fileUtils'
 
 const Companies: React.FC = () => {
   const dispatch = useDispatch()
-  const navigate = useNavigate()
   const { user } = useSelector((state: RootState) => state.auth)
   const { companies, loading, error, success } = useSelector((state: RootState) => state.company)
   const uiTheme = useSelector((state: RootState) => state.ui.theme)
 
   // Load companies when component mounts
   useEffect(() => {
-    if (user && isAdminOnlyRole(parseInt(user.role) as any)) {
+    if (user && isAdminOnlyRole(parseInt(String(user.role)) as any)) {
       dispatch(getAllCompaniesRequest())
     }
   }, [user?.role, dispatch])
@@ -59,12 +56,6 @@ const Companies: React.FC = () => {
       return () => clearTimeout(timer)
     }
   }, [success, dispatch])
-
-  const handleStatusChange = (companyId: number, newStatus: CompanyStatus) => {
-    dispatch(updateCompanyStatusRequest({ id: companyId, status: newStatus }))
-  }
-
-
 
   // Status Cell Renderer Component
   const StatusCellRenderer = (props: ICellRendererParams) => {
@@ -276,7 +267,7 @@ const Companies: React.FC = () => {
     return actions
   }, [])
 
-  if (!user || !isAdminOnlyRole(parseInt(user.role) as any)) {
+  if (!user || !isAdminOnlyRole(parseInt(String(user.role)) as any)) {
     return (
       <Box className="flex justify-center items-center h-64">
         <div className="text-lg font-semibold" style={{ color: uiTheme.text }}>

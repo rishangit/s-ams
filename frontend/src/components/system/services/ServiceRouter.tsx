@@ -12,7 +12,7 @@ const ServiceRouter: React.FC = () => {
 
   useEffect(() => {
     // Check if user has access to services (role 1 - owner)
-    if (!user || parseInt(user.role) !== 1) {
+    if (!user || parseInt(String(user.role)) !== 1) {
       navigate('/system/dashboard', { replace: true })
       return
     }
@@ -29,7 +29,7 @@ const ServiceRouter: React.FC = () => {
   }, [id, navigate, user])
 
   // Check if user has access to services (role 1 - owner)
-  if (!user || parseInt(user.role) !== 1) {
+  if (!user || parseInt(String(user.role)) !== 1) {
     return null // Will be redirected by useEffect
   }
 

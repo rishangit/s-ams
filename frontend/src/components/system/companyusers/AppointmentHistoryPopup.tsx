@@ -21,14 +21,11 @@ import {
   Close as CloseIcon,
   CalendarToday as CalendarIcon,
   AccessTime as TimeIcon,
-  Person as PersonIcon,
   Business as BusinessIcon,
   AttachMoney as MoneyIcon,
   Notes as NotesIcon,
   Edit as EditIcon,
-  Save as SaveIcon,
   Cancel as CancelIcon,
-  Add as AddIcon,
   Delete as DeleteIcon
 } from '@mui/icons-material'
 import { useSelector, useDispatch } from 'react-redux'
@@ -40,7 +37,6 @@ import { getStatusDisplayName, getStatusColor } from '../../../constants/appoint
 import { getProductsRequest } from '../../../store/actions/productsActions'
 import { updateUserHistoryRequest } from '../../../store/actions/userHistoryActions'
 import { FormInput, FormSelect, FormButton, CustomGrid } from '../../shared'
-import { RowAction } from '../../shared/RowActionsMenu'
 
 interface UserAppointment {
   id: number
@@ -127,7 +123,7 @@ const AppointmentHistoryPopup: React.FC<AppointmentHistoryPopupProps> = ({
   const dispatch = useDispatch()
   const { theme } = useSelector((state: RootState) => state.ui)
   const { products, loading: productsLoading } = useSelector((state: RootState) => state.products)
-  const { updateLoading, success, error } = useSelector((state: RootState) => state.userHistory)
+  const { updateLoading, success } = useSelector((state: RootState) => state.userHistory)
   
   const [userHistory, setUserHistory] = useState<UserHistory | null>(null)
   const [loading, setLoading] = useState(false)
@@ -141,7 +137,6 @@ const AppointmentHistoryPopup: React.FC<AppointmentHistoryPopupProps> = ({
     resolver: yupResolver(productSchema),
     defaultValues: {
       productId: '',
-      productName: '',
       quantityUsed: 1,
       unitCost: 0,
       notes: ''
@@ -236,6 +231,7 @@ const AppointmentHistoryPopup: React.FC<AppointmentHistoryPopupProps> = ({
 
   // Product management functions
   const onProductSubmit = (data: any) => {
+    if (!products) return
     const selectedProduct = products.find(p => p.id === data.productId)
     if (!selectedProduct) return
 
@@ -536,10 +532,10 @@ const AppointmentHistoryPopup: React.FC<AppointmentHistoryPopupProps> = ({
                             control={productForm.control}
                             name="productId"
                             label="Product"
-                            options={products.map(product => ({
+                            options={products?.map(product => ({
                               value: product.id,
                               label: product.name
-                            }))}
+                            })) || []}
                             disabled={productsLoading}
                           />
                         </Box>
@@ -548,7 +544,7 @@ const AppointmentHistoryPopup: React.FC<AppointmentHistoryPopupProps> = ({
                             control={productForm.control}
                             name="quantityUsed"
                             label="Quantity"
-                            type="number"
+                            type="text"
                           />
                         </Box>
                         <Box width={120}>
@@ -556,8 +552,7 @@ const AppointmentHistoryPopup: React.FC<AppointmentHistoryPopupProps> = ({
                             control={productForm.control}
                             name="unitCost"
                             label="Unit Cost"
-                            type="number"
-                            step="0.01"
+                            type="price"
                           />
                         </Box>
                       </Box>
@@ -574,8 +569,6 @@ const AppointmentHistoryPopup: React.FC<AppointmentHistoryPopupProps> = ({
                         <FormButton
                           type="submit"
                           variant="contained"
-                          size="small"
-                          loading={false}
                         >
                           {editingIndex !== null ? 'Update Product' : 'Add Product'}
                         </FormButton>
@@ -647,10 +640,8 @@ const AppointmentHistoryPopup: React.FC<AppointmentHistoryPopupProps> = ({
               Cancel
             </Button>
             <FormButton
-              startIcon={<SaveIcon />}
               onClick={handleSaveChanges}
               variant="contained"
-              loading={updateLoading}
             >
               Save Changes
             </FormButton>

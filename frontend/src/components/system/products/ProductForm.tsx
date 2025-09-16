@@ -1,5 +1,5 @@
 import React, { useState, useEffect, memo } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, FieldError } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import {
@@ -13,8 +13,6 @@ import {
   DialogContent
 } from '@mui/material'
 import {
-  Save as SaveIcon,
-  Cancel as CancelIcon,
   Inventory as ProductIcon
 } from '@mui/icons-material'
 import { useSelector, useDispatch } from 'react-redux'
@@ -27,7 +25,6 @@ import {
   updateProductRequest,
   getProductByIdRequest,
   clearProductsMessages,
-  setFormProduct,
   clearFormProduct
 } from '../../../store/actions/productsActions'
 import { ProductFormData, PRODUCT_CATEGORIES, PRODUCT_UNITS, PRODUCT_STATUS } from '../../../types/product'
@@ -114,19 +111,21 @@ const ProductForm: React.FC<ProductFormProps> = ({
   const isEditProduct = productId && productId !== 0
   
   const uiTheme = useSelector((state: RootState) => state.ui.theme)
-  const { user } = useSelector((state: RootState) => state.auth)
   const { 
     currentProduct,
-    formProduct,
     error, 
     success, 
     createLoading, 
-    updateLoading,
-    formLoading
+    updateLoading
   } = useSelector((state: RootState) => state.products)
 
   const [isEditMode, setIsEditMode] = useState(false)
   const [hasHandledSuccess, setHasHandledSuccess] = useState(false)
+
+  // Helper function to convert string error to FieldError
+  const createFieldError = (message: string | undefined): FieldError | undefined => {
+    return message ? { message, type: 'validation' } : undefined
+  }
 
   const {
     control,
@@ -178,23 +177,23 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
   // Load product data for editing
   useEffect(() => {
-    if (isEditMode && formProduct) {
+    if (isEditMode && currentProduct) {
       reset({
-        name: formProduct.name,
-        description: formProduct.description || '',
-        category: formProduct.category || '',
-        unit: formProduct.unit || '',
-        unitPrice: formProduct.unitPrice,
-        quantity: formProduct.quantity,
-        minQuantity: formProduct.minQuantity,
-        maxQuantity: formProduct.maxQuantity || undefined,
-        status: formProduct.status,
-        supplier: formProduct.supplier || '',
-        sku: formProduct.sku || '',
-        barcode: formProduct.barcode || ''
+        name: currentProduct.name,
+        description: currentProduct.description || '',
+        category: currentProduct.category || '',
+        unit: currentProduct.unit || '',
+        unitPrice: currentProduct.unitPrice,
+        quantity: currentProduct.quantity,
+        minQuantity: currentProduct.minQuantity,
+        maxQuantity: currentProduct.maxQuantity || undefined,
+        status: currentProduct.status,
+        supplier: currentProduct.supplier || '',
+        sku: currentProduct.sku || '',
+        barcode: currentProduct.barcode || ''
       })
     }
-  }, [isEditMode, formProduct, reset])
+  }, [isEditMode, currentProduct, reset])
 
   // Handle success
   useEffect(() => {
@@ -225,7 +224,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
   const onSubmit = (data: ProductFormData) => {
     if (isEditMode && productId) {
-      dispatch(updateProductRequest(productId, data))
+      dispatch(updateProductRequest({ id: productId, productData: data }))
     } else {
       dispatch(createProductRequest(data))
     }
@@ -286,7 +285,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
               control={control}
               label="Product Name"
               placeholder="Enter product name"
-              error={errors.name?.message}
+              error={createFieldError(errors.name?.message)}
               required
             />
           </Grid>
@@ -297,9 +296,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
               name="category"
               control={control}
               label="Category"
-              placeholder="Select category"
               options={categoryOptions}
-              error={errors.category?.message}
+              error={createFieldError(errors.category?.message)}
             />
           </Grid>
 
@@ -312,7 +310,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
               placeholder="Enter product description"
               multiline
               rows={3}
-              error={errors.description?.message}
+              error={createFieldError(errors.description?.message)}
             />
           </Grid>
 
@@ -322,9 +320,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
               name="unit"
               control={control}
               label="Unit"
-              placeholder="Select unit"
               options={unitOptions}
-              error={errors.unit?.message}
+              error={createFieldError(errors.unit?.message)}
             />
           </Grid>
 
@@ -335,9 +332,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
               control={control}
               label="Unit Price"
               placeholder="0.00"
-              type="number"
-              step="0.01"
-              error={errors.unitPrice?.message}
+              type="price"
+              error={createFieldError(errors.unitPrice?.message)}
               required
             />
           </Grid>
@@ -348,9 +344,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
               name="status"
               control={control}
               label="Status"
-              placeholder="Select status"
               options={statusOptions}
-              error={errors.status?.message}
+              error={createFieldError(errors.status?.message)}
               required
             />
           </Grid>
@@ -362,8 +357,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
               control={control}
               label="Current Quantity"
               placeholder="0"
-              type="number"
-              error={errors.quantity?.message}
+              type="price"
+              error={createFieldError(errors.quantity?.message)}
               required
             />
           </Grid>
@@ -375,8 +370,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
               control={control}
               label="Minimum Quantity"
               placeholder="0"
-              type="number"
-              error={errors.minQuantity?.message}
+              type="price"
+              error={createFieldError(errors.minQuantity?.message)}
               required
             />
           </Grid>
@@ -388,8 +383,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
               control={control}
               label="Maximum Quantity"
               placeholder="Optional"
-              type="number"
-              error={errors.maxQuantity?.message}
+              type="price"
+              error={createFieldError(errors.maxQuantity?.message)}
             />
           </Grid>
 
@@ -400,7 +395,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
               control={control}
               label="Supplier"
               placeholder="Enter supplier name"
-              error={errors.supplier?.message}
+              error={createFieldError(errors.supplier?.message)}
             />
           </Grid>
 
@@ -411,7 +406,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
               control={control}
               label="SKU"
               placeholder="Enter SKU"
-              error={errors.sku?.message}
+              error={createFieldError(errors.sku?.message)}
             />
           </Grid>
 
@@ -422,7 +417,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
               control={control}
               label="Barcode"
               placeholder="Enter barcode"
-              error={errors.barcode?.message}
+              error={createFieldError(errors.barcode?.message)}
             />
           </Grid>
 
@@ -433,7 +428,6 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 type="button"
                 variant="outlined"
                 onClick={handleClose}
-                startIcon={<CancelIcon />}
                 disabled={createLoading || updateLoading}
               >
                 Cancel
@@ -441,8 +435,6 @@ const ProductForm: React.FC<ProductFormProps> = ({
               <FormButton
                 type="submit"
                 variant="contained"
-                startIcon={<SaveIcon />}
-                loading={createLoading || updateLoading}
                 disabled={!isDirty && isEditMode}
               >
                 {isEditMode ? 'Update Product' : 'Create Product'}
@@ -475,7 +467,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
           </Box>
         </DialogTitle>
         <DialogContent>
-          {formLoading ? (
+          {createLoading || updateLoading ? (
             <Box className="flex justify-center items-center py-8">
               <CircularProgress style={{ color: uiTheme.primary }} />
             </Box>
@@ -508,7 +500,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
         </Typography>
       </Box>
 
-      {formLoading ? (
+      {createLoading || updateLoading ? (
         <Box className="flex justify-center items-center py-8">
           <CircularProgress style={{ color: uiTheme.primary }} />
         </Box>

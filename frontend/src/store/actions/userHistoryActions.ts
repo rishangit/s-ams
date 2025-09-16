@@ -1,5 +1,5 @@
 import { createAction } from '@reduxjs/toolkit'
-import { UserHistoryFormData, UserHistoryFilters, CompanyStats } from '../../types/userHistory'
+import { UserHistoryFormData, CompanyStats } from '../../types/userHistory'
 
 // User History interface (re-exported for consistency)
 export interface UserHistory {

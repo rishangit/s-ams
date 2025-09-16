@@ -7,15 +7,13 @@ import ProductForm from './ProductForm'
 import {
   getProductsRequest,
   deleteProductRequest,
-  updateProductStatusRequest,
-  updateProductQuantityRequest,
   clearProductsMessages,
   getProductCategoriesRequest
 } from '../../../store/actions/productsActions'
 import { useTheme } from '../../../hooks/useTheme'
 import { Edit, Delete, Add, Inventory as ProductIcon, Warning as WarningIcon } from '@mui/icons-material'
 import { Button, Box, Dialog, DialogTitle, DialogContent, Typography, Chip, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material'
-import { Product, PRODUCT_STATUS } from '../../../types/product'
+import { Product } from '../../../types/product'
 
 const Products: React.FC = () => {
   const dispatch = useDispatch()
@@ -69,13 +67,6 @@ const Products: React.FC = () => {
     setEditingProductId(null)
   }
 
-  const handleStatusChange = (productId: number, newStatus: 'active' | 'inactive' | 'discontinued') => {
-    dispatch(updateProductStatusRequest(productId, newStatus))
-  }
-
-  const handleQuantityUpdate = (productId: number, newQuantity: number) => {
-    dispatch(updateProductQuantityRequest(productId, newQuantity))
-  }
 
   // Filter products based on current filters
   const filteredProducts = useMemo(() => {

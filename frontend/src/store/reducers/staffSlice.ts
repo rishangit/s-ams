@@ -144,7 +144,7 @@ const staffSlice = createSlice({
         state.updateLoading = false
         state.success = 'Staff member updated successfully'
         if (state.staff) {
-          const index = state.staff.findIndex(staff => staff.id === action.payload.id)
+          const index = state.staff.findIndex((staff: Staff) => staff.id === action.payload.id)
           if (index !== -1) {
             state.staff[index] = action.payload
           }
@@ -171,7 +171,7 @@ const staffSlice = createSlice({
         state.deleteLoading = false
         state.success = 'Staff member removed successfully'
         if (state.staff) {
-          state.staff = state.staff.filter(staff => staff.id !== action.payload)
+          state.staff = state.staff.filter((staff: Staff) => staff.id !== action.payload)
         }
         if (state.currentStaff && state.currentStaff.id === action.payload) {
           state.currentStaff = null

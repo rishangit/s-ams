@@ -68,12 +68,12 @@ export const getStatusTextColor = (statusId: number): string => {
 }
 
 export const getStatusId = (statusName: string): number => {
-  const statusEntry = Object.entries(STATUS_NAMES).find(([id, name]) => name === statusName)
+  const statusEntry = Object.entries(STATUS_NAMES).find(([, name]) => name === statusName)
   return statusEntry ? parseInt(statusEntry[0]) : APPOINTMENT_STATUS.PENDING
 }
 
 export const isValidStatus = (statusId: number): boolean => {
-  return Object.values(APPOINTMENT_STATUS).includes(statusId)
+  return Object.values(APPOINTMENT_STATUS).includes(statusId as any)
 }
 
 export const isValidStatusName = (statusName: string): boolean => {
@@ -106,7 +106,8 @@ export const ALLOWED_STATUS_TRANSITIONS = {
 } as const
 
 export const canTransitionTo = (fromStatus: number, toStatus: number): boolean => {
-  return ALLOWED_STATUS_TRANSITIONS[fromStatus as keyof typeof ALLOWED_STATUS_TRANSITIONS]?.includes(toStatus) || false
+  const allowedTransitions = ALLOWED_STATUS_TRANSITIONS[fromStatus as keyof typeof ALLOWED_STATUS_TRANSITIONS]
+  return allowedTransitions ? (allowedTransitions as readonly number[]).includes(toStatus) : false
 }
 
 // Get next status for dynamic menu actions

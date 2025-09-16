@@ -84,27 +84,8 @@ export const getProfileEpic = (action$: any) =>
         switchMap((response) => {
           if (response.success && response.data) {
             console.log('Profile request successful')
-            // After successful profile fetch, also fetch available roles
-            return from(apiService.getAvailableRoles()).pipe(
-              map((rolesResponse) => {
-                if (rolesResponse.success && rolesResponse.data) {
-                  // Return both profile and roles data
-                  return getProfileSuccess({
-                    user: response.data.user,
-                    availableRoles: rolesResponse.data.availableRoles,
-                    currentRole: rolesResponse.data.currentRole
-                  })
-                } else {
-                  // If roles fetch fails, still return profile success
-                  return getProfileSuccess(response.data)
-                }
-              }),
-              catchError((rolesError) => {
-                console.log('Available roles fetch failed:', rolesError.message)
-                // If roles fetch fails, still return profile success
-                return of(getProfileSuccess(response.data))
-              })
-            )
+            // Return profile success directly
+            return of(getProfileSuccess(response.data))
           } else {
             console.log('Profile request failed:', response.message, 'Status:', (response as any).status)
             // If profile request fails with 401/403, clear the token
@@ -116,7 +97,7 @@ export const getProfileEpic = (action$: any) =>
               console.log('Clearing auth token due to authentication failure')
               localStorage.removeItem('authToken')
             }
-            return getProfileFailure(response.message)
+            return of(getProfileFailure(response.message))
           }
         }),
         catchError((error) => {
@@ -182,28 +163,8 @@ export const switchRoleEpic = (action$: any) =>
               localStorage.setItem('authToken', response.data.token)
             }
             
-            // After successful role switch, fetch available roles for the new role
-            return from(apiService.getAvailableRoles()).pipe(
-              map((rolesResponse) => {
-                if (rolesResponse.success && rolesResponse.data) {
-                  // Return both switch role and roles data
-                  return switchRoleSuccess({
-                    user: response.data.user,
-                    token: response.data.token,
-                    availableRoles: rolesResponse.data.availableRoles,
-                    currentRole: rolesResponse.data.currentRole
-                  })
-                } else {
-                  // If roles fetch fails, still return switch role success
-                  return switchRoleSuccess(response.data)
-                }
-              }),
-              catchError((rolesError) => {
-                console.log('Available roles fetch failed after role switch:', rolesError.message)
-                // If roles fetch fails, still return switch role success
-                return of(switchRoleSuccess(response.data))
-              })
-            )
+            // Return switch role success directly
+            return of(switchRoleSuccess(response.data))
           } else {
             return of(switchRoleFailure(response.message))
           }
@@ -226,28 +187,8 @@ export const switchBackEpic = (action$: any) =>
               localStorage.setItem('authToken', response.data.token)
             }
             
-            // After successful switch back, fetch available roles for the original role
-            return from(apiService.getAvailableRoles()).pipe(
-              map((rolesResponse) => {
-                if (rolesResponse.success && rolesResponse.data) {
-                  // Return both switch back and roles data
-                  return switchBackSuccess({
-                    user: response.data.user,
-                    token: response.data.token,
-                    availableRoles: rolesResponse.data.availableRoles,
-                    currentRole: rolesResponse.data.currentRole
-                  })
-                } else {
-                  // If roles fetch fails, still return switch back success
-                  return switchBackSuccess(response.data)
-                }
-              }),
-              catchError((rolesError) => {
-                console.log('Available roles fetch failed after switch back:', rolesError.message)
-                // If roles fetch fails, still return switch back success
-                return of(switchBackSuccess(response.data))
-              })
-            )
+            // Return switch back success directly
+            return of(switchBackSuccess(response.data))
           } else {
             return of(switchBackFailure(response.message))
           }
