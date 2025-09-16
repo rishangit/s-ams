@@ -12,7 +12,8 @@ import { format } from 'date-fns'
 import { apiService } from '../../../services/api'
 import { 
   getStatusDisplayName, 
-  getStatusColor 
+  getStatusColor,
+  isCompletedStatus
 } from '../../../constants/appointmentStatus'
 import AppointmentCompletionPopup from '../appointments/AppointmentCompletionPopup'
 
@@ -95,15 +96,31 @@ const UserAppointments: React.FC = () => {
     }
   }, [user, userId])
 
+  // Debug existingHistory state changes
+  useEffect(() => {
+    console.log('=== UserAppointments existingHistory changed ===')
+    console.log('existingHistory:', existingHistory)
+  }, [existingHistory])
+
   // Handle view details
   const handleViewDetails = async (appointment: UserAppointment) => {
     setSelectedAppointment(appointment)
     
     // Fetch existing history data if appointment is completed
-    if (appointment.status === 'completed') {
+    const statusNumber = typeof appointment.status === 'string' ? parseInt(appointment.status) : appointment.status
+    console.log('Appointment status check:', {
+      status: appointment.status,
+      statusNumber: statusNumber,
+      isCompleted: isCompletedStatus(statusNumber),
+      statusName: getStatusDisplayName(statusNumber)
+    })
+    
+    if (isCompletedStatus(statusNumber)) {
       try {
         const response = await apiService.getUserHistoryByAppointmentId(appointment.id)
+        console.log('API response:', response)
         if (response.success) {
+          console.log('Setting existing history:', response.data)
           setExistingHistory(response.data)
         } else {
           setExistingHistory(null)
@@ -116,6 +133,9 @@ const UserAppointments: React.FC = () => {
       setExistingHistory(null)
     }
     
+    console.log('=== Opening completion popup ===')
+    console.log('Appointment status:', appointment.status)
+    console.log('Existing history before opening:', existingHistory)
     setIsCompletionPopupOpen(true)
   }
 
@@ -355,16 +375,22 @@ const UserAppointments: React.FC = () => {
       />
 
       {/* Appointment Completion Popup */}
-      {selectedAppointment && (
-        <AppointmentCompletionPopup
-          isOpen={isCompletionPopupOpen}
-          onClose={handleCloseCompletionPopup}
-          onSuccess={handleCompletionSuccess}
-          appointment={selectedAppointment}
-          mode={existingHistory ? 'view' : 'create'}
-          existingHistory={existingHistory}
-        />
-      )}
+      {selectedAppointment && (() => {
+        console.log('=== Rendering AppointmentCompletionPopup ===')
+        console.log('selectedAppointment:', selectedAppointment)
+        console.log('existingHistory:', existingHistory)
+        console.log('mode:', existingHistory ? 'view' : 'create')
+        return (
+          <AppointmentCompletionPopup
+            isOpen={isCompletionPopupOpen}
+            onClose={handleCloseCompletionPopup}
+            onSuccess={handleCompletionSuccess}
+            appointment={selectedAppointment}
+            mode={existingHistory ? 'view' : 'create'}
+            existingHistory={existingHistory}
+          />
+        )
+      })()}
     </Box>
   )
 }

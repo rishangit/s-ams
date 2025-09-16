@@ -26,7 +26,7 @@ import {
 } from '@mui/icons-material'
 import { RootState } from '../../../store'
 import { getProductsRequest } from '../../../store/actions/productsActions'
-import { createUserHistoryRequest } from '../../../store/actions/userHistoryActions'
+import { createUserHistoryRequest, updateUserHistoryRequest } from '../../../store/actions/userHistoryActions'
 import { Product } from '../../../types/product'
 import { UserHistoryFormData, ProductUsed } from '../../../types/userHistory'
 import { FormInput, FormSelect, FormButton, CustomGrid } from '../../shared'
@@ -77,7 +77,7 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
 }) => {
   const dispatch = useDispatch()
   const { products, loading: productsLoading } = useSelector((state: RootState) => state.products)
-  const { createLoading, success, error } = useSelector((state: RootState) => state.userHistory)
+  const { createLoading, updateLoading, success, error } = useSelector((state: RootState) => state.userHistory)
   const { theme } = useSelector((state: RootState) => state.ui)
 
   // State for products grid
@@ -117,9 +117,43 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
 
   // Initialize data based on mode
   useEffect(() => {
+    console.log('=== AppointmentCompletionPopup useEffect ===')
+    console.log('isOpen:', isOpen)
+    console.log('existingHistory:', existingHistory)
+    console.log('mode:', mode)
+    
     if (isOpen && existingHistory && (mode === 'view' || mode === 'edit')) {
+      console.log('Existing history data:', existingHistory)
+      console.log('ProductsUsed type:', typeof existingHistory.productsUsed)
+      console.log('ProductsUsed value:', existingHistory.productsUsed)
+      
+      // Parse productsUsed if it's a string (from database JSON)
+      let productsData = []
+      if (existingHistory.productsUsed) {
+        if (typeof existingHistory.productsUsed === 'string') {
+          try {
+            productsData = JSON.parse(existingHistory.productsUsed)
+            console.log('Parsed products data:', productsData)
+          } catch (error) {
+            console.error('Error parsing productsUsed JSON:', error)
+            productsData = []
+          }
+        } else if (Array.isArray(existingHistory.productsUsed)) {
+          productsData = existingHistory.productsUsed
+          console.log('Products data (array):', productsData)
+        }
+      }
+      
+      // Ensure each product has the required fields and calculate total
+      productsData = productsData.map(product => ({
+        ...product,
+        total: (product.quantityUsed || 0) * (product.unitCost || 0)
+      }))
+      
+      console.log('Final products data for grid:', productsData)
+      
       // Populate with existing history data
-      setProductsUsed(existingHistory.productsUsed || [])
+      setProductsUsed(productsData)
       setNotesValue('notes', existingHistory.notes || '')
       setIsEditMode(mode === 'edit')
     } else if (isOpen && mode === 'create') {
@@ -129,6 +163,11 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
       setIsEditMode(false)
     }
   }, [isOpen, existingHistory, mode])
+
+  // Debug productsUsed state changes
+  useEffect(() => {
+    console.log('ProductsUsed state changed:', productsUsed)
+  }, [productsUsed])
 
   // Calculate total cost
   const totalCost = productsUsed.reduce((sum, product) => {
@@ -153,10 +192,10 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
 
   // Handle success
   useEffect(() => {
-    if (success && createLoading === false) {
+    if (success && createLoading === false && updateLoading === false) {
       handleSuccess()
     }
-  }, [success, createLoading])
+  }, [success, createLoading, updateLoading])
 
   const handleSuccess = () => {
     setProductsUsed([])
@@ -247,7 +286,24 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
       notes: data.notes || '' // Can be empty string
     }
 
-    dispatch(createUserHistoryRequest(historyData))
+    console.log('=== onCompletionSubmit Debug ===')
+    console.log('mode:', mode)
+    console.log('isEditMode:', isEditMode)
+    console.log('existingHistory:', existingHistory)
+    console.log('historyData:', historyData)
+
+    if ((mode === 'edit' || isEditMode) && existingHistory) {
+      // Update existing history
+      console.log('Dispatching updateUserHistoryRequest with ID:', existingHistory.id)
+      dispatch(updateUserHistoryRequest({ 
+        id: existingHistory.id, 
+        data: historyData 
+      }))
+    } else {
+      // Create new history
+      console.log('Dispatching createUserHistoryRequest')
+      dispatch(createUserHistoryRequest(historyData))
+    }
   }
 
   // Grid column definitions - simplified to match appointments grid pattern
@@ -560,7 +616,7 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
       </DialogContent>
 
       <DialogActions sx={{ p: 2, borderTop: `1px solid ${theme.border}` }}>
-        {mode === 'view' ? (
+        {mode === 'view' && !isEditMode ? (
           <FormButton
             type="button"
             variant="contained"
@@ -574,7 +630,7 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
               type="button"
               variant="outlined"
               onClick={handleClose}
-              disabled={createLoading}
+              disabled={createLoading || updateLoading}
             >
               Cancel
             </FormButton>
@@ -582,9 +638,9 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
               type="submit"
               variant="contained"
               onClick={handleNotesSubmit(onCompletionSubmit)}
-              disabled={createLoading}
+              disabled={createLoading || updateLoading}
             >
-              {createLoading ? (
+              {(createLoading || updateLoading) ? (
                 <>
                   <CircularProgress size={16} style={{ marginRight: 8 }} />
                   {mode === 'edit' ? 'Updating...' : 'Completing...'}

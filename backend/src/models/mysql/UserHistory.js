@@ -73,9 +73,23 @@ export class UserHistory {
       // Parse products_used JSON
       if (history.productsUsed) {
         try {
-          history.productsUsed = JSON.parse(history.productsUsed)
+          // Handle both string and already parsed JSON
+          if (typeof history.productsUsed === 'string') {
+            // Clean up the string if it has escaped quotes
+            let cleanJson = history.productsUsed
+            if (cleanJson.includes('\\"')) {
+              cleanJson = cleanJson.replace(/\\"/g, '"')
+            }
+            history.productsUsed = JSON.parse(cleanJson)
+          } else if (Array.isArray(history.productsUsed)) {
+            // Already an array, use as is
+            history.productsUsed = history.productsUsed
+          } else {
+            history.productsUsed = []
+          }
         } catch (parseError) {
           console.warn('Failed to parse productsUsed JSON:', history.productsUsed)
+          console.warn('Parse error:', parseError.message)
           history.productsUsed = []
         }
       } else {
@@ -123,9 +137,23 @@ export class UserHistory {
       // Parse products_used JSON
       if (history.productsUsed) {
         try {
-          history.productsUsed = JSON.parse(history.productsUsed)
+          // Handle both string and already parsed JSON
+          if (typeof history.productsUsed === 'string') {
+            // Clean up the string if it has escaped quotes
+            let cleanJson = history.productsUsed
+            if (cleanJson.includes('\\"')) {
+              cleanJson = cleanJson.replace(/\\"/g, '"')
+            }
+            history.productsUsed = JSON.parse(cleanJson)
+          } else if (Array.isArray(history.productsUsed)) {
+            // Already an array, use as is
+            history.productsUsed = history.productsUsed
+          } else {
+            history.productsUsed = []
+          }
         } catch (parseError) {
           console.warn('Failed to parse productsUsed JSON:', history.productsUsed)
+          console.warn('Parse error:', parseError.message)
           history.productsUsed = []
         }
       } else {
