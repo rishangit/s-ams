@@ -6,6 +6,7 @@ import { Dashboard, UserProfile, SystemLayout, Users, Companies, Appointments, S
 import CompanyUsers from '../companyusers/CompanyUsers'
 import UserAppointments from '../companyusers/UserAppointments'
 import UserCompanies from '../companies/UserCompanies'
+import UserCompanyAppointments from '../companies/UserCompanyAppointments'
 import AppointmentForm from '../appointments/AppointmentForm'
 import CalendarView from '../appointments/CalendarView'
 import CompanyRouteWrapper from '../company/CompanyRouteWrapper'
@@ -131,6 +132,13 @@ const SystemRoutes: React.FC = () => {
         <ProtectedRoute>
           <SystemLayout title="My Companies">
             <UserCompanies />
+          </SystemLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="my-companies/:companyId/appointments" element={
+        <ProtectedRoute>
+          <SystemLayout title="My Appointments">
+            <UserCompanyAppointments />
           </SystemLayout>
         </ProtectedRoute>
       } />

@@ -30,6 +30,7 @@ interface UserCompaniesCardviewProps {
   error: string | null
   uiTheme: any
   onViewCompany: (companyId: number) => void
+  onViewAppointments: (companyId: number) => void
   onBookAppointment: (companyId: number) => void
 }
 
@@ -39,12 +40,13 @@ const UserCompaniesCardview: React.FC<UserCompaniesCardviewProps> = ({
   error,
   uiTheme,
   onViewCompany,
+  onViewAppointments,
   onBookAppointment
 }) => {
   // Generate row actions
   const rowActions = useMemo(() => {
-    return generateUserCompanyRowActions(onViewCompany, onBookAppointment)
-  }, [onViewCompany, onBookAppointment])
+    return generateUserCompanyRowActions(onViewCompany, onViewAppointments, onBookAppointment)
+  }, [onViewCompany, onViewAppointments, onBookAppointment])
 
   if (loading) {
     return (

@@ -215,6 +215,23 @@ export class Company {
       throw new Error('Failed to find companies')
     }
   }
+
+  // Check if a user has appointments with a specific company
+  static async hasUserAppointments(userId, companyId) {
+    const query = `
+      SELECT COUNT(*) as count 
+      FROM appointments 
+      WHERE user_id = ? AND company_id = ?
+    `
+    
+    try {
+      const rows = await executeQuery(query, [userId, companyId])
+      return rows[0].count > 0
+    } catch (error) {
+      console.error('Error checking user appointments with company:', error)
+      throw new Error('Failed to check user appointments')
+    }
+  }
 }
 
 

@@ -413,6 +413,10 @@ class ApiService {
     return this.request<any[]>(`/company-users/${userId}/appointments`)
   }
 
+  async getUserAppointmentsByCompany(companyId: number): Promise<ApiResponse<any[]>> {
+    return this.request<any[]>(`/company/${companyId}/my-appointments`)
+  }
+
   // Product API methods
   async createProduct(productData: any): Promise<ApiResponse<any>> {
     return this.request<any>('/products', {
@@ -432,6 +436,19 @@ class ApiService {
     }
     const queryString = queryParams.toString()
     return this.request<any>(`/products${queryString ? `?${queryString}` : ''}`)
+  }
+
+  async getProductsByUserAppointments(filters?: any): Promise<ApiResponse<any>> {
+    const queryParams = new URLSearchParams()
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          queryParams.append(key, String(value))
+        }
+      })
+    }
+    const queryString = queryParams.toString()
+    return this.request<any>(`/products/user-appointments${queryString ? `?${queryString}` : ''}`)
   }
 
   async getProductById(id: number): Promise<ApiResponse<any>> {

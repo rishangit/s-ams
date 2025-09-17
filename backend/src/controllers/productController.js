@@ -546,3 +546,86 @@ export const getProductCategories = async (req, res) => {
     })
   }
 }
+
+// Get products for companies that the user has appointments with (for role 3 users)
+export const getProductsByUserAppointments = async (req, res) => {
+  try {
+    const userId = req.user.id
+    const userRole = req.user.role
+
+    // Only allow role 3 users to access this endpoint
+    if (parseInt(userRole) !== 3) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Only regular users can access this endpoint.'
+      })
+    }
+
+    // Get companies that the user has appointments with
+    const companies = await Company.findByUserAppointments(userId)
+    if (!companies || companies.length === 0) {
+      return res.json({
+        success: true,
+        data: {
+          products: []
+        }
+      })
+    }
+
+    // Get products from all companies the user has appointments with
+    const { status, category, search, limit = 50, offset = 0 } = req.query
+    const companyIds = companies.map(company => company.id)
+
+    const options = {
+      companyIds,
+      limit: parseInt(limit),
+      offset: parseInt(offset)
+    }
+
+    if (status) {
+      options.status = status
+    }
+
+    if (category) {
+      options.category = category
+    }
+
+    if (search) {
+      options.search = search
+    }
+
+    const products = await Product.findByCompanyIds(options)
+
+    res.json({
+      success: true,
+      data: {
+        products: products.map(product => ({
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          category: product.category,
+          unit: product.unit,
+          unitPrice: product.unitPrice,
+          quantity: product.quantity,
+          minQuantity: product.minQuantity,
+          maxQuantity: product.maxQuantity,
+          status: product.status,
+          supplier: product.supplier,
+          sku: product.sku,
+          barcode: product.barcode,
+          companyId: product.companyId,
+          companyName: companies.find(c => c.id === product.companyId)?.name || 'Unknown Company',
+          createdAt: product.createdAt,
+          updatedAt: product.updatedAt
+        }))
+      }
+    })
+  } catch (error) {
+    console.error('Get products by user appointments error:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get products',
+      error: error.message
+    })
+  }
+}

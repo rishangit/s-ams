@@ -2,6 +2,7 @@ import express from 'express'
 import { 
   createProduct, 
   getProductsByCompany,
+  getProductsByUserAppointments,
   getProductById, 
   updateProduct, 
   updateProductQuantity,
@@ -28,5 +29,8 @@ router.put('/:id', validateCompanyOwner, updateProduct)
 router.put('/:id/quantity', validateCompanyOwner, updateProductQuantity)
 router.put('/:id/status', validateCompanyOwner, updateProductStatus)
 router.delete('/:id', validateCompanyOwner, deleteProduct)
+
+// Role 3 user routes (for companies they have appointments with)
+router.get('/user-appointments', getProductsByUserAppointments)
 
 export default router

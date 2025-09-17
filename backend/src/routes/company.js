@@ -10,6 +10,7 @@ import {
   deleteCompany,
   getCompaniesByUserAppointments
 } from '../controllers/companyController.js'
+import { getUserAppointmentsByCompany } from '../controllers/companyUsersController.js'
 import { authenticateToken } from '../middleware/auth.js'
 import { requireAdmin, requireAdminOnly } from '../middleware/auth.js'
 
@@ -24,6 +25,7 @@ router.get('/user/:userId', getCompanyByUser) // Get company by user ID
 router.put('/:id', updateCompany) // Update company
 router.get('/booking', getCompaniesForBooking) // Get companies for appointment booking (authenticated users)
 router.get('/user-appointments', getCompaniesByUserAppointments) // Get companies user has appointments with (role 3 only)
+router.get('/:companyId/my-appointments', getUserAppointmentsByCompany) // Get current user's appointments with specific company (role 3 only)
 
 // Admin-only routes
 router.get('/', requireAdminOnly, getAllCompanies) // Get all companies (admin only, excludes owners)

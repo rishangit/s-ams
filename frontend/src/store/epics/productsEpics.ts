@@ -1,6 +1,6 @@
 import { ofType } from 'redux-observable'
 import { of, from } from 'rxjs'
-import { switchMap, catchError, map } from 'rxjs/operators'
+import { switchMap, catchError, map, withLatestFrom } from 'rxjs/operators'
 import { apiService } from '../../services/api'
 import {
   createProductRequest,
@@ -51,11 +51,20 @@ export const createProductEpic = (action$: any) =>
   )
 
 // Get Products Epic
-export const getProductsEpic = (action$: any) =>
+export const getProductsEpic = (action$: any, state$: any) =>
   action$.pipe(
     ofType(getProductsRequest.type),
-    switchMap((action: any) =>
-      from(apiService.getProducts(action.payload)).pipe(
+    withLatestFrom(state$),
+    switchMap(([action, state]: [any, any]) => {
+      const user = state.auth.user
+      const userRole = user ? parseInt(String(user.role)) : null
+      
+      // Use different endpoint based on user role
+      const apiCall = userRole === 3 
+        ? apiService.getProductsByUserAppointments(action.payload)
+        : apiService.getProducts(action.payload)
+      
+      return from(apiCall).pipe(
         map((response: any) => {
           if (response.success) {
             return getProductsSuccess(response.data.products)
@@ -65,7 +74,7 @@ export const getProductsEpic = (action$: any) =>
         }),
         catchError((error: any) => of(getProductsFailure(error.message || 'Failed to get products')))
       )
-    )
+    })
   )
 
 // Get Product by ID Epic

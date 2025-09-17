@@ -66,11 +66,25 @@ const CompanyDetail: React.FC = () => {
   const dispatch = useDispatch()
   // const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
-  // const { user } = useSelector((state: RootState) => state.auth)
+  const { user } = useSelector((state: RootState) => state.auth)
   const { company, loading, error, success, updateLoading } = useSelector((state: RootState) => state.company)
   const uiTheme = useSelector((state: RootState) => state.ui.theme)
 
   const [isEditing, setIsEditing] = useState(false)
+
+  // Check if current user can edit this company
+  const canEditCompany = () => {
+    if (!user || !company) return false
+    
+    // Admin (role 0) can edit any company
+    if (parseInt(String(user.role)) === 0) return true
+    
+    // Company owner can edit their own company
+    if (user.id === company.userId) return true
+    
+    // All other users (including role 3) cannot edit
+    return false
+  }
 
   const {
     control,
@@ -244,47 +258,61 @@ const CompanyDetail: React.FC = () => {
             style={{ backgroundColor: uiTheme.surface }}
           >
             <Box className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
-              <Typography
-                variant="h6"
-                className="font-semibold"
-                style={{ color: uiTheme.text }}
-              >
-                Company Information
-              </Typography>
-              {!isEditing ? (
-                <FormButton
-                  type="button"
-                  onClick={handleEdit}
+              <Box>
+                <Typography
+                  variant="h6"
+                  className="font-semibold"
+                  style={{ color: uiTheme.text }}
                 >
-                  <Box className="flex items-center space-x-2">
-                    <EditIcon />
-                    <span>Edit Company</span>
-                  </Box>
-                </FormButton>
-              ) : (
-                <Box className="flex flex-col md:flex-row gap-2">
-                  <FormButton
-                    type="button"
-                    variant="outlined"
-                    onClick={handleCancel}
+                  Company Information
+                </Typography>
+                {!canEditCompany() && (
+                  <Typography
+                    variant="body2"
+                    style={{ color: uiTheme.textSecondary, fontStyle: 'italic' }}
                   >
-                    Cancel
-                  </FormButton>
-                  <FormButton
-                    type="submit"
-                    disabled={updateLoading || !isDirty}
-                    onClick={handleSubmit(onSubmit)}
-                  >
-                    {updateLoading ? (
-                      <CircularProgress size={20} style={{ color: '#fff' }} />
-                    ) : (
+                    View-only mode - Only company owners can edit details
+                  </Typography>
+                )}
+              </Box>
+              {canEditCompany() && (
+                <>
+                  {!isEditing ? (
+                    <FormButton
+                      type="button"
+                      onClick={handleEdit}
+                    >
                       <Box className="flex items-center space-x-2">
-                        <SaveIcon />
-                        <span>Save Changes</span>
+                        <EditIcon />
+                        <span>Edit Company</span>
                       </Box>
-                    )}
-                  </FormButton>
-                </Box>
+                    </FormButton>
+                  ) : (
+                    <Box className="flex flex-col md:flex-row gap-2">
+                      <FormButton
+                        type="button"
+                        variant="outlined"
+                        onClick={handleCancel}
+                      >
+                        Cancel
+                      </FormButton>
+                      <FormButton
+                        type="submit"
+                        disabled={updateLoading || !isDirty}
+                        onClick={handleSubmit(onSubmit)}
+                      >
+                        {updateLoading ? (
+                          <CircularProgress size={20} style={{ color: '#fff' }} />
+                        ) : (
+                          <Box className="flex items-center space-x-2">
+                            <SaveIcon />
+                            <span>Save Changes</span>
+                          </Box>
+                        )}
+                      </FormButton>
+                    </Box>
+                  )}
+                </>
               )}
             </Box>
             
@@ -298,7 +326,7 @@ const CompanyDetail: React.FC = () => {
                     control={control}
                     error={errors.name}
                     required
-                    disabled={!isEditing}
+                    disabled={!isEditing || !canEditCompany()}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -309,7 +337,7 @@ const CompanyDetail: React.FC = () => {
                     control={control}
                     error={errors.phoneNumber}
                     required
-                    disabled={!isEditing}
+                    disabled={!isEditing || !canEditCompany()}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -320,7 +348,7 @@ const CompanyDetail: React.FC = () => {
                     control={control}
                     error={errors.landPhone}
                     required
-                    disabled={!isEditing}
+                    disabled={!isEditing || !canEditCompany()}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -331,7 +359,7 @@ const CompanyDetail: React.FC = () => {
                     control={control}
                     error={errors.geoLocation}
                     required
-                    disabled={!isEditing}
+                    disabled={!isEditing || !canEditCompany()}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -342,7 +370,7 @@ const CompanyDetail: React.FC = () => {
                     control={control}
                     error={errors.address}
                     required
-                    disabled={!isEditing}
+                    disabled={!isEditing || !canEditCompany()}
                   />
                 </Grid>
               </Grid>

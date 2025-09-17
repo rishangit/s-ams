@@ -79,6 +79,18 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
   const { products, loading: productsLoading } = useSelector((state: RootState) => state.products)
   const { createLoading, updateLoading, success, error } = useSelector((state: RootState) => state.userHistory)
   const { theme } = useSelector((state: RootState) => state.ui)
+  const { user } = useSelector((state: RootState) => state.auth)
+
+  // Check if current user can edit appointment details
+  const canEditAppointmentDetails = () => {
+    if (!user) return false
+    
+    const userRole = parseInt(String(user.role))
+    
+    // Admin (role 0) and Company owners (role 1) can edit
+    // Role 3 users (regular users) cannot edit appointment details
+    return userRole === 0 || userRole === 1
+  }
 
   // State for products grid
   const [productsUsed, setProductsUsed] = useState<ProductUsed[]>([])
@@ -360,7 +372,7 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
   ]
 
   // Row actions
-  const rowActions: RowAction[] = (mode === 'create' || isEditMode) ? [
+  const rowActions: RowAction[] = (mode === 'create' || isEditMode) && canEditAppointmentDetails() ? [
     {
       id: 'edit',
       label: 'Edit',
@@ -420,7 +432,7 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
             )}
           </Box>
           <Box display="flex" gap={1}>
-            {mode === 'view' && existingHistory && (
+            {mode === 'view' && existingHistory && canEditAppointmentDetails() && (
               <Button
                 startIcon={<EditIcon />}
                 onClick={() => setIsEditMode(true)}
@@ -473,7 +485,7 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
           <Typography variant="subtitle1" gutterBottom>
             {editingIndex !== null ? 'Edit Product' : 'Add Product (Optional)'}
           </Typography>
-          {(mode === 'create' || isEditMode) && (
+          {(mode === 'create' || isEditMode) && canEditAppointmentDetails() && (
             <form onSubmit={handleSubmit(onProductSubmit)}>
             <Box display="flex" gap={2} flexWrap="wrap" alignItems="flex-end">
               {/* Product Selection */}
@@ -584,7 +596,7 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
 
         {/* Completion Notes */}
         <Box mb={3}>
-          {(mode === 'create' || isEditMode) ? (
+          {(mode === 'create' || isEditMode) && canEditAppointmentDetails() ? (
             <form onSubmit={handleNotesSubmit(onCompletionSubmit)}>
               <FormInput
                 name="notes"
@@ -618,7 +630,7 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
           >
             Close
           </FormButton>
-        ) : (
+        ) : canEditAppointmentDetails() ? (
           <>
             <FormButton
               type="button"
@@ -647,6 +659,14 @@ const AppointmentCompletionPopup: React.FC<AppointmentCompletionPopupProps> = ({
               )}
             </FormButton>
           </>
+        ) : (
+          <FormButton
+            type="button"
+            variant="contained"
+            onClick={handleClose}
+          >
+            Close
+          </FormButton>
         )}
       </DialogActions>
     </Dialog>

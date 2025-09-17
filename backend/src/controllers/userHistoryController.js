@@ -134,6 +134,7 @@ export const getUserHistoryByAppointmentId = async (req, res) => {
   try {
     const { appointmentId } = req.params
     const currentUserId = req.user.id
+    const userRole = req.user.role
 
     const userHistory = await UserHistory.findByAppointmentId(appointmentId)
     if (!userHistory) {
@@ -144,8 +145,13 @@ export const getUserHistoryByAppointmentId = async (req, res) => {
     }
 
     // Check if user has permission to view this history
+    // Allow if: 1) User is the appointment owner (role 3), 2) User is company owner, 3) User is admin
     const company = await Company.findByUserId(currentUserId)
-    if (!company || company.id !== userHistory.companyId) {
+    const isAppointmentOwner = userHistory.userId === currentUserId
+    const isCompanyOwner = company && company.id === userHistory.companyId
+    const isAdmin = parseInt(userRole) === 0
+
+    if (!isAppointmentOwner && !isCompanyOwner && !isAdmin) {
       return res.status(403).json({
         success: false,
         message: 'You do not have permission to view this history'

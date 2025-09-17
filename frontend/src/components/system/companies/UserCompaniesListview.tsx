@@ -30,6 +30,7 @@ interface UserCompaniesListviewProps {
   error: string | null
   uiTheme: any
   onViewCompany: (companyId: number) => void
+  onViewAppointments: (companyId: number) => void
   onBookAppointment: (companyId: number) => void
 }
 
@@ -39,6 +40,7 @@ const UserCompaniesListview: React.FC<UserCompaniesListviewProps> = ({
   error,
   uiTheme,
   onViewCompany,
+  onViewAppointments,
   onBookAppointment
 }) => {
   const [page, setPage] = useState(0)
@@ -46,8 +48,8 @@ const UserCompaniesListview: React.FC<UserCompaniesListviewProps> = ({
 
   // Generate row actions
   const rowActions = useMemo(() => {
-    return generateUserCompanyRowActions(onViewCompany, onBookAppointment)
-  }, [onViewCompany, onBookAppointment])
+    return generateUserCompanyRowActions(onViewCompany, onViewAppointments, onBookAppointment)
+  }, [onViewCompany, onViewAppointments, onBookAppointment])
 
   // Get table headers
   const tableHeaders = useMemo(() => {

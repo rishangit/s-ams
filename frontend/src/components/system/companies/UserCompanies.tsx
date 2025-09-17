@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import { RootState } from '../../../store'
 import { ColDef, ICellRendererParams } from 'ag-grid-community'
 import { CustomGrid, RowAction } from '../../../components/shared'
@@ -27,6 +28,7 @@ import UserCompaniesCardview from './UserCompaniesCardview'
 
 const UserCompanies: React.FC = () => {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const { user } = useSelector((state: RootState) => state.auth)
   const { userCompanies, loading, error } = useSelector((state: RootState) => state.company)
   const uiTheme = useSelector((state: RootState) => state.ui.theme)
@@ -203,12 +205,17 @@ const UserCompanies: React.FC = () => {
   // Company action handlers
   const handleViewCompany = (companyId: number) => {
     console.log('View company:', companyId)
-    // TODO: Implement view company functionality
+    navigate(`/system/companies/${companyId}`)
   }
 
   const handleBookAppointment = (companyId: number) => {
     console.log('Book appointment for company:', companyId)
     // TODO: Implement book appointment functionality
+  }
+
+  const handleViewAppointments = (companyId: number) => {
+    console.log('View appointments for company:', companyId)
+    navigate(`/system/my-companies/${companyId}/appointments`)
   }
 
   // Row Actions Configuration
@@ -219,6 +226,13 @@ const UserCompanies: React.FC = () => {
       icon: <VisibilityIcon fontSize="small" />,
       onClick: (rowData) => handleViewCompany(rowData.id),
       color: 'primary'
+    },
+    {
+      id: 'appointments',
+      label: 'View Appointments',
+      icon: <CalendarIcon fontSize="small" />,
+      onClick: (rowData) => handleViewAppointments(rowData.id),
+      color: 'info'
     },
     {
       id: 'book',
@@ -401,6 +415,7 @@ const UserCompanies: React.FC = () => {
           error={error}
           uiTheme={uiTheme}
           onViewCompany={handleViewCompany}
+          onViewAppointments={handleViewAppointments}
           onBookAppointment={handleBookAppointment}
         />
       ) : (
@@ -410,6 +425,7 @@ const UserCompanies: React.FC = () => {
           error={error}
           uiTheme={uiTheme}
           onViewCompany={handleViewCompany}
+          onViewAppointments={handleViewAppointments}
           onBookAppointment={handleBookAppointment}
         />
       )}

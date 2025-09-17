@@ -6,6 +6,7 @@ import {
 // Generate row actions for user companies
 export const generateUserCompanyRowActions = (
   onViewCompany: (companyId: number) => void,
+  onViewAppointments: (companyId: number) => void,
   onBookAppointment: (companyId: number) => void
 ) => {
   const actions = []
@@ -17,6 +18,15 @@ export const generateUserCompanyRowActions = (
     icon: <ViewIcon fontSize="small" />,
     onClick: (rowData: any) => onViewCompany(rowData.id),
     color: 'primary'
+  })
+
+  // Add View Appointments
+  actions.push({
+    id: 'appointments',
+    label: 'View Appointments',
+    icon: <CalendarIcon fontSize="small" />,
+    onClick: (rowData: any) => onViewAppointments(rowData.id),
+    color: 'info'
   })
 
   // Add Book Appointment

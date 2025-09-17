@@ -188,7 +188,7 @@ export const updateCompany = async (req, res) => {
   }
 }
 
-// Get company by ID (users can view their own company, admins can view any company)
+// Get company by ID (users can view their own company, companies they have appointments with, admins can view any company)
 export const getCompanyById = async (req, res) => {
   try {
     const companyId = parseInt(req.params.id)
@@ -202,11 +202,15 @@ export const getCompanyById = async (req, res) => {
       })
     }
 
-    // Check if user is requesting their own company or is admin
-    if (req.user.id !== company.userId && req.user.role !== 0) {
+    // Check if user is requesting their own company, has appointments with this company, or is admin
+    const isOwner = req.user.id === company.userId
+    const isAdmin = req.user.role === 0
+    const hasAppointments = await Company.hasUserAppointments(req.user.id, companyId)
+
+    if (!isOwner && !isAdmin && !hasAppointments) {
       return res.status(403).json({
         success: false,
-        message: 'Access denied. You can only view your own company.'
+        message: 'Access denied. You can only view your own company or companies where you have appointments.'
       })
     }
     res.json({

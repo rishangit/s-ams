@@ -367,4 +367,75 @@ export class Product {
       throw new Error('Failed to check product existence')
     }
   }
+
+  static async findByCompanyIds(options = {}) {
+    let query = `
+      SELECT 
+        p.id, p.name, p.description, p.category, p.unit, p.unit_price as unitPrice, 
+        p.quantity, p.min_quantity as minQuantity, p.max_quantity as maxQuantity,
+        p.status, p.company_id as companyId, p.supplier, p.sku, p.barcode,
+        p.created_at as createdAt, p.updated_at as updatedAt,
+        c.name as companyName
+      FROM ${this.tableName} p
+      LEFT JOIN companies c ON p.company_id = c.id
+    `
+    
+    const values = []
+    
+    // Add company filter for multiple company IDs
+    if (options.companyIds && options.companyIds.length > 0) {
+      const placeholders = options.companyIds.map(() => '?').join(',')
+      query += ` WHERE p.company_id IN (${placeholders})`
+      values.push(...options.companyIds)
+    }
+    
+    // Add status filter
+    if (options.status) {
+      query += options.companyIds && options.companyIds.length > 0 ? ' AND p.status = ?' : ' WHERE p.status = ?'
+      values.push(options.status)
+    }
+    
+    // Add category filter
+    if (options.category) {
+      query += (options.companyIds && options.companyIds.length > 0 || options.status) ? ' AND p.category = ?' : ' WHERE p.category = ?'
+      values.push(options.category)
+    }
+    
+    // Add search filter
+    if (options.search) {
+      const searchCondition = ' AND (p.name LIKE ? OR p.description LIKE ? OR p.sku LIKE ?)'
+      query += (options.companyIds && options.companyIds.length > 0 || options.status || options.category) ? searchCondition : ' WHERE (p.name LIKE ? OR p.description LIKE ? OR p.sku LIKE ?)'
+      const searchTerm = `%${options.search}%`
+      values.push(searchTerm, searchTerm, searchTerm)
+    }
+    
+    // Add ordering
+    query += ' ORDER BY p.created_at DESC'
+    
+    // Add pagination
+    if (options.limit) {
+      query += ' LIMIT ?'
+      values.push(String(options.limit))
+      
+      if (options.offset) {
+        query += ' OFFSET ?'
+        values.push(String(options.offset))
+      }
+    }
+    
+    try {
+      const rows = await executeQuery(query, values)
+      // Convert numeric fields from strings to numbers
+      return rows.map(row => ({
+        ...row,
+        unitPrice: parseFloat(row.unitPrice),
+        quantity: parseInt(row.quantity),
+        minQuantity: parseInt(row.minQuantity),
+        maxQuantity: row.maxQuantity ? parseInt(row.maxQuantity) : null
+      }))
+    } catch (error) {
+      console.error('Error finding products by company IDs:', error)
+      throw new Error('Failed to find products')
+    }
+  }
 }
