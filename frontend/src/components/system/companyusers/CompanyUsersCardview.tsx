@@ -3,30 +3,24 @@ import {
   Card,
   CardContent,
   Typography,
-  Box,
   CircularProgress,
   Alert,
-  Grid,
-  Paper,
-  Stack,
+  Avatar,
   Chip
 } from '@mui/material'
 import {
-  Email as EmailIcon,
   Phone as PhoneIcon,
-  Event as EventIcon,
-  CalendarToday as DateIcon,
   Person as PersonIcon,
+  Event as EventIcon,
   Group as GroupIcon
 } from '@mui/icons-material'
 import { RowActionsMenu } from '../../../components/shared'
 import { 
-  CompanyUserInfo
-} from './utils/companyUserComponents'
-import { 
   generateCompanyUserRowActions,
   formatCompanyUserDate
 } from './utils/companyUserUtils'
+import { getProfileImageUrl } from '../../../utils/fileUtils'
+import { getRoleDisplayName } from '../../../constants/roles'
 
 interface CompanyUsersCardviewProps {
   filteredUsers: any[]
@@ -52,15 +46,15 @@ const CompanyUsersCardview: React.FC<CompanyUsersCardviewProps> = ({
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
+      <div className="flex justify-center items-center h-48">
         <CircularProgress />
-      </Box>
+      </div>
     )
   }
 
   if (error) {
     return (
-      <Alert severity="error" sx={{ mb: 2 }}>
+      <Alert severity="error" className="mb-4">
         {error}
       </Alert>
     )
@@ -68,47 +62,35 @@ const CompanyUsersCardview: React.FC<CompanyUsersCardviewProps> = ({
 
   if (success) {
     return (
-      <Alert severity="success" sx={{ mb: 2 }}>
+      <Alert severity="success" className="mb-4">
         {success}
       </Alert>
     )
   }
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Grid container spacing={3}>
+    <div className="p-0 overflow-visible">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 overflow-visible">
         {filteredUsers?.map((user) => (
-          <Grid item xs={12} sm={6} lg={4} key={user.id}>
+          <div key={user.id} className="col-span-1 overflow-visible">
             <Card 
               elevation={0}
-              sx={{ 
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
+              className="h-full flex flex-col relative overflow-visible rounded-xl transition-all duration-300 ease-out shadow-md hover:shadow-lg hover:-translate-y-1 group"
+              style={{ 
                 backgroundColor: uiTheme.background,
                 border: `1px solid ${uiTheme.border}`,
-                borderRadius: 3,
-                overflow: 'hidden',
-                position: 'relative',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                '&:hover': {
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
-                  transform: 'translateY(-2px)',
-                  borderColor: uiTheme.primary
-                }
-              }}
+                '--hover-border-color': uiTheme.primary,
+                transformOrigin: 'center center',
+                willChange: 'transform, box-shadow'
+              } as React.CSSProperties}
             >
               {/* 3-Dot Menu in Top Right Corner */}
-              <Box 
-                sx={{ 
-                  position: 'absolute', 
-                  top: 8, 
-                  right: 8, 
-                  zIndex: 1,
+              <div 
+                className="absolute top-2 right-2 z-20 rounded-full shadow-md"
+                style={{ 
                   backgroundColor: uiTheme.background,
-                  borderRadius: '50%',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden'
                 }}
               >
                 <RowActionsMenu
@@ -116,155 +98,143 @@ const CompanyUsersCardview: React.FC<CompanyUsersCardviewProps> = ({
                   actions={rowActions}
                   theme={uiTheme}
                 />
-              </Box>
+              </div>
 
-              <CardContent sx={{ flexGrow: 1, p: 3, pt: 4 }}>
-                {/* Header with User Info */}
-                <Box sx={{ mb: 3 }}>
-                  <CompanyUserInfo user={user} />
-                </Box>
-
-                {/* Contact Information Section */}
-                <Paper 
-                  elevation={0}
-                  sx={{ 
-                    p: 2, 
-                    mb: 2, 
-                    backgroundColor: `${uiTheme.primary}08`,
-                    border: `1px solid ${uiTheme.primary}20`,
-                    borderRadius: 2,
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.06)'
+              {/* Full-width Image Section with Blurred Background */}
+              <div
+                className="h-48 relative overflow-hidden rounded-t-xl"
+                style={{
+                  '--bg-image': user.profileImage 
+                    ? `url(${getProfileImageUrl(user.profileImage)})`
+                    : 'none',
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden'
+                } as React.CSSProperties}
+              >
+                {/* Blurred background */}
+                <div 
+                  className="absolute inset-0 bg-cover bg-center scale-110 blur-sm"
+                  style={{
+                    backgroundImage: user.profileImage 
+                      ? `url(${getProfileImageUrl(user.profileImage)})`
+                      : 'none'
                   }}
-                >
-                  <Stack spacing={1.5}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <EmailIcon sx={{ color: uiTheme.primary, fontSize: 20 }} />
-                      <Typography 
-                        variant="body2" 
-                        sx={{ 
-                          fontWeight: '600', 
-                          color: uiTheme.text,
-                          wordBreak: 'break-word'
-                        }}
-                      >
-                        {user.email}
-                      </Typography>
-                    </Box>
-                    {user.phoneNumber && (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <PhoneIcon sx={{ color: uiTheme.primary, fontSize: 20 }} />
-                        <Typography variant="body2" sx={{ fontWeight: '600', color: uiTheme.text }}>
-                          {user.phoneNumber}
-                        </Typography>
-                      </Box>
-                    )}
-                  </Stack>
-                </Paper>
-
-                {/* Appointments Section */}
-                <Paper 
-                  elevation={0}
-                  sx={{ 
-                    p: 2, 
-                    mb: 2, 
-                    backgroundColor: '#f0f9ff',
-                    border: '1px solid #e0f2fe',
-                    borderRadius: 2,
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.06)'
+                />
+                {/* Overlay */}
+                <div 
+                  className="absolute inset-0"
+                  style={{
+                    backgroundColor: user.profileImage 
+                      ? 'rgba(0, 0, 0, 0.3)'
+                      : '#f5f5f5'
                   }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
-                    <EventIcon sx={{ color: '#0ea5e9', fontSize: 20 }} />
-                    <Typography variant="body2" sx={{ fontWeight: '600', color: '#0ea5e9' }}>
-                      Total Appointments
-                    </Typography>
-                  </Box>
+                />
+                {/* Avatar centered over blurred background */}
+                <div className="relative z-10 h-full flex items-center justify-center">
+                  <Avatar
+                    className="w-30 h-30 border-4 border-white shadow-lg"
+                    style={{ 
+                      backgroundColor: uiTheme.primary,
+                      width: 120,
+                      height: 120
+                    }}
+                    src={getProfileImageUrl(user.profileImage)}
+                    onError={(e) => {
+                      const target = e.currentTarget as HTMLImageElement
+                      console.error('Company User Avatar image failed to load:', target.src)
+                    }}
+                  >
+                    <span className="text-white font-bold text-5xl">
+                      {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
+                    </span>
+                  </Avatar>
+                </div>
+              </div>
+
+              {/* Content Section */}
+              <CardContent 
+                className="flex-grow p-5 rounded-t-xl"
+                style={{
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden'
+                }}
+              >
+                {/* Title and Author */}
+                <div className="mb-4">
+                  <Typography 
+                    variant="h6" 
+                    className="font-bold mb-1 leading-tight"
+                    style={{ color: uiTheme.text }}
+                  >
+                    {user.firstName} {user.lastName}
+                  </Typography>
+                  <Typography 
+                    variant="body2" 
+                    className="text-sm"
+                    style={{ color: uiTheme.textSecondary }}
+                  >
+                    {user.email} • {formatCompanyUserDate(user.createdAt)}
+                  </Typography>
+                </div>
+
+                {/* Role Category Tag */}
+                <div className="flex justify-start mb-4">
                   <Chip
-                    label={user.totalAppointments}
+                    label={getRoleDisplayName(user.role)}
                     size="small"
-                    color="primary"
-                    variant="outlined"
-                    sx={{ ml: 4 }}
+                    className="text-white font-bold text-xs h-6 px-3"
+                    style={{
+                      backgroundColor: uiTheme.primary
+                    }}
                   />
-                </Paper>
+                </div>
 
-                {/* Appointment Dates Section */}
-                <Paper 
-                  elevation={0}
-                  sx={{ 
-                    p: 2, 
-                    mb: 2, 
-                    backgroundColor: '#f0fdf4',
-                    border: '1px solid #dcfce7',
-                    borderRadius: 2,
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.06)'
-                  }}
-                >
-                  <Stack spacing={1.5}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <DateIcon sx={{ color: '#16a34a', fontSize: 20 }} />
-                      <Typography variant="body2" sx={{ fontWeight: '600', color: '#16a34a' }}>
-                        First: {formatCompanyUserDate(user.firstAppointmentDate)}
+                {/* Additional Info - Simplified */}
+                <div className="flex flex-col gap-2">
+                  {user.phoneNumber && (
+                    <div className="flex items-center gap-2">
+                      <PhoneIcon className="w-4 h-4" style={{ color: uiTheme.textSecondary }} />
+                      <Typography variant="body2" className="text-xs" style={{ color: uiTheme.textSecondary }}>
+                        {user.phoneNumber}
                       </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <DateIcon sx={{ color: '#16a34a', fontSize: 20 }} />
-                      <Typography variant="body2" sx={{ fontWeight: '600', color: '#16a34a' }}>
-                        Last: {formatCompanyUserDate(user.lastAppointmentDate)}
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </Paper>
-
-                {/* Member Since Section */}
-                <Paper 
-                  elevation={0}
-                  sx={{ 
-                    p: 2, 
-                    mb: 2, 
-                    backgroundColor: '#fef3c7',
-                    border: '1px solid #fde68a',
-                    borderRadius: 2,
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.06)'
-                  }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                    <PersonIcon sx={{ color: '#d97706', fontSize: 20 }} />
-                    <Typography variant="body2" sx={{ fontWeight: '600', color: '#d97706' }}>
-                      Member since: {formatCompanyUserDate(user.createdAt)}
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <EventIcon className="w-4 h-4" style={{ color: uiTheme.textSecondary }} />
+                    <Typography variant="body2" className="text-xs" style={{ color: uiTheme.textSecondary }}>
+                      {user.totalAppointments} appointments
                     </Typography>
-                  </Box>
-                </Paper>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <PersonIcon className="w-4 h-4" style={{ color: uiTheme.textSecondary }} />
+                    <Typography variant="body2" className="text-xs" style={{ color: uiTheme.textSecondary }}>
+                      ID: {user.id}
+                    </Typography>
+                  </div>
+                </div>
               </CardContent>
             </Card>
-          </Grid>
+          </div>
         ))}
-      </Grid>
+      </div>
 
       {filteredUsers?.length === 0 && (
-        <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Box sx={{ 
-            width: 80, 
-            height: 80, 
-            borderRadius: '50%', 
-            backgroundColor: `${uiTheme.primary}10`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            mx: 'auto',
-            mb: 3
-          }}>
-            <GroupIcon sx={{ fontSize: 40, color: uiTheme.primary }} />
-          </Box>
-          <Typography variant="h6" sx={{ color: uiTheme.text, mb: 1, fontWeight: '600' }}>
+        <div className="text-center py-16">
+          <div 
+            className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
+            style={{ backgroundColor: `${uiTheme.primary}10` }}
+          >
+            <GroupIcon className="text-4xl" style={{ color: uiTheme.primary }} />
+          </div>
+          <Typography variant="h6" className="mb-2 font-semibold" style={{ color: uiTheme.text }}>
             No company users found
           </Typography>
-          <Typography variant="body2" sx={{ color: '#666' }}>
+          <Typography variant="body2" className="text-gray-600">
             Users will appear here once they book appointments with your company
           </Typography>
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }
 

@@ -1,5 +1,4 @@
 import {
-  Box,
   Typography,
   Chip,
   Avatar
@@ -21,10 +20,10 @@ export const UserAvatar = ({
   size?: number
 }) => (
   <Avatar
-    sx={{ 
+    className="bg-indigo-500"
+    style={{ 
       width: size, 
-      height: size,
-      backgroundColor: '#6366f1'
+      height: size
     }}
     src={getProfileImageUrl(user.profileImage)}
     onError={(e) => {
@@ -32,7 +31,7 @@ export const UserAvatar = ({
       console.error('User Avatar image failed to load:', target.src)
     }}
   >
-    <span style={{ color: 'white', fontWeight: 'bold', fontSize: size * 0.4 }}>
+    <span className="text-white font-bold" style={{ fontSize: size * 0.4 }}>
       {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
     </span>
   </Avatar>
@@ -46,14 +45,14 @@ export const UserName = ({
   user: any
   variant?: 'h6' | 'body2'
 }) => (
-  <Box>
-    <Typography variant={variant} sx={{ fontWeight: 'bold' }}>
+  <div>
+    <Typography variant={variant} className="font-bold">
       {user.firstName} {user.lastName}
     </Typography>
-    <Typography variant="caption" sx={{ color: '#666' }}>
+    <Typography variant="caption" className="text-gray-600">
       ID: {user.id}
     </Typography>
-  </Box>
+  </div>
 )
 
 // User Info Component (for cards)
@@ -62,39 +61,33 @@ export const UserInfo = ({
 }: { 
   user: any
 }) => (
-  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+  <div className="flex items-center gap-4">
     <UserAvatar user={user} size={48} />
     <UserName user={user} variant="h6" />
-  </Box>
+  </div>
 )
 
 // User Email Component
 export const UserEmail = ({ email }: { email: string }) => (
-  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-    <EmailIcon sx={{ color: '#666', fontSize: 16 }} />
+  <div className="flex items-center gap-2">
+    <EmailIcon className="w-4 h-4 text-gray-600" />
     <Typography 
       variant="body2" 
-      sx={{ 
-        color: '#666',
-        maxWidth: 200,
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap'
-      }}
+      className="text-gray-600 max-w-48 truncate"
     >
       {email}
     </Typography>
-  </Box>
+  </div>
 )
 
 // User Phone Component
 export const UserPhone = ({ phone }: { phone?: string }) => (
-  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-    <PhoneIcon sx={{ color: '#666', fontSize: 16 }} />
-    <Typography variant="body2" sx={{ color: '#666' }}>
+  <div className="flex items-center gap-2">
+    <PhoneIcon className="w-4 h-4 text-gray-600" />
+    <Typography variant="body2" className="text-gray-600">
       {formatUserPhone(phone)}
     </Typography>
-  </Box>
+  </div>
 )
 
 // User Role Chip Component
@@ -106,10 +99,9 @@ export const UserRoleChip = ({ role }: { role: number }) => {
     <Chip
       label={roleDisplayName}
       size="small"
+      className="text-white font-bold"
       style={{
-        backgroundColor: roleColor,
-        color: '#ffffff',
-        fontWeight: 'bold'
+        backgroundColor: roleColor
       }}
     />
   )
@@ -117,10 +109,10 @@ export const UserRoleChip = ({ role }: { role: number }) => {
 
 // User Date Component
 export const UserDate = ({ date }: { date: string }) => (
-  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-    <DateIcon sx={{ color: '#666', fontSize: 16 }} />
-    <Typography variant="body2" sx={{ color: '#666' }}>
+  <div className="flex items-center gap-2">
+    <DateIcon className="w-4 h-4 text-gray-600" />
+    <Typography variant="body2" className="text-gray-600">
       {formatUserDate(date)}
     </Typography>
-  </Box>
+  </div>
 )

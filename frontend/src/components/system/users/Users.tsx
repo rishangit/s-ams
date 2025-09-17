@@ -1,8 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Box,
-  Avatar,
-  Chip,
   IconButton,
   Tooltip,
   useMediaQuery
@@ -14,14 +12,11 @@ import {
 } from '@mui/icons-material'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../../store'
-import { getRoleDisplayName, isAdminOnlyRole } from '../../../constants/roles'
-import { getProfileImageUrl } from '../../../utils/fileUtils'
+import { isAdminOnlyRole } from '../../../constants/roles'
 import { useUsers } from '../../../hooks/useUsers'
-import { CustomGrid, RowAction } from '../../../components/shared'
-import { ColDef, ICellRendererParams } from 'ag-grid-community'
-import { Edit as EditIcon, Delete as DeleteIcon, Visibility as ViewIcon } from '@mui/icons-material'
 import UsersListview from './UsersListview'
 import UsersCardview from './UsersCardview'
+import UsersGridview from './UsersGridview'
 
 // interface User {
 //   id: number
@@ -93,28 +88,6 @@ const Users: React.FC = () => {
     }
   }, [success, clearSuccess])
 
-  const getRoleColor = (role: number) => {
-    switch (role) {
-      case 0: // Admin
-        return '#d32f2f' // Red
-      case 1: // Owner
-        return '#1976d2' // Blue
-      case 2: // Staff
-        return '#388e3c' // Green
-      case 3: // User
-        return '#f57c00' // Orange
-      default:
-        return '#757575' // Grey
-    }
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
-  }
 
   // Handle view mode change
   const handleViewModeChange = (newViewMode: 'grid' | 'list' | 'card') => {
@@ -140,138 +113,6 @@ const Users: React.FC = () => {
     }
   }
 
-  // User Cell Renderer Component
-  const UserCellRenderer = (props: ICellRendererParams) => {
-    const { data } = props
-    return (
-      <Box className="flex items-center gap-3">
-        <Avatar
-          className="w-10 h-10 border-2 border-white shadow-sm"
-          style={{ backgroundColor: uiTheme.primary }}
-          src={getProfileImageUrl(data.profileImage)}
-          onError={(e) => {
-            const target = e.currentTarget as HTMLImageElement
-            console.error('User Avatar image failed to load:', target.src)
-            console.error('User profile image path:', data.profileImage)
-          }}
-        >
-          <span className="text-white font-semibold text-sm">
-            {data.firstName?.charAt(0)}{data.lastName?.charAt(0)}
-          </span>
-        </Avatar>
-        <Box>
-          <div className="font-semibold text-sm" style={{ color: uiTheme.text }}>
-            {data.firstName} {data.lastName}
-          </div>
-          <div className="text-xs" style={{ color: uiTheme.textSecondary }}>
-            ID: {data.id}
-          </div>
-        </Box>
-      </Box>
-    )
-  }
-
-  // Role Cell Renderer Component
-  const RoleCellRenderer = (props: ICellRendererParams) => {
-    const { value } = props
-    return (
-      <Chip
-        label={getRoleDisplayName(value as any)}
-        size="small"
-        style={{
-          backgroundColor: getRoleColor(value),
-          color: '#ffffff',
-          fontWeight: 'bold'
-        }}
-      />
-    )
-  }
-
-  // Row Actions Configuration
-  const rowActions = useMemo<RowAction[]>(() => {
-    const actions: RowAction[] = [
-      {
-        id: 'view',
-        label: 'View User',
-        icon: <ViewIcon fontSize="small" />,
-        onClick: (rowData) => handleViewUser(rowData.id),
-        color: 'primary'
-      },
-      {
-        id: 'edit',
-        label: 'Edit User',
-        icon: <EditIcon fontSize="small" />,
-        onClick: (rowData) => handleEditUser(rowData.id),
-        color: 'info'
-      },
-      {
-        id: 'delete',
-        label: 'Delete User',
-        icon: <DeleteIcon fontSize="small" />,
-        onClick: (rowData) => handleDeleteUser(rowData.id),
-        color: 'error',
-        disabled: (rowData) => rowData.id === currentUser?.id // Can't delete self
-      }
-    ]
-
-    return actions
-  }, [currentUser])
-
-
-
-  // Column Definitions
-  const columnDefs = useMemo<ColDef[]>(() => [
-    {
-      headerName: 'User',
-      field: 'firstName',
-      cellRenderer: UserCellRenderer,
-      sortable: true,
-      filter: true,
-      resizable: true,
-      width: 250,
-      minWidth: 200
-    },
-    {
-      headerName: 'Email',
-      field: 'email',
-      sortable: true,
-      filter: true,
-      resizable: true,
-      width: 200,
-      minWidth: 150
-    },
-    {
-      headerName: 'Phone',
-      field: 'phoneNumber',
-      sortable: true,
-      filter: true,
-      resizable: true,
-      width: 150,
-      minWidth: 120,
-      valueGetter: (params) => params.data.phoneNumber || 'N/A'
-    },
-    {
-      headerName: 'Role',
-      field: 'role',
-      cellRenderer: RoleCellRenderer,
-      sortable: true,
-      filter: true,
-      resizable: true,
-      width: 120,
-      minWidth: 100
-    },
-
-    {
-      headerName: 'Created',
-      field: 'createdAt',
-      sortable: true,
-      filter: true,
-      resizable: true,
-      width: 150,
-      minWidth: 120,
-      valueGetter: (params) => formatDate(params.data.createdAt)
-    }
-  ], [uiTheme, currentUser])
 
   // Access control check
   if (!currentUser || !isAdminOnlyRole(currentUser.role as any)) {
@@ -285,7 +126,7 @@ const Users: React.FC = () => {
   }
 
   return (
-    <Box className="h-full p-6">
+    <Box className="h-full p-1 sm:p-6">
       {/* Header Section */}
       <Box className="flex items-center justify-between mb-6">
         <Box>
@@ -327,35 +168,35 @@ const Users: React.FC = () => {
               </IconButton>
             </Tooltip>
           )}
-          <Tooltip title="Card View">
-            <IconButton
-              size="small"
-              onClick={() => handleViewModeChange('card')}
-              style={{
-                backgroundColor: viewMode === 'card' ? uiTheme.primary : 'transparent',
-                color: viewMode === 'card' ? '#ffffff' : uiTheme.text
-              }}
-            >
-              <CardViewIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
+          {!isMobile && (
+            <Tooltip title="Card View">
+              <IconButton
+                size="small"
+                onClick={() => handleViewModeChange('card')}
+                style={{
+                  backgroundColor: viewMode === 'card' ? uiTheme.primary : 'transparent',
+                  color: viewMode === 'card' ? '#ffffff' : uiTheme.text
+                }}
+              >
+                <CardViewIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
         </Box>
       </Box>
 
       {/* Conditional Rendering of Grid, List, or Card View */}
       {viewMode === 'grid' ? (
-        <CustomGrid
-          title="Users Management"
-          data={users || []}
-          columnDefs={columnDefs}
+        <UsersGridview
+          filteredUsers={users || []}
           loading={loading}
           error={error}
           success={success}
-          theme={uiTheme}
-          height="calc(100vh - 200px)"
-          showTitle={false}
-          showAlerts={true}
-          rowActions={rowActions}
+          uiTheme={uiTheme}
+          currentUserId={currentUser?.id}
+          onViewUser={handleViewUser}
+          onEditUser={handleEditUser}
+          onDeleteUser={handleDeleteUser}
         />
       ) : viewMode === 'list' ? (
         <UsersListview

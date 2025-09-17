@@ -75,7 +75,7 @@ const CompanyUsersListview: React.FC<CompanyUsersListviewProps> = ({
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
+      <Box className="flex justify-center items-center h-48">
         <CircularProgress />
       </Box>
     )
@@ -83,7 +83,7 @@ const CompanyUsersListview: React.FC<CompanyUsersListviewProps> = ({
 
   if (error) {
     return (
-      <Alert severity="error" sx={{ mb: 2 }}>
+      <Alert severity="error" className="mb-4">
         {error}
       </Alert>
     )
@@ -91,7 +91,7 @@ const CompanyUsersListview: React.FC<CompanyUsersListviewProps> = ({
 
   if (success) {
     return (
-      <Alert severity="success" sx={{ mb: 2 }}>
+      <Alert severity="success" className="mb-4">
         {success}
       </Alert>
     )
@@ -99,17 +99,17 @@ const CompanyUsersListview: React.FC<CompanyUsersListviewProps> = ({
 
   return (
     <Box>
-      <TableContainer component={Paper} sx={{ maxHeight: 'calc(100vh - 350px)' }}>
+      <TableContainer component={Paper} className="max-h-[calc(100vh-350px)]">
         <Table stickyHeader>
           <TableHead>
             <TableRow>
               {tableHeaders.map((header) => (
                 <TableCell
                   key={header}
-                  sx={{
+                  className="font-bold"
+                  style={{
                     backgroundColor: uiTheme.background,
                     color: uiTheme.text,
-                    fontWeight: 'bold',
                     borderBottom: `2px solid ${uiTheme.primary}`
                   }}
                 >

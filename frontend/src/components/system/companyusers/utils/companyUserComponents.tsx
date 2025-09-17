@@ -23,10 +23,10 @@ export const CompanyUserAvatar = ({
   size?: number
 }) => (
   <Avatar
-    sx={{ 
+    className="bg-indigo-500"
+    style={{ 
       width: size, 
-      height: size,
-      backgroundColor: '#6366f1'
+      height: size
     }}
     src={getProfileImageUrl(user.profileImage)}
     onError={(e) => {
@@ -34,7 +34,7 @@ export const CompanyUserAvatar = ({
       console.error('Company User Avatar image failed to load:', target.src)
     }}
   >
-    <span style={{ color: 'white', fontWeight: 'bold', fontSize: size * 0.4 }}>
+    <span className="text-white font-bold" style={{ fontSize: size * 0.4 }}>
       {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
     </span>
   </Avatar>
@@ -49,10 +49,10 @@ export const CompanyUserName = ({
   variant?: 'h6' | 'body2'
 }) => (
   <Box>
-    <Typography variant={variant} sx={{ fontWeight: 'bold' }}>
+    <Typography variant={variant} className="font-bold">
       {user.firstName} {user.lastName}
     </Typography>
-    <Typography variant="caption" sx={{ color: '#666' }}>
+    <Typography variant="caption" className="text-gray-600">
       {getCompanyUserRoleDisplayName(user.role)}
     </Typography>
   </Box>
@@ -64,7 +64,7 @@ export const CompanyUserInfo = ({
 }: { 
   user: any
 }) => (
-  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+  <Box className="flex items-center gap-4">
     <CompanyUserAvatar user={user} size={48} />
     <CompanyUserName user={user} variant="h6" />
   </Box>
@@ -72,17 +72,11 @@ export const CompanyUserInfo = ({
 
 // Company User Email Component
 export const CompanyUserEmail = ({ email }: { email: string }) => (
-  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-    <EmailIcon sx={{ color: '#666', fontSize: 16 }} />
+  <Box className="flex items-center gap-2">
+    <EmailIcon className="text-gray-600" style={{ fontSize: 16 }} />
     <Typography 
       variant="body2" 
-      sx={{ 
-        color: '#666',
-        maxWidth: 200,
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap'
-      }}
+      className="text-gray-600 max-w-[200px] truncate"
     >
       {email}
     </Typography>
@@ -91,9 +85,9 @@ export const CompanyUserEmail = ({ email }: { email: string }) => (
 
 // Company User Phone Component
 export const CompanyUserPhone = ({ phone }: { phone?: string }) => (
-  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-    <PhoneIcon sx={{ color: '#666', fontSize: 16 }} />
-    <Typography variant="body2" sx={{ color: '#666' }}>
+  <Box className="flex items-center gap-2">
+    <PhoneIcon className="text-gray-600" style={{ fontSize: 16 }} />
+    <Typography variant="body2" className="text-gray-600">
       {formatCompanyUserPhone(phone)}
     </Typography>
   </Box>
@@ -101,8 +95,8 @@ export const CompanyUserPhone = ({ phone }: { phone?: string }) => (
 
 // Company User Total Appointments Component
 export const CompanyUserTotalAppointments = ({ count }: { count: number }) => (
-  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-    <EventIcon sx={{ color: '#6366f1', fontSize: 16 }} />
+  <Box className="flex items-center gap-2">
+    <EventIcon className="text-indigo-500" style={{ fontSize: 16 }} />
     <Chip
       label={formatTotalAppointments(count)}
       size="small"
@@ -120,9 +114,9 @@ export const CompanyUserDate = ({
   date?: string
   label: string
 }) => (
-  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-    <DateIcon sx={{ color: '#666', fontSize: 16 }} />
-    <Typography variant="body2" sx={{ color: '#666' }}>
+  <Box className="flex items-center gap-2">
+    <DateIcon className="text-gray-600" style={{ fontSize: 16 }} />
+    <Typography variant="body2" className="text-gray-600">
       {label}: {formatCompanyUserDate(date)}
     </Typography>
   </Box>
@@ -130,9 +124,9 @@ export const CompanyUserDate = ({
 
 // Company User Member Since Component
 export const CompanyUserMemberSince = ({ date }: { date: string }) => (
-  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-    <PersonIcon sx={{ color: '#666', fontSize: 16 }} />
-    <Typography variant="body2" sx={{ color: '#666' }}>
+  <Box className="flex items-center gap-2">
+    <PersonIcon className="text-gray-600" style={{ fontSize: 16 }} />
+    <Typography variant="body2" className="text-gray-600">
       Member since: {formatCompanyUserDate(date)}
     </Typography>
   </Box>

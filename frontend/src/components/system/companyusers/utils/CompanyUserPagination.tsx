@@ -39,7 +39,7 @@ function TablePaginationActions(props: TablePaginationActionsProps) {
   }
 
   return (
-    <Box sx={{ flexShrink: 0, ml: 2.5 }}>
+    <Box className="flex-shrink-0 ml-5">
       <Tooltip title="First page">
         <IconButton
           onClick={handleFirstPageButtonClick}
@@ -107,25 +107,11 @@ const CompanyUserPagination: React.FC<CompanyUserPaginationProps> = ({
       onPageChange={onPageChange}
       onRowsPerPageChange={onRowsPerPageChange}
       ActionsComponent={TablePaginationActions}
-      sx={{
+      className="border-t"
+      style={{
         borderTop: `1px solid ${uiTheme.border}`,
         backgroundColor: uiTheme.background,
-        color: uiTheme.text,
-        '& .MuiTablePagination-toolbar': {
-          color: uiTheme.text
-        },
-        '& .MuiTablePagination-selectLabel': {
-          color: uiTheme.text
-        },
-        '& .MuiTablePagination-displayedRows': {
-          color: uiTheme.text
-        },
-        '& .MuiTablePagination-select': {
-          color: uiTheme.text
-        },
-        '& .MuiTablePagination-selectIcon': {
-          color: uiTheme.text
-        }
+        color: uiTheme.text
       }}
     />
   )

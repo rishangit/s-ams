@@ -1,18 +1,13 @@
-import React, { useEffect, useState, useMemo } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { RootState } from '../../../store'
-import { ColDef } from 'ag-grid-community'
-import CustomGrid from '../../shared/CustomGrid'
+import CompanyUsersGridview from './CompanyUsersGridview'
 import CompanyUsersListview from './CompanyUsersListview'
 import CompanyUsersCardview from './CompanyUsersCardview'
-import { Box, Typography, Chip, Avatar, IconButton, Tooltip, useMediaQuery } from '@mui/material'
-import { Visibility as ViewIcon, ViewModule as GridViewIcon, ViewList as ListViewIcon, ViewComfy as CardViewIcon } from '@mui/icons-material'
-import { getProfileImageUrl } from '../../../utils/fileUtils'
-import { getRoleDisplayName } from '../../../constants/roles'
-import { format } from 'date-fns'
+import { Box, Typography, IconButton, Tooltip, useMediaQuery } from '@mui/material'
+import { ViewModule as GridViewIcon, ViewList as ListViewIcon, ViewComfy as CardViewIcon } from '@mui/icons-material'
 import { apiService } from '../../../services/api'
-import { RowAction } from '../../shared/RowActionsMenu'
 
 interface CompanyUser {
   id: number
@@ -86,125 +81,6 @@ const CompanyUsers: React.FC = () => {
     setUserSelectedView(false)
   }, [isMobile])
 
-  // Column definitions for the grid
-  const columnDefs: ColDef[] = useMemo(() => [
-    {
-      headerName: 'Name',
-      field: 'name',
-      width: 250,
-      valueGetter: (params: any) => {
-        const user = params.data as CompanyUser
-        return `${user.firstName} ${user.lastName}`
-      },
-      cellRenderer: (params: any) => {
-        const user = params.data as CompanyUser
-        return (
-          <Box className="flex items-center gap-3">
-            <Avatar
-              src={getProfileImageUrl(user.profileImage)}
-              alt={`${user.firstName} ${user.lastName}`}
-              sx={{ width: 40, height: 40 }}
-            />
-            <Box className="flex flex-col">
-              <Typography variant="body2" className="font-medium">
-                {user.firstName} {user.lastName}
-              </Typography>
-              <Typography variant="caption" className="text-gray-500">
-                {getRoleDisplayName(user.role as any)}
-              </Typography>
-            </Box>
-          </Box>
-        )
-      }
-    },
-    {
-      headerName: 'Email',
-      field: 'email',
-      width: 250,
-      cellRenderer: (params: any) => {
-        const user = params.data as CompanyUser
-        return (
-          <Typography variant="body2" className="truncate">
-            {user.email}
-          </Typography>
-        )
-      }
-    },
-    {
-      headerName: 'Phone',
-      field: 'phoneNumber',
-      width: 150,
-      cellRenderer: (params: any) => {
-        const user = params.data as CompanyUser
-        return (
-          <Typography variant="body2">
-            {user.phoneNumber || 'N/A'}
-          </Typography>
-        )
-      }
-    },
-    {
-      headerName: 'Total Appointments',
-      field: 'totalAppointments',
-      width: 150,
-      cellRenderer: (params: any) => {
-        const user = params.data as CompanyUser
-        return (
-          <Chip
-            label={user.totalAppointments}
-            size="small"
-            color="primary"
-            variant="outlined"
-          />
-        )
-      }
-    },
-    {
-      headerName: 'First Appointment',
-      field: 'firstAppointmentDate',
-      width: 150,
-      cellRenderer: (params: any) => {
-        const user = params.data as CompanyUser
-        return (
-          <Typography variant="body2">
-            {user.firstAppointmentDate 
-              ? format(new Date(user.firstAppointmentDate), 'MMM dd, yyyy')
-              : 'N/A'
-            }
-          </Typography>
-        )
-      }
-    },
-    {
-      headerName: 'Last Appointment',
-      field: 'lastAppointmentDate',
-      width: 150,
-      cellRenderer: (params: any) => {
-        const user = params.data as CompanyUser
-        return (
-          <Typography variant="body2">
-            {user.lastAppointmentDate 
-              ? format(new Date(user.lastAppointmentDate), 'MMM dd, yyyy')
-              : 'N/A'
-            }
-          </Typography>
-        )
-      }
-    },
-    {
-      headerName: 'Member Since',
-      field: 'createdAt',
-      width: 150,
-      cellRenderer: (params: any) => {
-        const user = params.data as CompanyUser
-        return (
-          <Typography variant="body2">
-            {format(new Date(user.createdAt), 'MMM dd, yyyy')}
-          </Typography>
-        )
-      }
-    }
-  ], [])
 
   // Handle view mode change
   const handleViewModeChange = (newViewMode: 'grid' | 'list' | 'card') => {
@@ -217,16 +93,6 @@ const CompanyUsers: React.FC = () => {
     navigate(`/system/company-users/${userId}`)
   }
 
-  // Row Actions Configuration
-  const rowActions = useMemo<RowAction[]>(() => [
-    {
-      id: 'viewAppointments',
-      label: 'View All Appointments',
-      icon: <ViewIcon fontSize="small" />,
-      onClick: (rowData: CompanyUser) => handleViewAppointments(rowData.id),
-      color: 'primary'
-    }
-  ], [])
 
   // Show loading state
   if (authLoading) {
@@ -317,19 +183,13 @@ const CompanyUsers: React.FC = () => {
 
       {/* Conditional Rendering of Grid, List, or Card View */}
       {viewMode === 'grid' ? (
-        <CustomGrid
-          title="Company Users"
-          data={users}
-          columnDefs={columnDefs}
+        <CompanyUsersGridview
+          filteredUsers={users}
           loading={loading}
           error={error}
           success={success}
-          theme={uiTheme}
-          height="calc(100vh - 280px)"
-          showTitle={false}
-          showAlerts={true}
-          rowActions={rowActions}
-          rowHeight={70}
+          uiTheme={uiTheme}
+          onViewAppointments={handleViewAppointments}
         />
       ) : viewMode === 'list' ? (
         <CompanyUsersListview
