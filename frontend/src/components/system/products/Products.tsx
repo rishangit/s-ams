@@ -4,6 +4,8 @@ import { RootState } from '../../../store'
 import { ColDef, ICellRendererParams } from 'ag-grid-community'
 import { CustomGrid, RowAction } from '../../shared'
 import ProductForm from './ProductForm'
+import ProductsListview from './ProductsListview'
+import ProductsCardview from './ProductsCardview'
 import {
   getProductsRequest,
   deleteProductRequest,
@@ -11,8 +13,8 @@ import {
   getProductCategoriesRequest
 } from '../../../store/actions/productsActions'
 import { useTheme } from '../../../hooks/useTheme'
-import { Edit, Delete, Add, Inventory as ProductIcon, Warning as WarningIcon } from '@mui/icons-material'
-import { Button, Box, Dialog, DialogTitle, DialogContent, Typography, Chip, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material'
+import { Edit, Delete, Add, Inventory as ProductIcon, Warning as WarningIcon, ViewModule as GridViewIcon, ViewList as ListViewIcon, ViewComfy as CardViewIcon } from '@mui/icons-material'
+import { Button, Box, Dialog, DialogTitle, DialogContent, Typography, Chip, TextField, Select, MenuItem, FormControl, InputLabel, IconButton, Tooltip, useMediaQuery } from '@mui/material'
 import { Product } from '../../../types/product'
 
 const Products: React.FC = () => {
@@ -20,7 +22,10 @@ const Products: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth)
   const { products, loading, error, success, categories } = useSelector((state: RootState) => state.products)
   const { theme } = useTheme()
+  const isMobile = useMediaQuery('(max-width: 768px)')
 
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'card'>('grid')
+  const [userSelectedView, setUserSelectedView] = useState<boolean>(false)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editingProductId, setEditingProductId] = useState<number | null>(null)
@@ -35,6 +40,22 @@ const Products: React.FC = () => {
       dispatch(getProductCategoriesRequest())
     }
   }, [user?.role, dispatch])
+
+  // Auto-switch to card view on mobile (only if user hasn't manually selected a view)
+  useEffect(() => {
+    if (!userSelectedView) {
+      if (isMobile && viewMode !== 'card') {
+        setViewMode('card')
+      } else if (!isMobile && viewMode === 'card') {
+        setViewMode('grid')
+      }
+    }
+  }, [isMobile, viewMode, userSelectedView])
+
+  // Reset user selection when screen size changes significantly
+  useEffect(() => {
+    setUserSelectedView(false)
+  }, [isMobile])
 
   // Clear error and success messages after 3 seconds
   useEffect(() => {
@@ -65,6 +86,12 @@ const Products: React.FC = () => {
     setIsAddModalOpen(false)
     setIsEditModalOpen(false)
     setEditingProductId(null)
+  }
+
+  // Handle view mode change
+  const handleViewModeChange = (newViewMode: 'grid' | 'list' | 'card') => {
+    setViewMode(newViewMode)
+    setUserSelectedView(true)
   }
 
 
@@ -306,14 +333,59 @@ const Products: React.FC = () => {
               Manage your inventory and product catalog
             </Typography>
           </Box>
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={handleAddProduct}
-            style={{ backgroundColor: theme.primary }}
-          >
-            Add Product
-          </Button>
+          <Box className="flex items-center gap-4">
+            {/* View Switcher */}
+            <Box className="flex items-center gap-1 border rounded-lg p-1" style={{ borderColor: theme.border }}>
+              {!isMobile && (
+                <Tooltip title="Grid View">
+                  <IconButton
+                    size="small"
+                    onClick={() => handleViewModeChange('grid')}
+                    style={{
+                      backgroundColor: viewMode === 'grid' ? theme.primary : 'transparent',
+                      color: viewMode === 'grid' ? '#ffffff' : theme.text
+                    }}
+                  >
+                    <GridViewIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              )}
+              {!isMobile && (
+                <Tooltip title="List View">
+                  <IconButton
+                    size="small"
+                    onClick={() => handleViewModeChange('list')}
+                    style={{
+                      backgroundColor: viewMode === 'list' ? theme.primary : 'transparent',
+                      color: viewMode === 'list' ? '#ffffff' : theme.text
+                    }}
+                  >
+                    <ListViewIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              )}
+              <Tooltip title="Card View">
+                <IconButton
+                  size="small"
+                  onClick={() => handleViewModeChange('card')}
+                  style={{
+                    backgroundColor: viewMode === 'card' ? theme.primary : 'transparent',
+                    color: viewMode === 'card' ? '#ffffff' : theme.text
+                  }}
+                >
+                  <CardViewIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Box>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={handleAddProduct}
+              style={{ backgroundColor: theme.primary }}
+            >
+              Add Product
+            </Button>
+          </Box>
         </Box>
 
         {/* Filters */}
@@ -357,21 +429,43 @@ const Products: React.FC = () => {
         </Box>
       </Box>
 
-      {/* Products Grid */}
-      <CustomGrid
-        title="Products"
-        data={filteredProducts || []}
-        columnDefs={columnDefs}
-        loading={loading}
-        error={error}
-        success={success}
-        theme={theme}
-        height="calc(100vh - 280px)"
-        showTitle={false}
-        showAlerts={true}
-        rowActions={rowActions}
-        rowHeight={70}
-      />
+      {/* Conditional Rendering of Grid, List, or Card View */}
+      {viewMode === 'grid' ? (
+        <CustomGrid
+          title="Products"
+          data={filteredProducts || []}
+          columnDefs={columnDefs}
+          loading={loading}
+          error={error}
+          success={success}
+          theme={theme}
+          height="calc(100vh - 280px)"
+          showTitle={false}
+          showAlerts={true}
+          rowActions={rowActions}
+          rowHeight={70}
+        />
+      ) : viewMode === 'list' ? (
+        <ProductsListview
+          filteredProducts={filteredProducts || []}
+          loading={loading}
+          error={error}
+          success={success}
+          theme={theme}
+          onEditProduct={handleEditProduct}
+          onDeleteProduct={handleDeleteProduct}
+        />
+      ) : (
+        <ProductsCardview
+          filteredProducts={filteredProducts || []}
+          loading={loading}
+          error={error}
+          success={success}
+          theme={theme}
+          onEditProduct={handleEditProduct}
+          onDeleteProduct={handleDeleteProduct}
+        />
+      )}
 
       {/* Add Product Modal */}
       <Dialog

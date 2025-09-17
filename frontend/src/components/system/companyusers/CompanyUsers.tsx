@@ -4,8 +4,10 @@ import { useNavigate } from 'react-router-dom'
 import { RootState } from '../../../store'
 import { ColDef } from 'ag-grid-community'
 import CustomGrid from '../../shared/CustomGrid'
-import { Box, Typography, Chip, Avatar } from '@mui/material'
-import { Visibility as ViewIcon } from '@mui/icons-material'
+import CompanyUsersListview from './CompanyUsersListview'
+import CompanyUsersCardview from './CompanyUsersCardview'
+import { Box, Typography, Chip, Avatar, IconButton, Tooltip, useMediaQuery } from '@mui/material'
+import { Visibility as ViewIcon, ViewModule as GridViewIcon, ViewList as ListViewIcon, ViewComfy as CardViewIcon } from '@mui/icons-material'
 import { getProfileImageUrl } from '../../../utils/fileUtils'
 import { getRoleDisplayName } from '../../../constants/roles'
 import { format } from 'date-fns'
@@ -31,7 +33,10 @@ const CompanyUsers: React.FC = () => {
   const navigate = useNavigate()
   const { user, loading: authLoading } = useSelector((state: RootState) => state.auth)
   const uiTheme = useSelector((state: RootState) => state.ui.theme)
+  const isMobile = useMediaQuery('(max-width: 768px)')
   
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'card'>('grid')
+  const [userSelectedView, setUserSelectedView] = useState<boolean>(false)
   const [users, setUsers] = useState<CompanyUser[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -64,6 +69,22 @@ const CompanyUsers: React.FC = () => {
       fetchCompanyUsers()
     }
   }, [user])
+
+  // Auto-switch to card view on mobile (only if user hasn't manually selected a view)
+  useEffect(() => {
+    if (!userSelectedView) {
+      if (isMobile && viewMode !== 'card') {
+        setViewMode('card')
+      } else if (!isMobile && viewMode === 'card') {
+        setViewMode('grid')
+      }
+    }
+  }, [isMobile, viewMode, userSelectedView])
+
+  // Reset user selection when screen size changes significantly
+  useEffect(() => {
+    setUserSelectedView(false)
+  }, [isMobile])
 
   // Column definitions for the grid
   const columnDefs: ColDef[] = useMemo(() => [
@@ -185,18 +206,27 @@ const CompanyUsers: React.FC = () => {
     }
   ], [])
 
+  // Handle view mode change
+  const handleViewModeChange = (newViewMode: 'grid' | 'list' | 'card') => {
+    setViewMode(newViewMode)
+    setUserSelectedView(true)
+  }
+
+  // Handle view appointments
+  const handleViewAppointments = (userId: number) => {
+    navigate(`/system/company-users/${userId}`)
+  }
+
   // Row Actions Configuration
   const rowActions = useMemo<RowAction[]>(() => [
     {
       id: 'viewAppointments',
       label: 'View All Appointments',
       icon: <ViewIcon fontSize="small" />,
-      onClick: (rowData: CompanyUser) => {
-        navigate(`/system/company-users/${rowData.id}`)
-      },
+      onClick: (rowData: CompanyUser) => handleViewAppointments(rowData.id),
       color: 'primary'
     }
-  ], [navigate])
+  ], [])
 
   // Show loading state
   if (authLoading) {
@@ -222,37 +252,104 @@ const CompanyUsers: React.FC = () => {
     <Box className="h-full flex flex-col">
       {/* Header Section */}
       <Box className="mb-6">
-        <Typography 
-          variant="h4" 
-          className="font-bold mb-2"
-          style={{ color: uiTheme.text }}
-        >
-          Company Users
-        </Typography>
-        <Typography 
-          variant="body1"
-          style={{ color: uiTheme.textSecondary }}
-        >
-          View all users who have received services from your company
-        </Typography>
+        <Box className="flex items-center justify-between mb-4">
+          <Box>
+            <Typography 
+              variant="h4" 
+              className="font-bold mb-2"
+              style={{ color: uiTheme.text }}
+            >
+              Company Users
+            </Typography>
+            <Typography 
+              variant="body1"
+              style={{ color: uiTheme.textSecondary }}
+            >
+              View all users who have received services from your company
+            </Typography>
+          </Box>
+          
+          {/* View Switcher */}
+          <Box className="flex items-center gap-1 border rounded-lg p-1" style={{ borderColor: uiTheme.border }}>
+            {!isMobile && (
+              <Tooltip title="Grid View">
+                <IconButton
+                  size="small"
+                  onClick={() => handleViewModeChange('grid')}
+                  style={{
+                    backgroundColor: viewMode === 'grid' ? uiTheme.primary : 'transparent',
+                    color: viewMode === 'grid' ? '#ffffff' : uiTheme.text
+                  }}
+                >
+                  <GridViewIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            )}
+            {!isMobile && (
+              <Tooltip title="List View">
+                <IconButton
+                  size="small"
+                  onClick={() => handleViewModeChange('list')}
+                  style={{
+                    backgroundColor: viewMode === 'list' ? uiTheme.primary : 'transparent',
+                    color: viewMode === 'list' ? '#ffffff' : uiTheme.text
+                  }}
+                >
+                  <ListViewIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            )}
+            <Tooltip title="Card View">
+              <IconButton
+                size="small"
+                onClick={() => handleViewModeChange('card')}
+                style={{
+                  backgroundColor: viewMode === 'card' ? uiTheme.primary : 'transparent',
+                  color: viewMode === 'card' ? '#ffffff' : uiTheme.text
+                }}
+              >
+                <CardViewIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        </Box>
       </Box>
 
-
-      {/* Grid Section */}
-      <CustomGrid
-        title="Company Users"
-        data={users}
-        columnDefs={columnDefs}
-        loading={loading}
-        error={error}
-        success={success}
-        theme={uiTheme}
-        height="calc(100vh - 280px)"
-        showTitle={false}
-        showAlerts={true}
-        rowActions={rowActions}
-        rowHeight={70}
-      />
+      {/* Conditional Rendering of Grid, List, or Card View */}
+      {viewMode === 'grid' ? (
+        <CustomGrid
+          title="Company Users"
+          data={users}
+          columnDefs={columnDefs}
+          loading={loading}
+          error={error}
+          success={success}
+          theme={uiTheme}
+          height="calc(100vh - 280px)"
+          showTitle={false}
+          showAlerts={true}
+          rowActions={rowActions}
+          rowHeight={70}
+        />
+      ) : viewMode === 'list' ? (
+        <CompanyUsersListview
+          filteredUsers={users}
+          loading={loading}
+          error={error}
+          success={success}
+          uiTheme={uiTheme}
+          onViewAppointments={handleViewAppointments}
+        />
+      ) : (
+        <CompanyUsersCardview
+          filteredUsers={users}
+          loading={loading}
+          error={error}
+          success={success}
+          uiTheme={uiTheme}
+          onViewAppointments={handleViewAppointments}
+        />
+      )}
     </Box>
   )
 }

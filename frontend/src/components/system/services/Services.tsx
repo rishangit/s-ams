@@ -6,19 +6,28 @@ import {
   MenuItem,
   FormControl,
   Button,
-  Typography
+  Typography,
+  IconButton,
+  Tooltip,
+  useMediaQuery,
+  useTheme
 } from '@mui/material'
 import {
   Build as ServicesIcon,
+  Add as AddIcon,
+  ViewModule as GridViewIcon,
+  ViewList as ListViewIcon,
+  ViewComfy as CardViewIcon,
   Edit as EditIcon,
-  Delete as DeleteIcon,
-  Add as AddIcon
+  Delete as DeleteIcon
 } from '@mui/icons-material'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '../../../store'
 import { CustomGrid, RowAction } from '../../../components/shared'
 import { ColDef, ICellRendererParams } from 'ag-grid-community'
 import ServiceForm from './ServiceForm'
+import ServicesListview from './ServicesListview'
+import ServicesCardview from './ServicesCardview'
 import { 
   getServicesRequest, 
   deleteServiceRequest,
@@ -28,6 +37,8 @@ import {
 
 const Services: React.FC = () => {
   const dispatch = useDispatch()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const { user } = useSelector((state: RootState) => state.auth)
   const uiTheme = useSelector((state: RootState) => state.ui.theme)
   const { 
@@ -41,6 +52,8 @@ const Services: React.FC = () => {
   const memoizedServices = useMemo(() => services, [services])
 
   const [statusFilter, setStatusFilter] = useState<string>('')
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'card'>('grid')
+  const [userSelectedView, setUserSelectedView] = useState<boolean>(false)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editingService, setEditingService] = useState<Service | null>(null)
@@ -53,6 +66,22 @@ const Services: React.FC = () => {
       dispatch(getServicesRequest())
     }
   }, [user]) // Run when user is available
+
+  // Auto-switch to card view on mobile (only if user hasn't manually selected a view)
+  useEffect(() => {
+    if (!userSelectedView) {
+      if (isMobile && viewMode !== 'card') {
+        setViewMode('card')
+      } else if (!isMobile && viewMode === 'card') {
+        setViewMode('grid')
+      }
+    }
+  }, [isMobile, viewMode, userSelectedView])
+
+  // Reset user selection when screen size changes significantly
+  useEffect(() => {
+    setUserSelectedView(false)
+  }, [isMobile])
 
   // Clear error and success messages after 3 seconds
   useEffect(() => {
@@ -87,6 +116,19 @@ const Services: React.FC = () => {
     setEditingService(null)
     // No need to refresh - Redux automatically updates the list when service is updated
   }
+
+  // Handle view mode change
+  const handleViewModeChange = (newViewMode: 'grid' | 'list' | 'card') => {
+    setViewMode(newViewMode)
+    setUserSelectedView(true)
+  }
+
+  // Filter services based on status
+  const filteredServices = useMemo(() => {
+    if (!services) return []
+    if (!statusFilter) return services
+    return services.filter(service => service.status === statusFilter)
+  }, [services, statusFilter])
 
   const StatusCellRenderer = (props: ICellRendererParams) => {
     const { value } = props
@@ -242,6 +284,50 @@ const Services: React.FC = () => {
       {/* Controls Section - All on the right */}
       <Box className="flex justify-end mb-6">
         <Box className="flex flex-row items-center gap-4">
+          {/* View Switcher */}
+          <Box className="flex items-center gap-1 border rounded-lg p-1" style={{ borderColor: uiTheme.border }}>
+            {!isMobile && (
+              <Tooltip title="Grid View">
+                <IconButton
+                  size="small"
+                  onClick={() => handleViewModeChange('grid')}
+                  style={{
+                    backgroundColor: viewMode === 'grid' ? uiTheme.primary : 'transparent',
+                    color: viewMode === 'grid' ? '#ffffff' : uiTheme.text
+                  }}
+                >
+                  <GridViewIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            )}
+            {!isMobile && (
+              <Tooltip title="List View">
+                <IconButton
+                  size="small"
+                  onClick={() => handleViewModeChange('list')}
+                  style={{
+                    backgroundColor: viewMode === 'list' ? uiTheme.primary : 'transparent',
+                    color: viewMode === 'list' ? '#ffffff' : uiTheme.text
+                  }}
+                >
+                  <ListViewIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            )}
+            <Tooltip title="Card View">
+              <IconButton
+                size="small"
+                onClick={() => handleViewModeChange('card')}
+                style={{
+                  backgroundColor: viewMode === 'card' ? uiTheme.primary : 'transparent',
+                  color: viewMode === 'card' ? '#ffffff' : uiTheme.text
+                }}
+              >
+                <CardViewIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
+
           {/* Status Filter */}
           <FormControl size="small" style={{ minWidth: 120 }}>
             <Select
@@ -268,19 +354,42 @@ const Services: React.FC = () => {
         </Box>
       </Box>
 
-      <CustomGrid
-        title="Services"
-        data={memoizedServices || []}
-        columnDefs={columnDefs}
-        loading={loading}
-        error={error}
-        success={success}
-        theme={uiTheme}
-        height="calc(100vh - 280px)"
-        showTitle={false}
-        showAlerts={true}
-        rowActions={rowActions}
-      />
+      {/* Conditional Rendering of Grid, List, or Card View */}
+      {viewMode === 'grid' ? (
+        <CustomGrid
+          title="Services"
+          data={filteredServices || []}
+          columnDefs={columnDefs}
+          loading={loading}
+          error={error}
+          success={success}
+          theme={uiTheme}
+          height="calc(100vh - 280px)"
+          showTitle={false}
+          showAlerts={true}
+          rowActions={rowActions}
+        />
+      ) : viewMode === 'list' ? (
+        <ServicesListview
+          filteredServices={filteredServices || []}
+          loading={loading}
+          error={error}
+          success={success}
+          uiTheme={uiTheme}
+          onEditService={(serviceId) => handleEditService({ id: serviceId } as Service)}
+          onDeleteService={handleDeleteService}
+        />
+      ) : (
+        <ServicesCardview
+          filteredServices={filteredServices || []}
+          loading={loading}
+          error={error}
+          success={success}
+          uiTheme={uiTheme}
+          onEditService={(serviceId) => handleEditService({ id: serviceId } as Service)}
+          onDeleteService={handleDeleteService}
+        />
+      )}
 
       {/* Add Service Modal */}
       <ServiceForm

@@ -4,14 +4,16 @@ import { RootState } from '../../../store'
 import { ColDef, ICellRendererParams } from 'ag-grid-community'
 import { CustomGrid, RowAction } from '../../shared'
 import StaffForm from './StaffForm'
+import StaffListview from './StaffListview'
+import StaffCardview from './StaffCardview'
 import {
   getStaffRequest,
   deleteStaffRequest,
   clearStaffMessages
 } from '../../../store/actions/staffActions'
 import { useTheme } from '../../../hooks/useTheme'
-import { Edit, Delete, Add, People as PeopleIcon } from '@mui/icons-material'
-import { Button, Box, Dialog, DialogTitle, DialogContent, Typography, Avatar, Chip } from '@mui/material'
+import { Edit, Delete, Add, People as PeopleIcon, ViewModule as GridViewIcon, ViewList as ListViewIcon, ViewComfy as CardViewIcon } from '@mui/icons-material'
+import { Button, Box, Dialog, DialogTitle, DialogContent, Typography, Avatar, Chip, IconButton, Tooltip, useMediaQuery } from '@mui/material'
 import { STAFF_STATUS, getStatusDisplayName } from '../../../constants/staffStatus'
 import { getProfileImageUrl } from '../../../utils/fileUtils'
 
@@ -20,7 +22,10 @@ const Staff: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth)
   const { staff, loading, error, success } = useSelector((state: RootState) => state.staff)
   const { theme } = useTheme()
+  const isMobile = useMediaQuery('(max-width: 768px)')
 
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'card'>('grid')
+  const [userSelectedView, setUserSelectedView] = useState<boolean>(false)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editingStaffId, setEditingStaffId] = useState<number | null>(null)
@@ -31,6 +36,22 @@ const Staff: React.FC = () => {
       dispatch(getStaffRequest())
     }
   }, [user?.role, dispatch])
+
+  // Auto-switch to card view on mobile (only if user hasn't manually selected a view)
+  useEffect(() => {
+    if (!userSelectedView) {
+      if (isMobile && viewMode !== 'card') {
+        setViewMode('card')
+      } else if (!isMobile && viewMode === 'card') {
+        setViewMode('grid')
+      }
+    }
+  }, [isMobile, viewMode, userSelectedView])
+
+  // Reset user selection when screen size changes significantly
+  useEffect(() => {
+    setUserSelectedView(false)
+  }, [isMobile])
 
   // Clear error and success messages after 3 seconds
   useEffect(() => {
@@ -61,6 +82,12 @@ const Staff: React.FC = () => {
     setIsAddModalOpen(false)
     setIsEditModalOpen(false)
     setEditingStaffId(null)
+  }
+
+  // Handle view mode change
+  const handleViewModeChange = (newViewMode: 'grid' | 'list' | 'card') => {
+    setViewMode(newViewMode)
+    setUserSelectedView(true)
   }
 
   // Staff Cell Renderer Component
@@ -234,6 +261,50 @@ const Staff: React.FC = () => {
       {/* Controls Section - All on the right */}
       <Box className="flex justify-end mb-6">
         <Box className="flex flex-row items-center gap-4">
+          {/* View Switcher */}
+          <Box className="flex items-center gap-1 border rounded-lg p-1" style={{ borderColor: theme.border }}>
+            {!isMobile && (
+              <Tooltip title="Grid View">
+                <IconButton
+                  size="small"
+                  onClick={() => handleViewModeChange('grid')}
+                  style={{
+                    backgroundColor: viewMode === 'grid' ? theme.primary : 'transparent',
+                    color: viewMode === 'grid' ? '#ffffff' : theme.text
+                  }}
+                >
+                  <GridViewIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            )}
+            {!isMobile && (
+              <Tooltip title="List View">
+                <IconButton
+                  size="small"
+                  onClick={() => handleViewModeChange('list')}
+                  style={{
+                    backgroundColor: viewMode === 'list' ? theme.primary : 'transparent',
+                    color: viewMode === 'list' ? '#ffffff' : theme.text
+                  }}
+                >
+                  <ListViewIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            )}
+            <Tooltip title="Card View">
+              <IconButton
+                size="small"
+                onClick={() => handleViewModeChange('card')}
+                style={{
+                  backgroundColor: viewMode === 'card' ? theme.primary : 'transparent',
+                  color: viewMode === 'card' ? '#ffffff' : theme.text
+                }}
+              >
+                <CardViewIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
+
           {/* Add Button */}
           {user && parseInt(String(user.role)) === 1 && (
             <Button
@@ -249,20 +320,42 @@ const Staff: React.FC = () => {
         </Box>
       </Box>
 
-      {/* Staff Grid */}
-      <CustomGrid
-        title="Staff Members"
-        data={staff || []}
-        columnDefs={columnDefs}
-        loading={loading}
-        error={error}
-        success={success}
-        theme={theme}
-        height="calc(100vh - 280px)"
-        showTitle={false}
-        showAlerts={true}
-        rowActions={rowActions}
-      />
+      {/* Conditional Rendering of Grid, List, or Card View */}
+      {viewMode === 'grid' ? (
+        <CustomGrid
+          title="Staff Members"
+          data={staff || []}
+          columnDefs={columnDefs}
+          loading={loading}
+          error={error}
+          success={success}
+          theme={theme}
+          height="calc(100vh - 280px)"
+          showTitle={false}
+          showAlerts={true}
+          rowActions={rowActions}
+        />
+      ) : viewMode === 'list' ? (
+        <StaffListview
+          filteredStaff={staff || []}
+          loading={loading}
+          error={error}
+          success={success}
+          theme={theme}
+          onEditStaff={handleEditStaff}
+          onDeleteStaff={handleDeleteStaff}
+        />
+      ) : (
+        <StaffCardview
+          filteredStaff={staff || []}
+          loading={loading}
+          error={error}
+          success={success}
+          theme={theme}
+          onEditStaff={handleEditStaff}
+          onDeleteStaff={handleDeleteStaff}
+        />
+      )}
 
       {/* Add Staff Modal */}
       <Dialog

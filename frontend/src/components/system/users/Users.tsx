@@ -1,14 +1,17 @@
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import {
   Box,
   Avatar,
   Chip,
-  // IconButton,
-  // Tooltip
+  IconButton,
+  Tooltip,
+  useMediaQuery
 } from '@mui/material'
-// import {
-//   Refresh as RefreshIcon
-// } from '@mui/icons-material'
+import {
+  ViewModule as GridViewIcon,
+  ViewList as ListViewIcon,
+  ViewComfy as CardViewIcon
+} from '@mui/icons-material'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../../store'
 import { getRoleDisplayName, isAdminOnlyRole } from '../../../constants/roles'
@@ -17,6 +20,8 @@ import { useUsers } from '../../../hooks/useUsers'
 import { CustomGrid, RowAction } from '../../../components/shared'
 import { ColDef, ICellRendererParams } from 'ag-grid-community'
 import { Edit as EditIcon, Delete as DeleteIcon, Visibility as ViewIcon } from '@mui/icons-material'
+import UsersListview from './UsersListview'
+import UsersCardview from './UsersCardview'
 
 // interface User {
 //   id: number
@@ -33,6 +38,7 @@ import { Edit as EditIcon, Delete as DeleteIcon, Visibility as ViewIcon } from '
 const Users: React.FC = () => {
   const { user: currentUser } = useSelector((state: RootState) => state.auth)
   const uiTheme = useSelector((state: RootState) => state.ui.theme)
+  const isMobile = useMediaQuery('(max-width: 768px)')
   const { 
     users, 
     loading, 
@@ -43,11 +49,30 @@ const Users: React.FC = () => {
     clearSuccess 
   } = useUsers()
 
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'card'>('grid')
+  const [userSelectedView, setUserSelectedView] = useState<boolean>(false)
+
   useEffect(() => {
     if (currentUser && isAdminOnlyRole(currentUser.role as any)) {
       fetchAllUsers()
     }
   }, [fetchAllUsers, currentUser])
+
+  // Auto-switch to card view on mobile (only if user hasn't manually selected a view)
+  useEffect(() => {
+    if (!userSelectedView) {
+      if (isMobile && viewMode !== 'card') {
+        setViewMode('card')
+      } else if (!isMobile && viewMode === 'card') {
+        setViewMode('grid')
+      }
+    }
+  }, [isMobile, viewMode, userSelectedView])
+
+  // Reset user selection when screen size changes significantly
+  useEffect(() => {
+    setUserSelectedView(false)
+  }, [isMobile])
 
   // Clear error and success messages after 3 seconds
   useEffect(() => {
@@ -89,6 +114,30 @@ const Users: React.FC = () => {
       month: 'short',
       day: 'numeric'
     })
+  }
+
+  // Handle view mode change
+  const handleViewModeChange = (newViewMode: 'grid' | 'list' | 'card') => {
+    setViewMode(newViewMode)
+    setUserSelectedView(true)
+  }
+
+  // User action handlers
+  const handleViewUser = (userId: number) => {
+    console.log('View user:', userId)
+    // TODO: Implement view user functionality
+  }
+
+  const handleEditUser = (userId: number) => {
+    console.log('Edit user:', userId)
+    // TODO: Implement edit user functionality
+  }
+
+  const handleDeleteUser = (userId: number) => {
+    if (window.confirm('Are you sure you want to delete this user?')) {
+      console.log('Delete user:', userId)
+      // TODO: Implement delete user functionality
+    }
   }
 
   // User Cell Renderer Component
@@ -145,32 +194,21 @@ const Users: React.FC = () => {
         id: 'view',
         label: 'View User',
         icon: <ViewIcon fontSize="small" />,
-        onClick: (rowData) => {
-          console.log('View user:', rowData)
-          // TODO: Implement view user functionality
-        },
+        onClick: (rowData) => handleViewUser(rowData.id),
         color: 'primary'
       },
       {
         id: 'edit',
         label: 'Edit User',
         icon: <EditIcon fontSize="small" />,
-        onClick: (rowData) => {
-          console.log('Edit user:', rowData)
-          // TODO: Implement edit user functionality
-        },
+        onClick: (rowData) => handleEditUser(rowData.id),
         color: 'info'
       },
       {
         id: 'delete',
         label: 'Delete User',
         icon: <DeleteIcon fontSize="small" />,
-        onClick: (rowData) => {
-          if (window.confirm(`Are you sure you want to delete user ${rowData.firstName} ${rowData.lastName}?`)) {
-            console.log('Delete user:', rowData)
-            // TODO: Implement delete user functionality
-          }
-        },
+        onClick: (rowData) => handleDeleteUser(rowData.id),
         color: 'error',
         disabled: (rowData) => rowData.id === currentUser?.id // Can't delete self
       }
@@ -248,19 +286,102 @@ const Users: React.FC = () => {
 
   return (
     <Box className="h-full p-6">
-      <CustomGrid
-        title="Users Management"
-        data={users || []}
-        columnDefs={columnDefs}
-        loading={loading}
-        error={error}
-        success={success}
-        theme={uiTheme}
-        height="calc(100vh - 120px)"
-        showTitle={true}
-        showAlerts={true}
-        rowActions={rowActions}
-      />
+      {/* Header Section */}
+      <Box className="flex items-center justify-between mb-6">
+        <Box>
+          <h1 className="text-2xl font-bold" style={{ color: uiTheme.text }}>
+            Users Management
+          </h1>
+          <p className="text-sm" style={{ color: uiTheme.textSecondary }}>
+            Manage system users and their roles
+          </p>
+        </Box>
+        
+        {/* View Switcher */}
+        <Box className="flex items-center gap-1 border rounded-lg p-1" style={{ borderColor: uiTheme.border }}>
+          {!isMobile && (
+            <Tooltip title="Grid View">
+              <IconButton
+                size="small"
+                onClick={() => handleViewModeChange('grid')}
+                style={{
+                  backgroundColor: viewMode === 'grid' ? uiTheme.primary : 'transparent',
+                  color: viewMode === 'grid' ? '#ffffff' : uiTheme.text
+                }}
+              >
+                <GridViewIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+          {!isMobile && (
+            <Tooltip title="List View">
+              <IconButton
+                size="small"
+                onClick={() => handleViewModeChange('list')}
+                style={{
+                  backgroundColor: viewMode === 'list' ? uiTheme.primary : 'transparent',
+                  color: viewMode === 'list' ? '#ffffff' : uiTheme.text
+                }}
+              >
+                <ListViewIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+          <Tooltip title="Card View">
+            <IconButton
+              size="small"
+              onClick={() => handleViewModeChange('card')}
+              style={{
+                backgroundColor: viewMode === 'card' ? uiTheme.primary : 'transparent',
+                color: viewMode === 'card' ? '#ffffff' : uiTheme.text
+              }}
+            >
+              <CardViewIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </Box>
+
+      {/* Conditional Rendering of Grid, List, or Card View */}
+      {viewMode === 'grid' ? (
+        <CustomGrid
+          title="Users Management"
+          data={users || []}
+          columnDefs={columnDefs}
+          loading={loading}
+          error={error}
+          success={success}
+          theme={uiTheme}
+          height="calc(100vh - 200px)"
+          showTitle={false}
+          showAlerts={true}
+          rowActions={rowActions}
+        />
+      ) : viewMode === 'list' ? (
+        <UsersListview
+          filteredUsers={users || []}
+          loading={loading}
+          error={error}
+          success={success}
+          uiTheme={uiTheme}
+          currentUserId={currentUser?.id}
+          onViewUser={handleViewUser}
+          onEditUser={handleEditUser}
+          onDeleteUser={handleDeleteUser}
+        />
+      ) : (
+        <UsersCardview
+          filteredUsers={users || []}
+          loading={loading}
+          error={error}
+          success={success}
+          uiTheme={uiTheme}
+          currentUserId={currentUser?.id}
+          onViewUser={handleViewUser}
+          onEditUser={handleEditUser}
+          onDeleteUser={handleDeleteUser}
+        />
+      )}
     </Box>
   )
 }
