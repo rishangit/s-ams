@@ -49,7 +49,6 @@ const Services: React.FC = () => {
   } = useSelector((state: RootState) => state.services)
 
   // Memoize services to prevent unnecessary re-renders
-  const memoizedServices = useMemo(() => services, [services])
 
   const [statusFilter, setStatusFilter] = useState<string>('')
   const [viewMode, setViewMode] = useState<'grid' | 'list' | 'card'>('grid')

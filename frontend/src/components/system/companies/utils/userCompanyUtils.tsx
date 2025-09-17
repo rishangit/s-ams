@@ -1,4 +1,3 @@
-import React from 'react'
 import {
   Visibility as ViewIcon,
   CalendarToday as CalendarIcon

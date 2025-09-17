@@ -1,7 +1,6 @@
 import {
   Box,
-  Typography,
-  Avatar
+  Typography
 } from '@mui/material'
 import {
   Business as BusinessIcon,

@@ -18,8 +18,7 @@ import {
 } from '@mui/icons-material'
 import { RowActionsMenu } from '../../../components/shared'
 import { 
-  UserCompanyInfo, 
-  UserCompanyTotalAppointments
+  UserCompanyInfo
 } from './utils/userCompanyComponents'
 import { 
   generateUserCompanyRowActions

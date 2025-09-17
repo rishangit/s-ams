@@ -7,7 +7,6 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Typography,
   Box,
   CircularProgress,
   Alert

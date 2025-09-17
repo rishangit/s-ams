@@ -12,7 +12,6 @@ import {
 } from '@mui/material'
 import {
   Inventory as ProductIcon,
-  Category as CategoryIcon,
   AttachMoney as PriceIcon,
   Inventory2 as QuantityIcon,
   Warning as WarningIcon,

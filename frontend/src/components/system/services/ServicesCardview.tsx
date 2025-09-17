@@ -15,8 +15,6 @@ import {
   AttachMoney as PriceIcon,
   Build as ServiceIcon
 } from '@mui/icons-material'
-import { useSelector } from 'react-redux'
-import { RootState } from '../../../store'
 import { RowActionsMenu } from '../../../components/shared'
 import { 
   ServiceInfo, 

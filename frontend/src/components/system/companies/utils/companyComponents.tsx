@@ -7,9 +7,7 @@ import {
 import {
   Business as BusinessIcon,
   Phone as PhoneIcon,
-  LocationOn as LocationIcon,
-  Person as PersonIcon,
-  Email as EmailIcon
+  LocationOn as LocationIcon
 } from '@mui/icons-material'
 import { getProfileImageUrl } from '../../../../utils/fileUtils'
 import { getCompanyStatusColor, getCompanyStatusDisplayName, formatCompanyPhone, formatCompanyAddress, formatCompanyGeoLocation } from './companyUtils'
@@ -132,8 +130,15 @@ export const CompanyLocation = ({
 
 // Company Status Chip Component
 export const CompanyStatusChip = ({ status }: { status: number }) => {
-  const statusColor = getCompanyStatusColor(status)
-  const statusDisplayName = getCompanyStatusDisplayName(status)
+  // Convert number to CompanyStatus enum value
+  const statusMap: { [key: number]: string } = {
+    0: 'pending',
+    1: 'active', 
+    2: 'inactive'
+  }
+  const statusEnum = statusMap[status] as any
+  const statusColor = getCompanyStatusColor(statusEnum)
+  const statusDisplayName = getCompanyStatusDisplayName(statusEnum)
 
   return (
     <Chip
