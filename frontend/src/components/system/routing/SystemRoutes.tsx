@@ -2,7 +2,7 @@ import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Register from '../auth/register'
 import Login from '../auth/login'
-import { Dashboard, UserProfile, SystemLayout, Users, Companies, Appointments, Staff, Products } from '../'
+import { Dashboard, UserProfile, SystemLayout, Users, Companies, Appointments, Staff, Products, Settings } from '../'
 import CompanyUsers from '../companyusers/CompanyUsers'
 import UserAppointments from '../companyusers/UserAppointments'
 import UserCompanies from '../companies/UserCompanies'
@@ -139,6 +139,13 @@ const SystemRoutes: React.FC = () => {
         <ProtectedRoute>
           <SystemLayout title="My Appointments">
             <UserCompanyAppointments />
+          </SystemLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="settings" element={
+        <ProtectedRoute>
+          <SystemLayout title="Settings">
+            <Settings />
           </SystemLayout>
         </ProtectedRoute>
       } />

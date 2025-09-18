@@ -9,7 +9,6 @@ import { RootState } from '../../store'
 import { setSidebarOpen } from '../../store/reducers/uiSlice'
 import { Navigation } from './navigation'
 import { Header } from './header'
-import { Settings } from './settings'
 
 interface SystemLayoutProps {
   children: React.ReactNode
@@ -66,9 +65,6 @@ const SystemLayout: React.FC<SystemLayoutProps> = ({
           {children}
         </Box>
       </Box>
-
-      {/* Settings Component */}
-      <Settings />
     </Box>
   )
 }

@@ -11,12 +11,10 @@ import {
 } from '@mui/material'
 import {
   Menu as MenuIcon,
-  Person as PersonIcon,
-  Settings as SettingsIcon
+  Person as PersonIcon
 } from '@mui/icons-material'
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { RootState } from '../../../store'
-import { setSettingsOpen } from '../../../store/reducers/uiSlice'
 import { getProfileImageUrl } from '../../../utils/fileUtils'
 import { getRoleDisplayName, RoleId } from '../../../constants/roles'
 import { useAuth } from '../../../hooks/useAuth'
@@ -35,15 +33,9 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
-  const dispatch = useDispatch()
   const { user } = useSelector((state: RootState) => state.auth)
   const uiTheme = useSelector((state: RootState) => state.ui.theme)
-  const { settingsOpen } = useSelector((state: RootState) => state.ui)
   const { switchBack } = useAuth()
-
-  const handleSettingsToggle = () => {
-    dispatch(setSettingsOpen(!settingsOpen))
-  }
 
     return (
     <AppBar
@@ -120,18 +112,6 @@ const Header: React.FC<HeaderProps> = ({
               )}
             </Box>
           )}
-          
-          {/* Settings Icon */}
-          <IconButton
-            onClick={handleSettingsToggle}
-            className="hover:bg-gray-100 dark:hover:bg-gray-800"
-            style={{ 
-              color: uiTheme.text,
-              backgroundColor: 'transparent'
-            }}
-          >
-            <SettingsIcon style={{ fontSize: '1.25rem' }} />
-          </IconButton>
           
           {/* User Profile Image */}
                           <Avatar

@@ -3,12 +3,10 @@ import {
   Card,
   CardContent,
   Typography,
-  Box,
   CircularProgress,
   Alert,
-  Grid,
-  Paper,
-  Stack
+  Avatar,
+  Chip
 } from '@mui/material'
 import {
   Business as BusinessIcon,
@@ -17,9 +15,6 @@ import {
   CalendarToday as CalendarIcon
 } from '@mui/icons-material'
 import { RowActionsMenu } from '../../../components/shared'
-import { 
-  UserCompanyInfo
-} from './utils/userCompanyComponents'
 import { 
   generateUserCompanyRowActions
 } from './utils/userCompanyUtils'
@@ -50,55 +45,43 @@ const UserCompaniesCardview: React.FC<UserCompaniesCardviewProps> = ({
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
+      <div className="flex justify-center items-center h-48">
         <CircularProgress />
-      </Box>
+      </div>
     )
   }
 
   if (error) {
     return (
-      <Alert severity="error" sx={{ mb: 2 }}>
+      <Alert severity="error" className="mb-4">
         {error}
       </Alert>
     )
   }
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Grid container spacing={3}>
+    <div className="p-0 overflow-visible">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 overflow-visible">
         {filteredUserCompanies?.map((company) => (
-          <Grid item xs={12} sm={6} lg={4} key={company.id}>
+          <div key={company.id} className="col-span-1 overflow-visible">
             <Card 
               elevation={0}
-              sx={{ 
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
+              className="h-full flex flex-col relative overflow-visible rounded-xl transition-all duration-300 ease-out shadow-md hover:shadow-lg hover:-translate-y-1 group"
+              style={{ 
                 backgroundColor: uiTheme.background,
                 border: `1px solid ${uiTheme.border}`,
-                borderRadius: 3,
-                overflow: 'hidden',
-                position: 'relative',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                '&:hover': {
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
-                  transform: 'translateY(-2px)',
-                  borderColor: uiTheme.primary
-                }
-              }}
+                '--hover-border-color': uiTheme.primary,
+                transformOrigin: 'center center',
+                willChange: 'transform, box-shadow'
+              } as React.CSSProperties}
             >
               {/* 3-Dot Menu in Top Right Corner */}
-              <Box 
-                sx={{ 
-                  position: 'absolute', 
-                  top: 8, 
-                  right: 8, 
-                  zIndex: 1,
+              <div 
+                className="absolute top-2 right-2 z-20 rounded-full shadow-md"
+                style={{ 
                   backgroundColor: uiTheme.background,
-                  borderRadius: '50%',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden'
                 }}
               >
                 <RowActionsMenu
@@ -106,142 +89,131 @@ const UserCompaniesCardview: React.FC<UserCompaniesCardviewProps> = ({
                   actions={rowActions}
                   theme={uiTheme}
                 />
-              </Box>
+              </div>
 
-              <CardContent sx={{ flexGrow: 1, p: 3, pt: 4 }}>
-                {/* Header with Company Info */}
-                <Box sx={{ mb: 3 }}>
-                  <UserCompanyInfo company={company} />
-                </Box>
+              {/* Full-width Image Section with Blurred Background */}
+              <div
+                className="h-48 relative overflow-hidden rounded-t-xl"
+                style={{
+                  '--bg-image': 'none',
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden'
+                } as React.CSSProperties}
+              >
+                {/* Blurred background with company theme */}
+                <div 
+                  className="absolute inset-0 bg-gradient-to-br from-blue-100 to-blue-200 scale-110 blur-sm"
+                />
+                {/* Overlay */}
+                <div 
+                  className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-blue-600/30"
+                />
+                {/* Company Icon centered over blurred background */}
+                <div className="relative z-10 h-full flex items-center justify-center">
+                  <Avatar
+                    className="w-30 h-30 border-4 border-white shadow-lg"
+                    style={{ 
+                      backgroundColor: uiTheme.primary,
+                      width: 120,
+                      height: 120
+                    }}
+                  >
+                    <BusinessIcon className="text-white text-5xl" />
+                  </Avatar>
+                </div>
+              </div>
 
-                {/* Contact Information Section */}
-                <Paper 
-                  elevation={0}
-                  sx={{ 
-                    p: 2, 
-                    mb: 2, 
-                    backgroundColor: `${uiTheme.primary}08`,
-                    border: `1px solid ${uiTheme.primary}20`,
-                    borderRadius: 2,
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.06)'
-                  }}
-                >
-                  <Stack spacing={1.5}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <PhoneIcon sx={{ color: uiTheme.primary, fontSize: 20 }} />
-                      <Typography variant="body2" sx={{ fontWeight: '600', color: uiTheme.text }}>
-                        {company.phoneNumber || 'N/A'}
+              {/* Content Section */}
+              <CardContent 
+                className="flex-grow p-5 rounded-t-xl"
+                style={{
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden'
+                }}
+              >
+                {/* Title and Company Info */}
+                <div className="mb-4">
+                  <Typography 
+                    variant="h6" 
+                    className="font-bold mb-1 leading-tight"
+                    style={{ color: uiTheme.text }}
+                  >
+                    {company.name}
+                  </Typography>
+                  <Typography 
+                    variant="body2" 
+                    className="text-sm"
+                    style={{ color: uiTheme.textSecondary }}
+                  >
+                    ID: {company.id} • {new Date(company.createdAt).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </Typography>
+                </div>
+
+                {/* Status Category Tag */}
+                <div className="flex justify-start mb-4">
+                  <Chip
+                    label={company.status?.charAt(0).toUpperCase() + company.status?.slice(1)}
+                    size="small"
+                    className="text-white font-bold text-xs h-6 px-3"
+                    style={{
+                      backgroundColor: company.status === 'active' ? '#16a34a' : 
+                                      company.status === 'pending' ? '#f59e0b' : '#ef4444'
+                    }}
+                  />
+                </div>
+
+                {/* Additional Info - Simplified */}
+                <div className="flex flex-col gap-2">
+                  {company.phoneNumber && (
+                    <div className="flex items-center gap-2">
+                      <PhoneIcon className="w-4 h-4" style={{ color: uiTheme.textSecondary }} />
+                      <Typography variant="body2" className="text-xs" style={{ color: uiTheme.textSecondary }}>
+                        {company.phoneNumber}
                       </Typography>
-                    </Box>
-                    {company.landPhone && (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <PhoneIcon sx={{ color: uiTheme.primary, fontSize: 20 }} />
-                        <Typography variant="body2" sx={{ fontWeight: '600', color: uiTheme.text }}>
-                          {company.landPhone}
-                        </Typography>
-                      </Box>
-                    )}
-                  </Stack>
-                </Paper>
-
-                {/* Location Section */}
-                <Paper 
-                  elevation={0}
-                  sx={{ 
-                    p: 2, 
-                    mb: 2, 
-                    backgroundColor: '#f0f9ff',
-                    border: '1px solid #e0f2fe',
-                    borderRadius: 2,
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.06)'
-                  }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                    <LocationIcon sx={{ color: '#0ea5e9', fontSize: 20, mt: 0.5 }} />
-                    <Box>
-                      <Typography 
-                        variant="body2" 
-                        sx={{ 
-                          fontWeight: '600', 
-                          color: '#0ea5e9',
-                          wordBreak: 'break-word'
-                        }}
-                      >
-                        {company.address || 'N/A'}
+                    </div>
+                  )}
+                  {company.address && (
+                    <div className="flex items-center gap-2">
+                      <LocationIcon className="w-4 h-4" style={{ color: uiTheme.textSecondary }} />
+                      <Typography variant="body2" className="text-xs truncate" style={{ color: uiTheme.textSecondary }}>
+                        {company.address}
                       </Typography>
-                      {company.geoLocation && (
-                        <Typography 
-                          variant="caption" 
-                          sx={{ 
-                            color: '#0ea5e9',
-                            display: 'block',
-                            mt: 0.5
-                          }}
-                        >
-                          {company.geoLocation}
-                        </Typography>
-                      )}
-                    </Box>
-                  </Box>
-                </Paper>
-
-                {/* Total Appointments Section */}
-                <Paper 
-                  elevation={0}
-                  sx={{ 
-                    p: 2, 
-                    mb: 2, 
-                    backgroundColor: '#f0fdf4',
-                    border: '1px solid #dcfce7',
-                    borderRadius: 2,
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.06)'
-                  }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
-                    <CalendarIcon sx={{ color: '#16a34a', fontSize: 20 }} />
-                    <Typography variant="body2" sx={{ fontWeight: '600', color: '#16a34a' }}>
-                      Total Appointments
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <CalendarIcon className="w-4 h-4" style={{ color: uiTheme.textSecondary }} />
+                    <Typography variant="body2" className="text-xs" style={{ color: uiTheme.textSecondary }}>
+                      {company.totalAppointments || 0} appointments
                     </Typography>
-                  </Box>
-                  <Box sx={{ ml: 4 }}>
-                    <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#16a34a' }}>
-                      {company.totalAppointments || 0}
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: '#16a34a' }}>
-                      appointments booked
-                    </Typography>
-                  </Box>
-                </Paper>
+                  </div>
+                </div>
               </CardContent>
             </Card>
-          </Grid>
+          </div>
         ))}
-      </Grid>
+      </div>
 
       {filteredUserCompanies?.length === 0 && (
-        <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Box sx={{ 
-            width: 80, 
-            height: 80, 
-            borderRadius: '50%', 
-            backgroundColor: `${uiTheme.primary}10`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            mx: 'auto',
-            mb: 3
-          }}>
-            <BusinessIcon sx={{ fontSize: 40, color: uiTheme.primary }} />
-          </Box>
-          <Typography variant="h6" sx={{ color: uiTheme.text, mb: 1, fontWeight: '600' }}>
+        <div className="text-center py-16">
+          <div 
+            className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
+            style={{ backgroundColor: `${uiTheme.primary}10` }}
+          >
+            <BusinessIcon className="text-4xl" style={{ color: uiTheme.primary }} />
+          </div>
+          <Typography variant="h6" className="mb-2 font-semibold" style={{ color: uiTheme.text }}>
             No companies found
           </Typography>
-          <Typography variant="body2" sx={{ color: '#666' }}>
+          <Typography variant="body2" className="text-gray-600">
             Companies will appear here once you book appointments with them
           </Typography>
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }
 

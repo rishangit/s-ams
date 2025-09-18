@@ -22,7 +22,8 @@ import {
   Event as EventIcon,
   CalendarToday as CalendarIcon,
   Group as StaffIcon,
-  Inventory as ProductsIcon
+  Inventory as ProductsIcon,
+  Settings as SettingsIcon
 } from '@mui/icons-material'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate, useLocation } from 'react-router-dom'
@@ -510,6 +511,47 @@ const Navigation: React.FC<NavigationProps> = ({
         </ListItem>
         */}
       </List>
+
+        {/* Settings - Available for all authenticated users */}
+        {user && (
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => handleNavigation('/system/settings')}
+              style={{
+                backgroundColor: location.pathname === '/system/settings'
+                  ? uiTheme.primary
+                  : 'transparent',
+                color: location.pathname === '/system/settings'
+                  ? '#ffffff'
+                  : uiTheme.text,
+                borderRight: location.pathname === '/system/settings'
+                  ? `2px solid ${uiTheme.primary}`
+                  : 'none',
+                margin: '0 8px',
+                borderRadius: '8px'
+              }}
+              className="hover:opacity-80 transition-all duration-200"
+            >
+              <ListItemIcon>
+                <SettingsIcon
+                  style={{
+                    color: location.pathname === '/system/settings'
+                      ? '#ffffff'
+                      : uiTheme.textSecondary
+                  }}
+                />
+              </ListItemIcon>
+              <ListItemText
+                primary="Settings"
+                style={{
+                  color: location.pathname === '/system/settings'
+                    ? '#ffffff'
+                    : uiTheme.text
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+        )}
 
       {/* User Section at Bottom */}
       <Box

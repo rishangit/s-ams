@@ -223,8 +223,8 @@ const Appointments: React.FC = () => {
       <Box className="flex justify-end mb-6">
         <Box className="flex flex-row items-center gap-4">
           {/* View Switcher */}
-          <Box className="flex items-center gap-1 border rounded-lg p-1" style={{ borderColor: uiTheme.border }}>
-            {!isMobile && (
+          {!isMobile && (
+            <Box className="flex items-center gap-1 border rounded-lg p-1" style={{ borderColor: uiTheme.border }}>
               <Tooltip title="Grid View">
                 <IconButton
                   size="small"
@@ -237,8 +237,6 @@ const Appointments: React.FC = () => {
                   <GridViewIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
-            )}
-            {!isMobile && (
               <Tooltip title="List View">
                 <IconButton
                   size="small"
@@ -251,20 +249,20 @@ const Appointments: React.FC = () => {
                   <ListViewIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
-            )}
-            <Tooltip title="Card View">
-              <IconButton
-                size="small"
-                onClick={() => handleViewModeChange('card')}
-                style={{
-                  backgroundColor: viewMode === 'card' ? uiTheme.primary : 'transparent',
-                  color: viewMode === 'card' ? '#ffffff' : uiTheme.text
-                }}
-              >
-                <CardViewIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          </Box>
+              <Tooltip title="Card View">
+                <IconButton
+                  size="small"
+                  onClick={() => handleViewModeChange('card')}
+                  style={{
+                    backgroundColor: viewMode === 'card' ? uiTheme.primary : 'transparent',
+                    color: viewMode === 'card' ? '#ffffff' : uiTheme.text
+                  }}
+                >
+                  <CardViewIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          )}
 
           {/* Status Filter */}
           <FormControl size="small" style={{ minWidth: 120 }}>

@@ -1,16 +1,13 @@
 import React, { useState, useMemo } from 'react'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
   Box,
   CircularProgress,
   Alert
 } from '@mui/material'
+import {
+  ArrowUpward as ArrowUpwardIcon,
+  ArrowDownward as ArrowDownwardIcon
+} from '@mui/icons-material'
 import { RowActionsMenu } from '../../../components/shared'
 import { 
   CompanyUserInfo, 
@@ -21,10 +18,8 @@ import {
   CompanyUserMemberSince
 } from './utils/companyUserComponents'
 import { 
-  generateCompanyUserRowActions, 
-  getCompanyUserTableHeaders
+  generateCompanyUserRowActions
 } from './utils/companyUserUtils'
-import CompanyUserPagination from './utils/CompanyUserPagination'
 
 interface CompanyUsersListviewProps {
   filteredUsers: any[]
@@ -51,9 +46,9 @@ const CompanyUsersListview: React.FC<CompanyUsersListviewProps> = ({
     return generateCompanyUserRowActions(onViewAppointments)
   }, [onViewAppointments])
 
-  // Get table headers
+  // Get table headers (customized to combine columns)
   const tableHeaders = useMemo(() => {
-    return getCompanyUserTableHeaders()
+    return ['Name', 'Contacts', 'Total Appointments', 'Appointments', 'Member Since', 'Actions']
   }, [])
 
   // Pagination handlers
@@ -61,7 +56,7 @@ const CompanyUsersListview: React.FC<CompanyUsersListviewProps> = ({
     setPage(newPage)
   }
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10))
     setPage(0)
   }
@@ -98,88 +93,136 @@ const CompanyUsersListview: React.FC<CompanyUsersListviewProps> = ({
   }
 
   return (
-    <Box>
-      <TableContainer component={Paper} className="max-h-[calc(100vh-350px)]">
-        <Table stickyHeader>
-          <TableHead>
-            <TableRow>
-              {tableHeaders.map((header) => (
-                <TableCell
-                  key={header}
-                  className="font-bold"
-                  style={{
-                    backgroundColor: uiTheme.background,
-                    color: uiTheme.text,
-                    borderBottom: `2px solid ${uiTheme.primary}`
-                  }}
-                >
-                  {header}
-                </TableCell>
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col h-full min-h-0">
+      {/* Modern Table Container */}
+      <div className="overflow-x-auto flex-1 min-h-0">
+        <table className="w-full">
+          {/* Table Header */}
+          <thead className="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th className="px-6 py-4 text-left">
+                <div className="flex items-center space-x-2">
+                  <input 
+                    type="checkbox" 
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                  />
+                </div>
+              </th>
+              {tableHeaders.map((header, index) => (
+                <th key={header} className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <div className="flex items-center space-x-1">
+                    <span>{header}</span>
+                    {index === 1 && <ArrowUpwardIcon className="w-4 h-4 text-gray-400" />}
+                  </div>
+                </th>
               ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
+            </tr>
+          </thead>
+          
+          {/* Table Body */}
+          <tbody className="bg-white">
             {paginatedUsers.map((user) => (
-              <TableRow key={user.id} hover>
+              <tr 
+                key={user.id} 
+                className="hover:bg-gray-50 transition-colors duration-150 border-b border-gray-200"
+              >
+                {/* Checkbox */}
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <input 
+                    type="checkbox" 
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                  />
+                </td>
+
                 {/* Name */}
-                <TableCell>
+                <td className="px-6 py-4 whitespace-nowrap">
                   <CompanyUserInfo user={user} />
-                </TableCell>
+                </td>
 
-                {/* Email */}
-                <TableCell>
-                  <CompanyUserEmail email={user.email} />
-                </TableCell>
-
-                {/* Phone */}
-                <TableCell>
-                  <CompanyUserPhone phone={user.phoneNumber} />
-                </TableCell>
+                {/* Contacts (Email + Phone combined) */}
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="space-y-2">
+                    <CompanyUserEmail email={user.email} />
+                    <CompanyUserPhone phone={user.phoneNumber} />
+                  </div>
+                </td>
 
                 {/* Total Appointments */}
-                <TableCell>
+                <td className="px-6 py-4 whitespace-nowrap">
                   <CompanyUserTotalAppointments count={user.totalAppointments} />
-                </TableCell>
+                </td>
 
-                {/* First Appointment */}
-                <TableCell>
-                  <CompanyUserDate date={user.firstAppointmentDate} label="First" />
-                </TableCell>
-
-                {/* Last Appointment */}
-                <TableCell>
-                  <CompanyUserDate date={user.lastAppointmentDate} label="Last" />
-                </TableCell>
+                {/* Appointments (First + Last combined) */}
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="space-y-2">
+                    <CompanyUserDate date={user.firstAppointmentDate} label="First" />
+                    <CompanyUserDate date={user.lastAppointmentDate} label="Last" />
+                  </div>
+                </td>
 
                 {/* Member Since */}
-                <TableCell>
+                <td className="px-6 py-4 whitespace-nowrap">
                   <CompanyUserMemberSince date={user.createdAt} />
-                </TableCell>
+                </td>
 
                 {/* Actions */}
-                <TableCell>
-                  <RowActionsMenu
-                    rowData={user}
-                    actions={rowActions}
-                    theme={uiTheme}
-                  />
-                </TableCell>
-              </TableRow>
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <div className="flex items-center justify-end">
+                    <RowActionsMenu
+                      rowData={user}
+                      actions={rowActions}
+                      theme={uiTheme}
+                    />
+                  </div>
+                </td>
+              </tr>
             ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+          </tbody>
+        </table>
+      </div>
       
-      {/* Pagination */}
-      <CompanyUserPagination
-        count={filteredUsers?.length || 0}
-        page={page}
-        rowsPerPage={rowsPerPage}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        uiTheme={uiTheme}
-      />
-    </Box>
+      {/* Modern Pagination */}
+      <div className="bg-white px-6 py-4 border-t border-gray-200 flex items-center justify-end">
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-700">Rows per page:</span>
+            <select 
+              value={rowsPerPage}
+              onChange={(e) => handleChangeRowsPerPage(e)}
+              className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+            </select>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-700">
+              {page * rowsPerPage + 1}-{Math.min((page + 1) * rowsPerPage, filteredUsers?.length || 0)} of {filteredUsers?.length || 0}
+            </span>
+            
+            <div className="flex space-x-1">
+              <button
+                onClick={() => handleChangePage(null, page - 1)}
+                disabled={page === 0}
+                className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ArrowDownwardIcon className="w-4 h-4 text-gray-400 rotate-90" />
+              </button>
+              <button
+                onClick={() => handleChangePage(null, page + 1)}
+                disabled={page >= Math.ceil((filteredUsers?.length || 0) / rowsPerPage) - 1}
+                className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ArrowUpwardIcon className="w-4 h-4 text-gray-400 rotate-90" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 
