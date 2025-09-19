@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '../../../store'
-import { ColDef, ICellRendererParams } from 'ag-grid-community'
-import { CustomGrid, RowAction } from '../../shared'
+import { ViewSwitcher, ViewMode } from '../../shared'
 import StaffForm from './StaffForm'
+import StaffGridview from './StaffGridview'
 import StaffListview from './StaffListview'
 import StaffCardview from './StaffCardview'
 import {
@@ -12,19 +12,17 @@ import {
   clearStaffMessages
 } from '../../../store/actions/staffActions'
 import { useTheme } from '../../../hooks/useTheme'
-import { Edit, Delete, Add, People as PeopleIcon, ViewModule as GridViewIcon, ViewList as ListViewIcon, ViewComfy as CardViewIcon } from '@mui/icons-material'
-import { Button, Box, Dialog, DialogTitle, DialogContent, Typography, Avatar, Chip, IconButton, Tooltip, useMediaQuery } from '@mui/material'
-import { STAFF_STATUS, getStatusDisplayName } from '../../../constants/staffStatus'
-import { getProfileImageUrl } from '../../../utils/fileUtils'
+import { Add, People as PeopleIcon } from '@mui/icons-material'
+import { Button, Box, Dialog, DialogTitle, DialogContent, Typography, useMediaQuery } from '@mui/material'
 
 const Staff: React.FC = () => {
   const dispatch = useDispatch()
   const { user } = useSelector((state: RootState) => state.auth)
   const { staff, loading, error, success } = useSelector((state: RootState) => state.staff)
-  const { theme } = useTheme()
+  const { theme: uiTheme } = useTheme()
   const isMobile = useMediaQuery('(max-width: 768px)')
 
-  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'card'>('grid')
+  const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [userSelectedView, setUserSelectedView] = useState<boolean>(false)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -85,149 +83,11 @@ const Staff: React.FC = () => {
   }
 
   // Handle view mode change
-  const handleViewModeChange = (newViewMode: 'grid' | 'list' | 'card') => {
+  const handleViewModeChange = (newViewMode: ViewMode) => {
     setViewMode(newViewMode)
     setUserSelectedView(true)
   }
 
-  // Staff Cell Renderer Component
-  const StaffCellRenderer = (props: ICellRendererParams) => {
-    const { data } = props
-    return (
-      <Box className="flex items-center gap-3">
-        <Avatar
-          className="w-10 h-10 border-2 border-white shadow-sm"
-          style={{ backgroundColor: theme.primary }}
-          src={getProfileImageUrl(data.profileImage)}
-          onError={(e) => {
-            const target = e.currentTarget as HTMLImageElement
-            console.error('Staff Avatar image failed to load:', target.src)
-            console.error('Staff profile image path:', data.profileImage)
-          }}
-        >
-          <span className="text-white font-semibold text-sm">
-            {data.firstName?.charAt(0)}{data.lastName?.charAt(0)}
-          </span>
-        </Avatar>
-        <Box>
-          <div className="font-semibold text-sm" style={{ color: theme.text }}>
-            {data.firstName} {data.lastName}
-          </div>
-          <div className="text-xs" style={{ color: theme.textSecondary }}>
-            ID: {data.id}
-          </div>
-        </Box>
-      </Box>
-    )
-  }
-
-  // Row Actions Configuration
-  const rowActions: RowAction[] = [
-    {
-      id: 'edit',
-      label: 'Edit Staff',
-      icon: <Edit fontSize="small" />,
-      onClick: (rowData) => handleEditStaff(rowData.id),
-      color: 'primary'
-    },
-    {
-      id: 'delete',
-      label: 'Delete Staff',
-      icon: <Delete fontSize="small" />,
-      onClick: (rowData) => handleDeleteStaff(rowData.id),
-      color: 'error'
-    }
-  ]
-
-  const columnDefs: ColDef[] = [
-    {
-      headerName: 'Staff Member',
-      field: 'firstName',
-      cellRenderer: StaffCellRenderer,
-      flex: 1,
-      minWidth: 200
-    },
-    {
-      headerName: 'Email',
-      field: 'email',
-      flex: 1,
-      minWidth: 200
-    },
-    {
-      headerName: 'Phone',
-      field: 'phoneNumber',
-      flex: 1,
-      minWidth: 150
-    },
-    {
-      headerName: 'Working Hours',
-      field: 'workingHours',
-      valueGetter: (params) => {
-        const data = params.data
-        if (!data) return ''
-        const start = data.workingHoursStart || ''
-        const end = data.workingHoursEnd || ''
-        if (start && end) {
-          return `${start} - ${end}`
-        } else if (start) {
-          return `From ${start}`
-        } else if (end) {
-          return `Until ${end}`
-        }
-        return 'Not set'
-      },
-      flex: 1,
-      minWidth: 150
-    },
-    {
-      headerName: 'Skills',
-      field: 'skills',
-      valueGetter: (params) => {
-        const skills = params.data?.skills
-        return skills ? (skills.length > 50 ? skills.substring(0, 50) + '...' : skills) : 'None'
-      },
-      flex: 1,
-      minWidth: 200
-    },
-    {
-      headerName: 'Status',
-      field: 'status',
-      cellRenderer: (params: any) => {
-        const status = params.value
-        const displayName = getStatusDisplayName(status)
-        
-        // Color mapping for different statuses
-        const getStatusColor = (status: number) => {
-          switch (status) {
-            case STAFF_STATUS.ACTIVE:
-              return '#10b981' // Green
-            case STAFF_STATUS.INACTIVE:
-              return '#6b7280' // Gray
-            case STAFF_STATUS.SUSPENDED:
-              return '#f59e0b' // Orange
-            case STAFF_STATUS.TERMINATED:
-              return '#ef4444' // Red
-            default:
-              return '#6b7280' // Gray
-          }
-        }
-        
-        return (
-          <Chip
-            label={displayName}
-            size="small"
-            style={{
-              backgroundColor: getStatusColor(status),
-              color: '#fff',
-              fontWeight: 'bold'
-            }}
-          />
-        )
-      },
-      flex: 0.8,
-      minWidth: 100
-    }
-  ]
 
   // Show loading while user is being loaded
   if (!user) {
@@ -236,7 +96,7 @@ const Staff: React.FC = () => {
         <Typography
           variant="h6"
           className="text-base md:text-xl"
-          style={{ color: theme.text }}
+          style={{ color: uiTheme.text }}
         >
           Loading user data...
         </Typography>
@@ -244,118 +104,92 @@ const Staff: React.FC = () => {
     )
   }
 
+  // Show access denied if user is not a company owner
+  if (parseInt(String(user.role)) !== 1) {
+    return (
+      <Box className="flex items-center justify-center h-64">
+        <Typography
+          variant="h6"
+          className="text-base md:text-xl"
+          style={{ color: uiTheme.text }}
+        >
+          Access denied. This page is only available for company owners.
+        </Typography>
+      </Box>
+    )
+  }
+
   return (
-    <Box className="h-full md:p-6">
+    <Box className="flex flex-col h-full">
       {/* Header Section */}
-      <Box className="flex items-center gap-3 mb-6">
-        <PeopleIcon style={{ color: theme.primary, fontSize: 32 }} />
+      <Box className="flex items-center gap-3 mb-6 flex-shrink-0">
+        <PeopleIcon style={{ color: uiTheme.primary, fontSize: 32 }} />
         <Typography
           variant="h6"
           className="text-xl md:text-3xl font-bold"
-          style={{ color: theme.text }}
+          style={{ color: uiTheme.text }}
         >
           Staff Members
         </Typography>
       </Box>
 
       {/* Controls Section - All on the right */}
-      <Box className="flex justify-end mb-6">
+      <Box className="flex justify-end mb-6 flex-shrink-0">
         <Box className="flex flex-row items-center gap-4">
           {/* View Switcher */}
-          <Box className="flex items-center gap-1 border rounded-lg p-1" style={{ borderColor: theme.border }}>
-            {!isMobile && (
-              <Tooltip title="Grid View">
-                <IconButton
-                  size="small"
-                  onClick={() => handleViewModeChange('grid')}
-                  style={{
-                    backgroundColor: viewMode === 'grid' ? theme.primary : 'transparent',
-                    color: viewMode === 'grid' ? '#ffffff' : theme.text
-                  }}
-                >
-                  <GridViewIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )}
-            {!isMobile && (
-              <Tooltip title="List View">
-                <IconButton
-                  size="small"
-                  onClick={() => handleViewModeChange('list')}
-                  style={{
-                    backgroundColor: viewMode === 'list' ? theme.primary : 'transparent',
-                    color: viewMode === 'list' ? '#ffffff' : theme.text
-                  }}
-                >
-                  <ListViewIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )}
-            <Tooltip title="Card View">
-              <IconButton
-                size="small"
-                onClick={() => handleViewModeChange('card')}
-                style={{
-                  backgroundColor: viewMode === 'card' ? theme.primary : 'transparent',
-                  color: viewMode === 'card' ? '#ffffff' : theme.text
-                }}
-              >
-                <CardViewIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          </Box>
+          <ViewSwitcher
+            viewMode={viewMode}
+            onViewModeChange={handleViewModeChange}
+            theme={uiTheme}
+          />
 
           {/* Add Button */}
-          {user && parseInt(String(user.role)) === 1 && (
-            <Button
-              variant="contained"
-              onClick={handleAddStaff}
-              style={{ backgroundColor: theme.primary, color: '#ffffff' }}
-              startIcon={<Add />}
-              className="w-auto"
-            >
-              <span>Add Staff Member</span>
-            </Button>
-          )}
+          <Button
+            variant="contained"
+            onClick={handleAddStaff}
+            style={{ backgroundColor: uiTheme.primary, color: '#ffffff' }}
+            startIcon={<Add />}
+            className="w-auto"
+          >
+            <span>Add Staff Member</span>
+          </Button>
         </Box>
       </Box>
 
       {/* Conditional Rendering of Grid, List, or Card View */}
-      {viewMode === 'grid' ? (
-        <CustomGrid
-          title="Staff Members"
-          data={staff || []}
-          columnDefs={columnDefs}
-          loading={loading}
-          error={error}
-          success={success}
-          theme={theme}
-          height="calc(100vh - 280px)"
-          showTitle={false}
-          showAlerts={true}
-          rowActions={rowActions}
-        />
-      ) : viewMode === 'list' ? (
-        <StaffListview
-          filteredStaff={staff || []}
-          loading={loading}
-          error={error}
-          success={success}
-          theme={theme}
-          onEditStaff={handleEditStaff}
-          onDeleteStaff={handleDeleteStaff}
-        />
-      ) : (
-        <StaffCardview
-          filteredStaff={staff || []}
-          loading={loading}
-          error={error}
-          success={success}
-          theme={theme}
-          onEditStaff={handleEditStaff}
-          onDeleteStaff={handleDeleteStaff}
-        />
-      )}
+      <Box className="flex-1 min-h-0">
+        {viewMode === 'grid' ? (
+          <StaffGridview
+            filteredStaff={staff || []}
+            loading={loading}
+            error={error}
+            success={success}
+            uiTheme={uiTheme}
+            onEditStaff={handleEditStaff}
+            onDeleteStaff={handleDeleteStaff}
+          />
+        ) : viewMode === 'list' ? (
+          <StaffListview
+            filteredStaff={staff || []}
+            loading={loading}
+            error={error}
+            success={success}
+            uiTheme={uiTheme}
+            onEditStaff={handleEditStaff}
+            onDeleteStaff={handleDeleteStaff}
+          />
+        ) : (
+          <StaffCardview
+            filteredStaff={staff || []}
+            loading={loading}
+            error={error}
+            success={success}
+            uiTheme={uiTheme}
+            onEditStaff={handleEditStaff}
+            onDeleteStaff={handleDeleteStaff}
+          />
+        )}
+      </Box>
 
       {/* Add Staff Modal */}
       <Dialog
@@ -365,12 +199,12 @@ const Staff: React.FC = () => {
         fullWidth
         PaperProps={{
           style: {
-            backgroundColor: theme.surface,
-            color: theme.text
+            backgroundColor: uiTheme.surface,
+            color: uiTheme.text
           }
         }}
       >
-        <DialogTitle style={{ color: theme.text }}>
+        <DialogTitle style={{ color: uiTheme.text }}>
           Add New Staff Member
         </DialogTitle>
         <DialogContent>
@@ -392,12 +226,12 @@ const Staff: React.FC = () => {
         fullWidth
         PaperProps={{
           style: {
-            backgroundColor: theme.surface,
-            color: theme.text
+            backgroundColor: uiTheme.surface,
+            color: uiTheme.text
           }
         }}
       >
-        <DialogTitle style={{ color: theme.text }}>
+        <DialogTitle style={{ color: uiTheme.text }}>
           Edit Staff Member
         </DialogTitle>
         <DialogContent>

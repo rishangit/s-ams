@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography } from '@mui/material'
 import { useSelector } from 'react-redux'
-import { RootState } from '../../store'
+import { RootState } from '../../../store'
 
 const CustomModal: React.FC = () => {
   const [open, setOpen] = useState(false)

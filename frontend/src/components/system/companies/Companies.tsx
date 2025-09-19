@@ -1,15 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import {
   Box,
-  IconButton,
-  Tooltip,
   useMediaQuery
 } from '@mui/material'
-import {
-  ViewModule as GridViewIcon,
-  ViewList as ListViewIcon,
-  ViewComfy as CardViewIcon
-} from '@mui/icons-material'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { RootState } from '../../../store'
@@ -19,6 +12,7 @@ import {
   clearCompanySuccess
 } from '../../../store/actions/companyActions'
 import { isAdminOnlyRole } from '../../../constants/roles'
+import { ViewSwitcher, ViewMode } from '../../../components/shared'
 import CompaniesListview from './CompaniesListview'
 import CompaniesCardview from './CompaniesCardview'
 import CompaniesGridview from './CompaniesGridview'
@@ -31,7 +25,7 @@ const Companies: React.FC = () => {
   const uiTheme = useSelector((state: RootState) => state.ui.theme)
   const isMobile = useMediaQuery('(max-width: 768px)')
 
-  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'card'>('grid')
+  const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [userSelectedView, setUserSelectedView] = useState<boolean>(false)
 
   // Load companies when component mounts
@@ -78,7 +72,7 @@ const Companies: React.FC = () => {
 
 
   // Handle view mode change
-  const handleViewModeChange = (newViewMode: 'grid' | 'list' | 'card') => {
+  const handleViewModeChange = (newViewMode: ViewMode) => {
     setViewMode(newViewMode)
     setUserSelectedView(true)
   }
@@ -92,10 +86,9 @@ const Companies: React.FC = () => {
     navigate(`/system/companies/${companyId}/edit`)
   }
 
-  const handleDeleteCompany = (companyId: number) => {
+  const handleDeleteCompany = (_companyId: number) => {
     if (window.confirm('Are you sure you want to delete this company?')) {
       // TODO: Implement delete company functionality
-      console.log('Delete company:', companyId)
     }
   }
 
@@ -124,49 +117,11 @@ const Companies: React.FC = () => {
         </Box>
         
         {/* View Switcher */}
-        {!isMobile && (
-          <Box className="flex items-center gap-1 border border-gray-300 dark:border-gray-600 rounded-lg p-1">
-            <Tooltip title="Grid View">
-              <IconButton
-                size="small"
-                onClick={() => handleViewModeChange('grid')}
-                className={`transition-colors ${
-                  viewMode === 'grid' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-              >
-                <GridViewIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="List View">
-              <IconButton
-                size="small"
-                onClick={() => handleViewModeChange('list')}
-                className={`transition-colors ${
-                  viewMode === 'list' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-              >
-                <ListViewIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Card View">
-              <IconButton
-                size="small"
-                onClick={() => handleViewModeChange('card')}
-                className={`transition-colors ${
-                  viewMode === 'card' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-              >
-                <CardViewIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        )}
+        <ViewSwitcher
+          viewMode={viewMode}
+          onViewModeChange={handleViewModeChange}
+          theme={uiTheme}
+        />
       </Box>
 
       {/* Conditional Rendering of Grid, List, or Card View */}

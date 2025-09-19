@@ -68,7 +68,7 @@ const Settings: React.FC<SettingsProps> = () => {
     <div className="h-full md:p-6">
       {/* Header Section */}
       <div className="flex items-center gap-3 mb-6">
-        <SettingsIcon className="text-blue-600 text-3xl" />
+        <SettingsIcon className="text-3xl" style={{ color: uiTheme.primary }} />
         <Typography
           variant="h6"
           className="text-xl md:text-3xl font-bold text-gray-900 dark:text-white"
@@ -84,19 +84,44 @@ const Settings: React.FC<SettingsProps> = () => {
           onChange={handleTabChange} 
           aria-label="settings tabs"
           variant="standard"
-          className="[&_.MuiTabs-indicator]:bg-blue-600 [&_.MuiTabs-indicator]:h-0.5 [&_.MuiTabs-indicator]:rounded-t-sm [&_.MuiTabs-flexContainer]:gap-0"
+          className="[&_.MuiTabs-indicator]:h-0.5 [&_.MuiTabs-indicator]:rounded-t-sm [&_.MuiTabs-flexContainer]:gap-0"
+          sx={{
+            '& .MuiTabs-indicator': {
+              backgroundColor: uiTheme.primary
+            }
+          }}
         >
           <Tab 
             icon={<GeneralIcon className="text-lg mr-2" />} 
             label="General" 
             iconPosition="start"
-            className="normal-case font-medium text-sm min-h-12 text-gray-500 border-none [&.Mui-selected]:text-blue-600 [&.Mui-selected]:font-semibold hover:text-gray-700 hover:bg-transparent focus:outline-none focus:ring-0 focus:shadow-none"
+            className="normal-case font-medium text-sm min-h-12 border-none hover:bg-transparent focus:outline-none focus:ring-0 focus:shadow-none"
+            sx={{
+              color: uiTheme.textSecondary,
+              '&.Mui-selected': {
+                color: uiTheme.primary,
+                fontWeight: 600
+              },
+              '&:hover': {
+                color: uiTheme.text
+              }
+            }}
           />
           <Tab 
             icon={<UIIcon className="text-lg mr-2" />} 
             label="UI" 
             iconPosition="start"
-            className="normal-case font-medium text-sm min-h-12 text-gray-500 border-none [&.Mui-selected]:text-blue-600 [&.Mui-selected]:font-semibold hover:text-gray-700 hover:bg-transparent focus:outline-none focus:ring-0 focus:shadow-none"
+            className="normal-case font-medium text-sm min-h-12 border-none hover:bg-transparent focus:outline-none focus:ring-0 focus:shadow-none"
+            sx={{
+              color: uiTheme.textSecondary,
+              '&.Mui-selected': {
+                color: uiTheme.primary,
+                fontWeight: 600
+              },
+              '&:hover': {
+                color: uiTheme.text
+              }
+            }}
           />
         </Tabs>
       </div>
@@ -113,7 +138,7 @@ const Settings: React.FC<SettingsProps> = () => {
             >
               <CardContent className="p-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <NotificationIcon className="text-blue-600 text-xl" />
+                  <NotificationIcon className="text-xl" style={{ color: uiTheme.primary }} />
                   <Typography
                     variant="subtitle1"
                     className="font-semibold text-gray-900 dark:text-white text-sm"
@@ -157,7 +182,7 @@ const Settings: React.FC<SettingsProps> = () => {
             >
               <CardContent className="p-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <SecurityIcon className="text-blue-600 text-xl" />
+                  <SecurityIcon className="text-xl" style={{ color: uiTheme.primary }} />
                   <Typography
                     variant="subtitle1"
                     className="font-semibold text-gray-900 dark:text-white text-sm"
@@ -202,7 +227,7 @@ const Settings: React.FC<SettingsProps> = () => {
             >
               <CardContent className="p-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <SettingsIcon className="text-blue-600 text-xl" />
+                  <SettingsIcon className="text-xl" style={{ color: uiTheme.primary }} />
                   <Typography
                     variant="subtitle1"
                     className="font-semibold text-gray-900 dark:text-white text-sm"
@@ -260,7 +285,7 @@ const Settings: React.FC<SettingsProps> = () => {
             >
               <CardContent className="p-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <ThemeIcon className="text-blue-600 text-xl" />
+                  <ThemeIcon className="text-xl" style={{ color: uiTheme.primary }} />
                   <Typography
                     variant="subtitle1"
                     className="font-semibold text-gray-900 dark:text-white text-sm"
@@ -280,7 +305,7 @@ const Settings: React.FC<SettingsProps> = () => {
                     <Switch
                       checked={uiTheme.mode === 'dark'}
                       onChange={handleThemeToggle}
-                      className="text-blue-600"
+                      style={{ color: uiTheme.primary }}
                     />
                   }
                   label={
@@ -304,7 +329,7 @@ const Settings: React.FC<SettingsProps> = () => {
             >
               <CardContent className="p-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <UIIcon className="text-blue-600 text-xl" />
+                  <UIIcon className="text-xl" style={{ color: uiTheme.primary }} />
                   <Typography
                     variant="subtitle1"
                     className="font-semibold text-gray-900 dark:text-white text-sm"

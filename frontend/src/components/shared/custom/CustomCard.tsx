@@ -2,7 +2,7 @@ import React from 'react'
 import { Card, CardContent, CardActions, Typography, Button, Avatar } from '@mui/material'
 import { Person, Email, Phone } from '@mui/icons-material'
 import { useSelector } from 'react-redux'
-import { RootState } from '../../store'
+import { RootState } from '../../../store'
 
 const CustomCard: React.FC = () => {
   const theme = useSelector((state: RootState) => state.ui.theme)

@@ -56,9 +56,9 @@ const UsersGridview: React.FC<UsersGridviewProps> = ({
   const UserCellRenderer = (props: ICellRendererParams) => {
     const { data } = props
     return (
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 h-full" style={{ minWidth: 0, overflow: 'hidden' }}>
         <Avatar
-          className="w-10 h-10 border-2 border-white shadow-sm"
+          className="w-10 h-10 border-2 border-white shadow-sm flex-shrink-0"
           style={{ backgroundColor: uiTheme.primary }}
           src={getProfileImageUrl(data.profileImage)}
           onError={(e) => {
@@ -71,11 +71,27 @@ const UsersGridview: React.FC<UsersGridviewProps> = ({
             {data.firstName?.charAt(0)}{data.lastName?.charAt(0)}
           </span>
         </Avatar>
-        <div>
-          <div className="font-semibold text-sm" style={{ color: uiTheme.text }}>
+        <div style={{ minWidth: 0, overflow: 'hidden' }}>
+          <div 
+            className="font-semibold text-sm" 
+            style={{ 
+              color: uiTheme.text,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
+            }}
+          >
             {data.firstName} {data.lastName}
           </div>
-          <div className="text-xs" style={{ color: uiTheme.textSecondary }}>
+          <div 
+            className="text-xs" 
+            style={{ 
+              color: uiTheme.textSecondary,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
+            }}
+          >
             ID: {data.id}
           </div>
         </div>
@@ -87,14 +103,35 @@ const UsersGridview: React.FC<UsersGridviewProps> = ({
   const RoleCellRenderer = (props: ICellRendererParams) => {
     const { value } = props
     return (
-      <Chip
-        label={getRoleDisplayName(value as any)}
-        size="small"
-        className="text-white font-bold"
-        style={{
-          backgroundColor: getRoleColor(value)
+      <div className="flex items-center h-full justify-center">
+        <Chip
+          label={getRoleDisplayName(value as any)}
+          size="small"
+          className="text-white font-bold"
+          style={{
+            backgroundColor: getRoleColor(value)
+          }}
+        />
+      </div>
+    )
+  }
+
+  // Text Cell Renderer Component for simple text content
+  const TextCellRenderer = (props: ICellRendererParams) => {
+    const { value } = props
+    return (
+      <div 
+        className="flex items-center h-full" 
+        style={{ 
+          color: uiTheme.text,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          minWidth: 0
         }}
-      />
+      >
+        {value}
+      </div>
     )
   }
 
@@ -138,26 +175,43 @@ const UsersGridview: React.FC<UsersGridviewProps> = ({
       filter: true,
       resizable: true,
       width: 250,
-      minWidth: 200
+      minWidth: 200,
+      maxWidth: 300,
+        cellStyle: { 
+          display: 'flex', 
+          alignItems: 'center'
+        }
     },
     {
       headerName: 'Email',
       field: 'email',
+      cellRenderer: TextCellRenderer,
       sortable: true,
       filter: true,
       resizable: true,
       width: 200,
-      minWidth: 150
+      minWidth: 150,
+      maxWidth: 280,
+        cellStyle: { 
+          display: 'flex', 
+          alignItems: 'center'
+        }
     },
     {
       headerName: 'Phone',
       field: 'phoneNumber',
+      cellRenderer: TextCellRenderer,
       sortable: true,
       filter: true,
       resizable: true,
       width: 150,
       minWidth: 120,
-      valueGetter: (params) => params.data.phoneNumber || 'N/A'
+      maxWidth: 180,
+      valueGetter: (params) => params.data.phoneNumber || 'N/A',
+        cellStyle: { 
+          display: 'flex', 
+          alignItems: 'center'
+        }
     },
     {
       headerName: 'Role',
@@ -167,17 +221,28 @@ const UsersGridview: React.FC<UsersGridviewProps> = ({
       filter: true,
       resizable: true,
       width: 120,
-      minWidth: 100
+      minWidth: 100,
+      maxWidth: 140,
+        cellStyle: { 
+          display: 'flex', 
+          alignItems: 'center'
+        }
     },
     {
       headerName: 'Created',
       field: 'createdAt',
+      cellRenderer: TextCellRenderer,
       sortable: true,
       filter: true,
       resizable: true,
-      width: 150,
+      width: 130,
       minWidth: 120,
-      valueGetter: (params) => formatDate(params.data.createdAt)
+      maxWidth: 150,
+      valueGetter: (params) => formatDate(params.data.createdAt),
+        cellStyle: { 
+          display: 'flex', 
+          alignItems: 'center'
+        }
     }
   ], [uiTheme, currentUserId])
 
@@ -190,7 +255,7 @@ const UsersGridview: React.FC<UsersGridviewProps> = ({
       error={error}
       success={success}
       theme={uiTheme}
-      height="calc(100vh - 200px)"
+      height="auto"
       showTitle={false}
       showAlerts={true}
       rowActions={rowActions}

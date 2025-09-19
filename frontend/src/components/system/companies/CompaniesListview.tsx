@@ -102,7 +102,7 @@ const CompaniesListview: React.FC<CompaniesListviewProps> = ({
 
   return (
     <Box>
-      <TableContainer component={Paper} sx={{ maxHeight: 'calc(100vh - 350px)' }}>
+      <TableContainer component={Paper} sx={{ maxHeight: 'none', minHeight: '400px' }}>
         <Table stickyHeader>
           <TableHead>
             <TableRow>

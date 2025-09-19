@@ -1,14 +1,8 @@
 import React, { useMemo } from 'react'
 import {
-  Card,
-  CardContent,
   Typography,
-  Box,
   CircularProgress,
-  Alert,
-  Grid,
-  Paper,
-  Stack
+  Alert
 } from '@mui/material'
 import {
   AccessTime as TimeIcon,
@@ -17,7 +11,6 @@ import {
 } from '@mui/icons-material'
 import { RowActionsMenu } from '../../../components/shared'
 import { 
-  ServiceInfo, 
   ServiceStatusChip
 } from './utils/serviceComponents'
 import { 
@@ -50,15 +43,15 @@ const ServicesCardview: React.FC<ServicesCardviewProps> = ({
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
+      <div className="flex justify-center items-center h-48">
         <CircularProgress />
-      </Box>
+      </div>
     )
   }
 
   if (error) {
     return (
-      <Alert severity="error" sx={{ mb: 2 }}>
+      <Alert severity="error" className="mb-4">
         {error}
       </Alert>
     )
@@ -66,47 +59,34 @@ const ServicesCardview: React.FC<ServicesCardviewProps> = ({
 
   if (success) {
     return (
-      <Alert severity="success" sx={{ mb: 2 }}>
+      <Alert severity="success" className="mb-4">
         {success}
       </Alert>
     )
   }
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Grid container spacing={3}>
+    <div className="p-0 overflow-visible">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 overflow-visible">
         {filteredServices?.map((service) => (
-          <Grid item xs={12} sm={6} lg={4} key={service.id}>
-            <Card 
-              elevation={0}
-              sx={{ 
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
+          <div key={service.id} className="col-span-1 overflow-visible">
+            <div 
+              className="h-full flex flex-col relative overflow-visible rounded-xl transition-all duration-300 ease-out shadow-md hover:shadow-lg hover:-translate-y-1 group"
+              style={{ 
                 backgroundColor: uiTheme.background,
                 border: `1px solid ${uiTheme.border}`,
-                borderRadius: 3,
-                overflow: 'hidden',
-                position: 'relative',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                '&:hover': {
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
-                  transform: 'translateY(-2px)',
-                  borderColor: uiTheme.primary
-                }
-              }}
+                '--hover-border-color': uiTheme.primary,
+                transformOrigin: 'center center',
+                willChange: 'transform, box-shadow'
+              } as React.CSSProperties}
             >
               {/* 3-Dot Menu in Top Right Corner */}
-              <Box 
-                sx={{ 
-                  position: 'absolute', 
-                  top: 8, 
-                  right: 8, 
-                  zIndex: 1,
+              <div 
+                className="absolute top-2 right-2 z-20 rounded-full shadow-md"
+                style={{ 
                   backgroundColor: uiTheme.background,
-                  borderRadius: '50%',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden'
                 }}
               >
                 <RowActionsMenu
@@ -114,105 +94,132 @@ const ServicesCardview: React.FC<ServicesCardviewProps> = ({
                   actions={rowActions}
                   theme={uiTheme}
                 />
-              </Box>
+              </div>
 
-              <CardContent sx={{ flexGrow: 1, p: 3, pt: 4 }}>
-                {/* Header with Service Name and Status */}
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
-                  <Box sx={{ flex: 1, pr: 1 }}>
-                    <ServiceInfo 
-                      name={service.name}
-                      description={service.description}
-                      price={service.price}
-                    />
-                  </Box>
+              {/* Service Image Section */}
+              <div
+                className="h-32 relative overflow-hidden rounded-t-xl"
+                style={{
+                  background: `linear-gradient(135deg, ${uiTheme.primary}15 0%, ${uiTheme.primary}25 100%)`,
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden'
+                }}
+              >
+                {/* Service Icon centered */}
+                <div className="relative z-10 h-full flex items-center justify-center">
+                  <div
+                    className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg"
+                    style={{ 
+                      backgroundColor: uiTheme.primary,
+                    }}
+                  >
+                    <ServiceIcon className="text-white text-2xl" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Content Section */}
+              <div 
+                className="flex-grow p-5 rounded-t-xl"
+                style={{
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden'
+                }}
+              >
+                {/* Title and Description */}
+                <div className="mb-4">
+                  <Typography 
+                    variant="h6" 
+                    className="font-bold mb-1 leading-tight"
+                    style={{ color: uiTheme.text }}
+                  >
+                    {service.name}
+                  </Typography>
+                  <Typography 
+                    variant="body2" 
+                    className="text-sm"
+                    style={{ color: uiTheme.textSecondary }}
+                  >
+                    {service.description ? 
+                      (service.description.length > 50 
+                        ? `${service.description.substring(0, 50)}...` 
+                        : service.description
+                      ) : 'No description'
+                    }
+                  </Typography>
+                </div>
+
+                {/* Status Chip */}
+                <div className="flex justify-start mb-4">
                   <ServiceStatusChip status={service.status} />
-                </Box>
+                </div>
 
-                {/* Duration Section */}
-                <Paper 
-                  elevation={0}
-                  sx={{ 
-                    p: 2, 
-                    mb: 2, 
-                    backgroundColor: `${uiTheme.primary}08`,
-                    border: `1px solid ${uiTheme.primary}20`,
-                    borderRadius: 2,
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.06)'
-                  }}
-                >
-                  <Stack spacing={1.5}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <TimeIcon sx={{ color: uiTheme.primary, fontSize: 20 }} />
-                      <Typography variant="body2" sx={{ fontWeight: '600', color: uiTheme.text }}>
-                        Duration: {service.duration || 'Not specified'}
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </Paper>
-
-                {/* Price Section */}
-                <Paper 
-                  elevation={0}
-                  sx={{ 
-                    p: 2, 
-                    mb: 2, 
-                    backgroundColor: '#f0f9ff',
-                    border: '1px solid #e0f2fe',
-                    borderRadius: 2,
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.06)'
-                  }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                    <PriceIcon sx={{ color: '#10b981', fontSize: 20 }} />
-                    <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#10b981' }}>
+                {/* Price and Duration - Clean Display */}
+                <div className="flex flex-col gap-3 mb-4">
+                  {/* Price */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <PriceIcon className="w-5 h-5" style={{ color: uiTheme.primary }} />
+                      <span className="text-sm font-medium" style={{ color: uiTheme.text }}>Price</span>
+                    </div>
+                    <Typography 
+                      variant="h6" 
+                      className="font-bold"
+                      style={{ color: uiTheme.primary }}
+                    >
                       ${typeof service.price === 'string' ? parseFloat(service.price).toFixed(2) : service.price?.toFixed(2) || '0.00'}
                     </Typography>
-                  </Box>
-                </Paper>
+                  </div>
 
-                {/* Created Date */}
-                <Box sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'space-between',
-                  pt: 1,
-                  borderTop: `1px solid ${uiTheme.border}`
-                }}>
-                  <Typography variant="caption" sx={{ color: '#999' }}>
+                  {/* Duration */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <TimeIcon className="w-5 h-5" style={{ color: uiTheme.primary }} />
+                      <span className="text-sm font-medium" style={{ color: uiTheme.text }}>Duration</span>
+                    </div>
+                    <Typography 
+                      variant="body1" 
+                      className="font-semibold"
+                      style={{ color: uiTheme.text }}
+                    >
+                      {service.duration || 'Not specified'}
+                    </Typography>
+                  </div>
+                </div>
+
+                {/* Created Date - Simplified */}
+                <div className="pt-2">
+                  <Typography 
+                    variant="caption" 
+                    className="text-xs"
+                    style={{ color: uiTheme.textSecondary }}
+                  >
                     Created: {new Date(service.createdAt).toLocaleDateString()}
                   </Typography>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
+                </div>
+              </div>
+            </div>
+          </div>
         ))}
-      </Grid>
+      </div>
 
       {filteredServices?.length === 0 && (
-        <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Box sx={{ 
-            width: 80, 
-            height: 80, 
-            borderRadius: '50%', 
-            backgroundColor: `${uiTheme.primary}10`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            mx: 'auto',
-            mb: 3
-          }}>
-            <ServiceIcon sx={{ fontSize: 40, color: uiTheme.primary }} />
-          </Box>
-          <Typography variant="h6" sx={{ color: uiTheme.text, mb: 1, fontWeight: '600' }}>
+        <div className="text-center py-16">
+          <div 
+            className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
+            style={{ backgroundColor: `${uiTheme.primary}10` }}
+          >
+            <ServiceIcon className="text-4xl" style={{ color: uiTheme.primary }} />
+          </div>
+          <Typography variant="h6" className="mb-2 font-semibold" style={{ color: uiTheme.text }}>
             No services found
           </Typography>
-          <Typography variant="body2" sx={{ color: '#666' }}>
+          <Typography variant="body2" className="text-gray-600">
             Try adjusting your filters or create a new service
           </Typography>
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }
 

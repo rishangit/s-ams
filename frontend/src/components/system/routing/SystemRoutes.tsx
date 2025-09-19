@@ -34,28 +34,28 @@ const SystemRoutes: React.FC = () => {
       {/* Protected routes with SystemLayout wrapper */}
       <Route path="dashboard" element={
         <ProtectedRoute>
-          <SystemLayout title="Dashboard">
+          <SystemLayout>
             <Dashboard />
           </SystemLayout>
         </ProtectedRoute>
       } />
       <Route path="profile" element={
         <ProtectedRoute>
-          <SystemLayout title="User Profile">
+          <SystemLayout>
             <UserProfile />
           </SystemLayout>
         </ProtectedRoute>
       } />
       <Route path="users" element={
         <AdminRoute>
-          <SystemLayout title="Users Management">
+          <SystemLayout>
             <Users />
           </SystemLayout>
         </AdminRoute>
       } />
       <Route path="companies" element={
         <AdminRoute>
-          <SystemLayout title="Companies Management">
+          <SystemLayout>
             <Companies />
           </SystemLayout>
         </AdminRoute>
@@ -67,84 +67,84 @@ const SystemRoutes: React.FC = () => {
       } />
       <Route path="services/*" element={
         <OwnerRoute>
-          <SystemLayout title="Services Management">
+          <SystemLayout>
             <ServiceRouter />
           </SystemLayout>
         </OwnerRoute>
       } />
       <Route path="staff" element={
         <OwnerRoute>
-          <SystemLayout title="Staff Management">
+          <SystemLayout>
             <Staff />
           </SystemLayout>
         </OwnerRoute>
       } />
       <Route path="products" element={
         <OwnerRoute>
-          <SystemLayout title="Products Management">
+          <SystemLayout>
             <Products />
           </SystemLayout>
         </OwnerRoute>
       } />
       <Route path="company-users" element={
         <OwnerRoute>
-          <SystemLayout title="Company Users">
+          <SystemLayout>
             <CompanyUsers />
           </SystemLayout>
         </OwnerRoute>
       } />
       <Route path="company-users/:userId" element={
         <OwnerRoute>
-          <SystemLayout title="User Appointments">
+          <SystemLayout>
             <UserAppointments />
           </SystemLayout>
         </OwnerRoute>
       } />
       <Route path="appointments" element={
         <ProtectedRoute>
-          <SystemLayout title="Appointments">
+          <SystemLayout>
             <Appointments />
           </SystemLayout>
         </ProtectedRoute>
       } />
       <Route path="appointments/new" element={
         <ProtectedRoute>
-          <SystemLayout title="Book New Appointment">
+          <SystemLayout>
             <AppointmentForm />
           </SystemLayout>
         </ProtectedRoute>
       } />
       <Route path="appointments/:id" element={
         <ProtectedRoute>
-          <SystemLayout title="Edit Appointment">
+          <SystemLayout>
             <AppointmentForm />
           </SystemLayout>
         </ProtectedRoute>
       } />
       <Route path="calendar" element={
         <ProtectedRoute>
-          <SystemLayout title="Appointment Calendar">
+          <SystemLayout>
             <CalendarView />
           </SystemLayout>
         </ProtectedRoute>
       } />
       <Route path="my-companies" element={
         <ProtectedRoute>
-          <SystemLayout title="My Companies">
+          <SystemLayout>
             <UserCompanies />
           </SystemLayout>
         </ProtectedRoute>
       } />
       <Route path="my-companies/:companyId/appointments" element={
         <ProtectedRoute>
-          <SystemLayout title="My Appointments">
+          <SystemLayout>
             <UserCompanyAppointments />
           </SystemLayout>
         </ProtectedRoute>
       } />
       <Route path="settings" element={
         <ProtectedRoute>
-          <SystemLayout title="Settings">
+          <SystemLayout>
             <Settings />
           </SystemLayout>
         </ProtectedRoute>

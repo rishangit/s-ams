@@ -43,14 +43,16 @@ const CompaniesGridview: React.FC<CompaniesGridviewProps> = ({
     const statusText = getCompanyStatusDisplayName(value)
     
     return (
-      <Chip
-        label={statusText}
-        size="small"
-        className="text-white font-bold"
-        style={{
-          backgroundColor: statusColor
-        }}
-      />
+      <div className="flex items-center h-full justify-center">
+        <Chip
+          label={statusText}
+          size="small"
+          className="text-white font-bold"
+          style={{
+            backgroundColor: statusColor
+          }}
+        />
+      </div>
     )
   }
 
@@ -59,13 +61,27 @@ const CompaniesGridview: React.FC<CompaniesGridviewProps> = ({
     const { data } = props
     
     return (
-      <Box className="flex items-center gap-2">
-        <BusinessIcon className="text-blue-600" />
-        <Box>
-          <div className="font-semibold text-sm text-gray-900 dark:text-gray-100">
+      <Box className="flex items-center gap-2 h-full" sx={{ minWidth: 0, overflow: 'hidden' }}>
+        <BusinessIcon className="text-blue-600 flex-shrink-0" />
+        <Box sx={{ minWidth: 0, overflow: 'hidden' }}>
+          <div 
+            className="font-semibold text-sm text-gray-900 dark:text-gray-100"
+            style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
+            }}
+          >
             {data.name}
           </div>
-          <div className="text-xs text-gray-600 dark:text-gray-400">
+          <div 
+            className="text-xs text-gray-600 dark:text-gray-400"
+            style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
+            }}
+          >
             ID: {data.id}
           </div>
         </Box>
@@ -78,17 +94,33 @@ const CompaniesGridview: React.FC<CompaniesGridviewProps> = ({
     const { data } = props
     
     return (
-      <Box>
+      <Box sx={{ minWidth: 0, overflow: 'hidden' }}>
         <Box className="flex items-center gap-1 mb-1">
-          <PhoneIcon fontSize="small" className="text-blue-600" />
-          <div className="text-sm text-gray-900 dark:text-gray-100">
+          <PhoneIcon fontSize="small" className="text-blue-600 flex-shrink-0" />
+          <div 
+            className="text-sm text-gray-900 dark:text-gray-100"
+            style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              minWidth: 0
+            }}
+          >
             {data.phoneNumber}
           </div>
         </Box>
         {data.landPhone && (
           <Box className="flex items-center gap-1">
-            <PhoneIcon fontSize="small" className="text-blue-600" />
-            <div className="text-sm text-gray-600 dark:text-gray-400">
+            <PhoneIcon fontSize="small" className="text-blue-600 flex-shrink-0" />
+            <div 
+              className="text-sm text-gray-600 dark:text-gray-400"
+              style={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                minWidth: 0
+              }}
+            >
               {data.landPhone}
             </div>
           </Box>
@@ -102,15 +134,31 @@ const CompaniesGridview: React.FC<CompaniesGridviewProps> = ({
     const { data } = props
     
     return (
-      <Box>
+      <Box sx={{ minWidth: 0, overflow: 'hidden' }}>
         <Box className="flex items-center gap-1 mb-1">
-          <LocationIcon fontSize="small" className="text-blue-600" />
-          <div className="text-sm text-gray-900 dark:text-gray-100">
+          <LocationIcon fontSize="small" className="text-blue-600 flex-shrink-0" />
+          <div 
+            className="text-sm text-gray-900 dark:text-gray-100"
+            style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              minWidth: 0
+            }}
+          >
             {data.address}
           </div>
         </Box>
         {data.geoLocation && (
-          <div className="text-xs text-gray-600 dark:text-gray-400">
+          <div 
+            className="text-xs text-gray-600 dark:text-gray-400"
+            style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              minWidth: 0
+            }}
+          >
             {data.geoLocation}
           </div>
         )}
@@ -123,9 +171,9 @@ const CompaniesGridview: React.FC<CompaniesGridviewProps> = ({
     const { data } = props
     
     return (
-      <Box className="flex items-center gap-3">
+      <Box className="flex items-center gap-3 h-full" sx={{ minWidth: 0, overflow: 'hidden' }}>
         <Avatar
-          className="w-8 h-8 border-2 border-white shadow-sm bg-blue-600"
+          className="w-8 h-8 border-2 border-white shadow-sm bg-blue-600 flex-shrink-0"
           src={getProfileImageUrl(data.userProfileImage)}
           onError={(e) => {
             const target = e.currentTarget as HTMLImageElement
@@ -137,11 +185,25 @@ const CompaniesGridview: React.FC<CompaniesGridviewProps> = ({
             {data.userFirstName?.charAt(0)}{data.userLastName?.charAt(0)}
           </span>
         </Avatar>
-        <Box>
-          <div className="font-semibold text-sm text-gray-900 dark:text-gray-100">
+        <Box sx={{ minWidth: 0, overflow: 'hidden' }}>
+          <div 
+            className="font-semibold text-sm text-gray-900 dark:text-gray-100"
+            style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
+            }}
+          >
             {data.userFirstName} {data.userLastName}
           </div>
-          <div className="text-xs text-gray-600 dark:text-gray-400">
+          <div 
+            className="text-xs text-gray-600 dark:text-gray-400"
+            style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
+            }}
+          >
             {data.userEmail}
           </div>
         </Box>
@@ -159,7 +221,15 @@ const CompaniesGridview: React.FC<CompaniesGridviewProps> = ({
       filter: true,
       resizable: true,
       width: 250,
-      minWidth: 200
+      minWidth: 200,
+      maxWidth: 300,
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
+      }
     },
     {
       headerName: 'Contact Info',
@@ -169,7 +239,15 @@ const CompaniesGridview: React.FC<CompaniesGridviewProps> = ({
       filter: true,
       resizable: true,
       width: 200,
-      minWidth: 150
+      minWidth: 150,
+      maxWidth: 250,
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
+      }
     },
     {
       headerName: 'Location',
@@ -179,7 +257,15 @@ const CompaniesGridview: React.FC<CompaniesGridviewProps> = ({
       filter: true,
       resizable: true,
       width: 250,
-      minWidth: 200
+      minWidth: 200,
+      maxWidth: 350,
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
+      }
     },
     {
       headerName: 'Status',
@@ -189,7 +275,13 @@ const CompaniesGridview: React.FC<CompaniesGridviewProps> = ({
       filter: true,
       resizable: true,
       width: 120,
-      minWidth: 100
+      minWidth: 100,
+      maxWidth: 140,
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center',
+        justifyContent: 'center'
+      }
     },
     {
       headerName: 'Owner',
@@ -199,7 +291,15 @@ const CompaniesGridview: React.FC<CompaniesGridviewProps> = ({
       filter: true,
       resizable: true,
       width: 200,
-      minWidth: 150
+      minWidth: 150,
+      maxWidth: 250,
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
+      }
     }
   ], [uiTheme])
 
@@ -241,7 +341,7 @@ const CompaniesGridview: React.FC<CompaniesGridviewProps> = ({
       error={error}
       success={success}
       theme={uiTheme}
-      height="calc(100vh - 200px)"
+      height="auto"
       showTitle={false}
       showAlerts={true}
       rowActions={rowActions}

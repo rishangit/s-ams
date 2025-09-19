@@ -17,7 +17,7 @@ import {
 } from 'ag-grid-community'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
-import RowActionsMenu, { RowAction } from './RowActionsMenu'
+import RowActionsMenu, { RowAction } from '../RowActionsMenu'
 
 // Register AG Grid modules
 ModuleRegistry.registerModules([AllCommunityModule])
@@ -85,23 +85,8 @@ const CustomGrid: React.FC<CustomGridProps> = ({
     }, [])
 
 
-    console.log('📊 CustomGrid Debug:', {
-        title,
-        dataLength: data ? data.length : 0,
-        data: data,
-        loading,
-        error,
-        success,
-        columnDefsLength: columnDefs ? columnDefs.length : 0,
-        rowActionsLength: rowActions ? rowActions.length : 0
-    })
 
     const handleGridReady = (params: GridReadyEvent) => {
-        console.log('🎯 Grid Ready Event:', {
-            rowCount: params.api.getDisplayedRowCount(),
-            dataLength: data ? data.length : 0,
-            columnCount: params.api.getColumnDefs()?.length || 0
-        })
         setGridApi(params.api)
         if (onGridReady) {
             onGridReady(params)
@@ -144,7 +129,6 @@ const CustomGrid: React.FC<CustomGridProps> = ({
                         const rowElement = (rowNode as any)?.rowElement
                         if (rowElement) {
                             rowElement.classList.add('row-highlighted')
-                            console.log('🎯 Highlighted row:', rowId)
                         }
                     }
                 }
@@ -152,7 +136,6 @@ const CustomGrid: React.FC<CustomGridProps> = ({
             
             // STEP 3: Auto-remove highlight after 2 seconds
             highlightTimeoutRef.current = setTimeout(() => {
-                console.log('🎯 Removing highlight for row:', rowId)
                 gridApi.forEachNode((node) => {
                     if (node.data && node.id) {
                         const currentRowId = node.data.id || node.data.appointmentId || node.data.userId || node.data.companyId || node.data.staffId || node.data.serviceId
@@ -225,17 +208,14 @@ const CustomGrid: React.FC<CustomGridProps> = ({
         return [...columnDefs, actionsColumn]
     }, [columnDefs, rowActions, theme])
 
-    // Debug final column definitions
-    console.log('📊 CustomGrid Final Column Defs:', {
-        finalColumnDefsLength: finalColumnDefs ? finalColumnDefs.length : 0,
-        hasActionsColumn: rowActions && rowActions.length > 0
-    })
 
     const gridStyle = useMemo(() => {
         const isDark = theme.mode === 'dark'
+        const isAutoHeight = height === 'auto'
         
         return {
-            height: height,
+            height: isAutoHeight ? 'auto' : height,
+            minHeight: isAutoHeight ? '400px' : undefined,
             width: '100%',
             '--ag-header-background-color': theme.primary,
             '--ag-header-foreground-color': '#ffffff',
@@ -255,14 +235,20 @@ const CustomGrid: React.FC<CustomGridProps> = ({
 
     if (loading) {
         return (
-            <Box className="flex justify-center items-center" style={{ height }}>
+            <Box 
+                className="flex justify-center items-center" 
+                style={{ 
+                    height: height === 'auto' ? '400px' : height,
+                    minHeight: height === 'auto' ? '400px' : undefined
+                }}
+            >
                 <CircularProgress />
             </Box>
         )
     }
 
     return (
-        <Box className="h-full flex flex-col">
+        <Box className={`${height === 'auto' ? 'h-auto' : 'h-full'} flex flex-col`}>
             {/* CSS for row highlighting and grid visibility */}
             <style>
                 {`
@@ -275,16 +261,16 @@ const CustomGrid: React.FC<CustomGridProps> = ({
                     }
                     /* Ensure grid is visible in dialogs */
                     .ag-theme-alpine {
-                        height: 100% !important;
-                        min-height: 200px !important;
+                        height: ${height === 'auto' ? 'auto' : '100%'} !important;
+                        min-height: ${height === 'auto' ? '400px' : '200px'} !important;
                     }
                     .ag-root-wrapper {
-                        height: 100% !important;
-                        min-height: 200px !important;
+                        height: ${height === 'auto' ? 'auto' : '100%'} !important;
+                        min-height: ${height === 'auto' ? '400px' : '200px'} !important;
                     }
                     .ag-body-viewport {
-                        height: 100% !important;
-                        min-height: 200px !important;
+                        height: ${height === 'auto' ? 'auto' : '100%'} !important;
+                        min-height: ${height === 'auto' ? '400px' : '200px'} !important;
                     }
                     /* Mobile-specific overrides */
                     @media (max-width: 768px) {
@@ -329,20 +315,20 @@ const CustomGrid: React.FC<CustomGridProps> = ({
 
             {/* Grid Section */}
             <Paper
-                className="flex-1 overflow-hidden rounded-lg shadow-sm"
+                className={`${height === 'auto' ? 'flex-none' : 'flex-1'} ${height === 'auto' ? 'overflow-visible' : 'overflow-hidden'} rounded-lg shadow-sm`}
                 style={{ 
                     backgroundColor: theme.surface,
                     border: `1px solid ${theme.mode === 'dark' ? '#334155' : '#e5e7eb'}`,
-                    height: height,
-                    minHeight: typeof height === 'string' && height.includes('%') ? '200px' : undefined
+                    height: height === 'auto' ? 'auto' : height,
+                    minHeight: height === 'auto' ? '400px' : (typeof height === 'string' && height.includes('%') ? '200px' : undefined)
                 }}
             >
                 <Box
-                    className="ag-theme-alpine h-full w-full"
+                    className={`ag-theme-alpine w-full ${height === 'auto' ? 'h-auto' : 'h-full'}`}
                     style={{
                         ...gridStyle,
-                        height: '100%',
-                        minHeight: '200px'
+                        height: height === 'auto' ? 'auto' : '100%',
+                        minHeight: height === 'auto' ? '400px' : '200px'
                     }}
                 >
                     {/* @ts-ignore */}
@@ -356,7 +342,7 @@ const CustomGrid: React.FC<CustomGridProps> = ({
                         paginationPageSizeSelector={isMobile ? false : [10, 20, 50, 100]}
                         defaultColDef={defaultColDef}
                         animateRows={true}
-                        domLayout="normal"
+                        domLayout={height === 'auto' ? 'autoHeight' : 'normal'}
                         suppressCellFocus={false}
                         enableCellTextSelection={true}
                         suppressRowHoverHighlight={false}

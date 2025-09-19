@@ -5,9 +5,10 @@ import { RootState } from '../../../store'
 import CompanyUsersGridview from './CompanyUsersGridview'
 import CompanyUsersListview from './CompanyUsersListview'
 import CompanyUsersCardview from './CompanyUsersCardview'
-import { Box, Typography, IconButton, Tooltip, useMediaQuery } from '@mui/material'
-import { ViewModule as GridViewIcon, ViewList as ListViewIcon, ViewComfy as CardViewIcon } from '@mui/icons-material'
+import { Box, Typography, useMediaQuery } from '@mui/material'
+import { People as PeopleIcon } from '@mui/icons-material'
 import { apiService } from '../../../services/api'
+import { ViewSwitcher, ViewMode } from '../../../components/shared'
 
 interface CompanyUser {
   id: number
@@ -30,7 +31,7 @@ const CompanyUsers: React.FC = () => {
   const uiTheme = useSelector((state: RootState) => state.ui.theme)
   const isMobile = useMediaQuery('(max-width: 768px)')
   
-  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'card'>('grid')
+  const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [userSelectedView, setUserSelectedView] = useState<boolean>(false)
   const [users, setUsers] = useState<CompanyUser[]>([])
   const [loading, setLoading] = useState(false)
@@ -83,7 +84,7 @@ const CompanyUsers: React.FC = () => {
 
 
   // Handle view mode change
-  const handleViewModeChange = (newViewMode: 'grid' | 'list' | 'card') => {
+  const handleViewModeChange = (newViewMode: ViewMode) => {
     setViewMode(newViewMode)
     setUserSelectedView(true)
   }
@@ -115,101 +116,62 @@ const CompanyUsers: React.FC = () => {
   }
 
   return (
-    <Box className="h-full flex flex-col">
+    <Box className="flex flex-col h-full">
       {/* Header Section */}
-      <Box className="mb-6">
-        <Box className="flex items-center justify-between mb-4">
-          <Box>
-            <Typography 
-              variant="h4" 
-              className="font-bold mb-2"
-              style={{ color: uiTheme.text }}
-            >
-              Company Users
-            </Typography>
-            <Typography 
-              variant="body1"
-              style={{ color: uiTheme.textSecondary }}
-            >
-              View all users who have received services from your company
-            </Typography>
-          </Box>
-          
+      <Box className="flex items-center gap-3 mb-6 flex-shrink-0">
+        <PeopleIcon style={{ color: uiTheme.primary, fontSize: 32 }} />
+        <Typography
+          variant="h6"
+          className="text-xl md:text-3xl font-bold"
+          style={{ color: uiTheme.text }}
+        >
+          Company Users
+        </Typography>
+      </Box>
+
+      {/* Controls Section - All on the right */}
+      <Box className="flex justify-end mb-6 flex-shrink-0">
+        <Box className="flex flex-row items-center gap-4">
           {/* View Switcher */}
-          <Box className="flex items-center gap-1 border rounded-lg p-1" style={{ borderColor: uiTheme.border }}>
-            {!isMobile && (
-              <Tooltip title="Grid View">
-                <IconButton
-                  size="small"
-                  onClick={() => handleViewModeChange('grid')}
-                  style={{
-                    backgroundColor: viewMode === 'grid' ? uiTheme.primary : 'transparent',
-                    color: viewMode === 'grid' ? '#ffffff' : uiTheme.text
-                  }}
-                >
-                  <GridViewIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )}
-            {!isMobile && (
-              <Tooltip title="List View">
-                <IconButton
-                  size="small"
-                  onClick={() => handleViewModeChange('list')}
-                  style={{
-                    backgroundColor: viewMode === 'list' ? uiTheme.primary : 'transparent',
-                    color: viewMode === 'list' ? '#ffffff' : uiTheme.text
-                  }}
-                >
-                  <ListViewIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )}
-            <Tooltip title="Card View">
-              <IconButton
-                size="small"
-                onClick={() => handleViewModeChange('card')}
-                style={{
-                  backgroundColor: viewMode === 'card' ? uiTheme.primary : 'transparent',
-                  color: viewMode === 'card' ? '#ffffff' : uiTheme.text
-                }}
-              >
-                <CardViewIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          </Box>
+          <ViewSwitcher
+            viewMode={viewMode}
+            onViewModeChange={handleViewModeChange}
+            theme={uiTheme}
+          />
         </Box>
       </Box>
 
       {/* Conditional Rendering of Grid, List, or Card View */}
-      {viewMode === 'grid' ? (
-        <CompanyUsersGridview
-          filteredUsers={users}
-          loading={loading}
-          error={error}
-          success={success}
-          uiTheme={uiTheme}
-          onViewAppointments={handleViewAppointments}
-        />
-      ) : viewMode === 'list' ? (
-        <CompanyUsersListview
-          filteredUsers={users}
-          loading={loading}
-          error={error}
-          success={success}
-          uiTheme={uiTheme}
-          onViewAppointments={handleViewAppointments}
-        />
-      ) : (
-        <CompanyUsersCardview
-          filteredUsers={users}
-          loading={loading}
-          error={error}
-          success={success}
-          uiTheme={uiTheme}
-          onViewAppointments={handleViewAppointments}
-        />
-      )}
+      <Box className="flex-1 min-h-0">
+        {viewMode === 'grid' ? (
+          <CompanyUsersGridview
+            filteredUsers={users}
+            loading={loading}
+            error={error}
+            success={success}
+            uiTheme={uiTheme}
+            onViewAppointments={handleViewAppointments}
+          />
+        ) : viewMode === 'list' ? (
+          <CompanyUsersListview
+            filteredUsers={users}
+            loading={loading}
+            error={error}
+            success={success}
+            uiTheme={uiTheme}
+            onViewAppointments={handleViewAppointments}
+          />
+        ) : (
+          <CompanyUsersCardview
+            filteredUsers={users}
+            loading={loading}
+            error={error}
+            success={success}
+            uiTheme={uiTheme}
+            onViewAppointments={handleViewAppointments}
+          />
+        )}
+      </Box>
     </Box>
   )
 }

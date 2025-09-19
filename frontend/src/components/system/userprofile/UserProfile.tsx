@@ -266,7 +266,7 @@ const UserProfile: React.FC = () => {
             className="p-6"
             style={{
               backgroundColor: uiTheme.surface,
-              border: `1px solid ${uiTheme.mode === 'dark' ? '#334155' : '#e5e7eb'}`
+              border: `1px solid ${uiTheme.border}`
             }}
           >
             <Box className="flex flex-col items-center text-center">
@@ -330,7 +330,7 @@ const UserProfile: React.FC = () => {
             className="p-6"
             style={{
               backgroundColor: uiTheme.surface,
-              border: `1px solid ${uiTheme.mode === 'dark' ? '#334155' : '#e5e7eb'}`
+              border: `1px solid ${uiTheme.border}`
             }}
           >
             <Typography
@@ -451,7 +451,7 @@ const UserProfile: React.FC = () => {
               className="p-6"
               style={{
                 backgroundColor: uiTheme.surface,
-                border: `1px solid ${uiTheme.mode === 'dark' ? '#334155' : '#e5e7eb'}`
+                border: `1px solid ${uiTheme.border}`
               }}
             >
               <Box className="flex items-center mb-4">
@@ -482,8 +482,8 @@ const UserProfile: React.FC = () => {
               <Box
                 className="p-4 rounded-lg mb-4"
                 style={{
-                  backgroundColor: uiTheme.mode === 'dark' ? '#1e3a8a20' : '#dbeafe',
-                  border: `1px solid ${uiTheme.mode === 'dark' ? '#3b82f620' : '#93c5fd'}`
+                  backgroundColor: `${uiTheme.primary}20`,
+                  border: `1px solid ${uiTheme.primary}40`
                 }}
               >
                 <Typography

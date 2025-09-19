@@ -1,18 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import {
   Box,
-  IconButton,
-  Tooltip,
   useMediaQuery
 } from '@mui/material'
-import {
-  ViewModule as GridViewIcon,
-  ViewList as ListViewIcon,
-  ViewComfy as CardViewIcon
-} from '@mui/icons-material'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../../store'
 import { isAdminOnlyRole } from '../../../constants/roles'
+import { ViewSwitcher, ViewMode } from '../../../components/shared'
 import { useUsers } from '../../../hooks/useUsers'
 import UsersListview from './UsersListview'
 import UsersCardview from './UsersCardview'
@@ -44,7 +38,7 @@ const Users: React.FC = () => {
     clearSuccess 
   } = useUsers()
 
-  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'card'>('grid')
+  const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [userSelectedView, setUserSelectedView] = useState<boolean>(false)
 
   useEffect(() => {
@@ -90,25 +84,22 @@ const Users: React.FC = () => {
 
 
   // Handle view mode change
-  const handleViewModeChange = (newViewMode: 'grid' | 'list' | 'card') => {
+  const handleViewModeChange = (newViewMode: ViewMode) => {
     setViewMode(newViewMode)
     setUserSelectedView(true)
   }
 
   // User action handlers
-  const handleViewUser = (userId: number) => {
-    console.log('View user:', userId)
+  const handleViewUser = (_userId: number) => {
     // TODO: Implement view user functionality
   }
 
-  const handleEditUser = (userId: number) => {
-    console.log('Edit user:', userId)
+  const handleEditUser = (_userId: number) => {
     // TODO: Implement edit user functionality
   }
 
-  const handleDeleteUser = (userId: number) => {
+  const handleDeleteUser = (_userId: number) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
-      console.log('Delete user:', userId)
       // TODO: Implement delete user functionality
     }
   }
@@ -139,50 +130,11 @@ const Users: React.FC = () => {
         </Box>
         
         {/* View Switcher */}
-        <Box className="flex items-center gap-1 border rounded-lg p-1" style={{ borderColor: uiTheme.border }}>
-          {!isMobile && (
-            <Tooltip title="Grid View">
-              <IconButton
-                size="small"
-                onClick={() => handleViewModeChange('grid')}
-                style={{
-                  backgroundColor: viewMode === 'grid' ? uiTheme.primary : 'transparent',
-                  color: viewMode === 'grid' ? '#ffffff' : uiTheme.text
-                }}
-              >
-                <GridViewIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          )}
-          {!isMobile && (
-            <Tooltip title="List View">
-              <IconButton
-                size="small"
-                onClick={() => handleViewModeChange('list')}
-                style={{
-                  backgroundColor: viewMode === 'list' ? uiTheme.primary : 'transparent',
-                  color: viewMode === 'list' ? '#ffffff' : uiTheme.text
-                }}
-              >
-                <ListViewIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          )}
-          {!isMobile && (
-            <Tooltip title="Card View">
-              <IconButton
-                size="small"
-                onClick={() => handleViewModeChange('card')}
-                style={{
-                  backgroundColor: viewMode === 'card' ? uiTheme.primary : 'transparent',
-                  color: viewMode === 'card' ? '#ffffff' : uiTheme.text
-                }}
-              >
-                <CardViewIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          )}
-        </Box>
+        <ViewSwitcher
+          viewMode={viewMode}
+          onViewModeChange={handleViewModeChange}
+          theme={uiTheme}
+        />
       </Box>
 
       {/* Conditional Rendering of Grid, List, or Card View */}

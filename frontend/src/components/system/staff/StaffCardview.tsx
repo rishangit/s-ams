@@ -3,15 +3,12 @@ import {
   Card,
   CardContent,
   Typography,
-  Box,
   CircularProgress,
   Alert,
-  Grid,
-  Paper,
-  Stack
+  Avatar,
+  Chip
 } from '@mui/material'
 import {
-  Email as EmailIcon,
   Phone as PhoneIcon,
   AccessTime as TimeIcon,
   Work as SkillsIcon,
@@ -19,19 +16,18 @@ import {
 } from '@mui/icons-material'
 import { RowActionsMenu } from '../../../components/shared'
 import { 
-  StaffInfo, 
-  StaffStatusChip
-} from './utils/staffComponents'
-import { 
-  generateStaffRowActions
+  generateStaffRowActions,
+  getStaffStatusColor,
+  getStaffStatusDisplayName
 } from './utils/staffUtils'
+import { getProfileImageUrl } from '../../../utils/fileUtils'
 
 interface StaffCardviewProps {
   filteredStaff: any[]
   loading: boolean
   error: string | null
   success: string | null
-  theme: any
+  uiTheme: any
   onEditStaff: (staffId: number) => void
   onDeleteStaff: (staffId: number) => void
 }
@@ -41,7 +37,7 @@ const StaffCardview: React.FC<StaffCardviewProps> = ({
   loading,
   error,
   success,
-  theme,
+  uiTheme,
   onEditStaff,
   onDeleteStaff
 }) => {
@@ -52,15 +48,15 @@ const StaffCardview: React.FC<StaffCardviewProps> = ({
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
+      <div className="flex justify-center items-center h-48">
         <CircularProgress />
-      </Box>
+      </div>
     )
   }
 
   if (error) {
     return (
-      <Alert severity="error" sx={{ mb: 2 }}>
+      <Alert severity="error" className="mb-4">
         {error}
       </Alert>
     )
@@ -68,183 +64,191 @@ const StaffCardview: React.FC<StaffCardviewProps> = ({
 
   if (success) {
     return (
-      <Alert severity="success" sx={{ mb: 2 }}>
+      <Alert severity="success" className="mb-4">
         {success}
       </Alert>
     )
   }
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Grid container spacing={3}>
+    <div className="p-0 overflow-visible">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 overflow-visible">
         {filteredStaff?.map((staff) => (
-          <Grid item xs={12} sm={6} lg={4} key={staff.id}>
+          <div key={staff.id} className="col-span-1 overflow-visible">
             <Card 
               elevation={0}
-              sx={{ 
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                backgroundColor: theme.background,
-                border: `1px solid ${theme.border}`,
-                borderRadius: 3,
-                overflow: 'hidden',
-                position: 'relative',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                '&:hover': {
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
-                  transform: 'translateY(-2px)',
-                  borderColor: theme.primary
-                }
-              }}
+              className="h-full flex flex-col relative overflow-visible rounded-xl transition-all duration-300 ease-out shadow-md hover:shadow-lg hover:-translate-y-1 group"
+              style={{ 
+                backgroundColor: uiTheme.background,
+                border: `1px solid ${uiTheme.border}`,
+                '--hover-border-color': uiTheme.primary,
+                transformOrigin: 'center center',
+                willChange: 'transform, box-shadow'
+              } as React.CSSProperties}
             >
               {/* 3-Dot Menu in Top Right Corner */}
-              <Box 
-                sx={{ 
-                  position: 'absolute', 
-                  top: 8, 
-                  right: 8, 
-                  zIndex: 1,
-                  backgroundColor: theme.background,
-                  borderRadius: '50%',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+              <div 
+                className="absolute top-2 right-2 z-20 rounded-full shadow-md"
+                style={{ 
+                  backgroundColor: uiTheme.background,
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden'
                 }}
               >
                 <RowActionsMenu
                   rowData={staff}
                   actions={rowActions}
-                  theme={theme}
+                  theme={uiTheme}
                 />
-              </Box>
+              </div>
 
-              <CardContent sx={{ flexGrow: 1, p: 3, pt: 4 }}>
-                {/* Header with Staff Info and Status */}
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
-                  <Box sx={{ flex: 1, pr: 1 }}>
-                    <StaffInfo staff={staff} />
-                  </Box>
-                  <StaffStatusChip status={staff.status} />
-                </Box>
-
-                {/* Contact Information Section */}
-                <Paper 
-                  elevation={0}
-                  sx={{ 
-                    p: 2, 
-                    mb: 2, 
-                    backgroundColor: `${theme.primary}08`,
-                    border: `1px solid ${theme.primary}20`,
-                    borderRadius: 2,
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.06)'
+              {/* Staff Image Section */}
+              <div
+                className="h-48 relative overflow-hidden rounded-t-xl"
+                style={{
+                  '--bg-image': staff.profileImage 
+                    ? `url(${getProfileImageUrl(staff.profileImage)})`
+                    : 'none',
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden'
+                } as React.CSSProperties}
+              >
+                {/* Blurred background */}
+                <div 
+                  className="absolute inset-0 bg-cover bg-center scale-110 blur-sm"
+                  style={{
+                    backgroundImage: staff.profileImage 
+                      ? `url(${getProfileImageUrl(staff.profileImage)})`
+                      : 'none'
                   }}
-                >
-                  <Stack spacing={1.5}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <EmailIcon sx={{ color: theme.primary, fontSize: 20 }} />
-                      <Typography variant="body2" sx={{ fontWeight: '600', color: theme.text }}>
-                        {staff.email}
+                />
+                {/* Overlay */}
+                <div 
+                  className="absolute inset-0"
+                  style={{
+                    backgroundColor: staff.profileImage 
+                      ? 'rgba(0, 0, 0, 0.3)'
+                      : '#f5f5f5'
+                  }}
+                />
+                {/* Avatar centered over blurred background */}
+                <div className="relative z-10 h-full flex items-center justify-center">
+                  <Avatar
+                    className="w-30 h-30 border-4 border-white shadow-lg"
+                    style={{ 
+                      backgroundColor: uiTheme.primary,
+                      width: 120,
+                      height: 120
+                    }}
+                    src={getProfileImageUrl(staff.profileImage)}
+                    onError={(e) => {
+                      const target = e.currentTarget as HTMLImageElement
+                      console.error('Staff Avatar image failed to load:', target.src)
+                    }}
+                  >
+                    <span className="text-white font-bold text-5xl">
+                      {staff.firstName?.charAt(0)}{staff.lastName?.charAt(0)}
+                    </span>
+                  </Avatar>
+                </div>
+              </div>
+
+              {/* Content Section */}
+              <CardContent 
+                className="flex-grow p-5 rounded-t-xl"
+                style={{
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden'
+                }}
+              >
+                {/* Title and Email */}
+                <div className="mb-4">
+                  <Typography 
+                    variant="h6" 
+                    className="font-bold mb-1 leading-tight"
+                    style={{ color: uiTheme.text }}
+                  >
+                    {staff.firstName} {staff.lastName}
+                  </Typography>
+                  <Typography 
+                    variant="body2" 
+                    className="text-sm"
+                    style={{ color: uiTheme.textSecondary }}
+                  >
+                    {staff.email} • ID: {staff.id}
+                  </Typography>
+                </div>
+
+                {/* Status Chip */}
+                <div className="flex justify-start mb-4">
+                  <Chip
+                    label={getStaffStatusDisplayName(staff.status)}
+                    size="small"
+                    className="text-white font-bold text-xs h-6 px-3"
+                    style={{
+                      backgroundColor: getStaffStatusColor(staff.status)
+                    }}
+                  />
+                </div>
+
+                {/* Additional Info - Simplified */}
+                <div className="flex flex-col gap-2">
+                  {staff.phoneNumber && (
+                    <div className="flex items-center gap-2">
+                      <PhoneIcon className="w-4 h-4" style={{ color: uiTheme.textSecondary }} />
+                      <Typography variant="body2" className="text-xs" style={{ color: uiTheme.textSecondary }}>
+                        {staff.phoneNumber}
                       </Typography>
-                    </Box>
-                    {staff.phoneNumber && (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <PhoneIcon sx={{ color: theme.primary, fontSize: 20 }} />
-                        <Typography variant="body2" sx={{ fontWeight: '600', color: theme.text }}>
-                          {staff.phoneNumber}
-                        </Typography>
-                      </Box>
-                    )}
-                  </Stack>
-                </Paper>
-
-                {/* Working Hours Section */}
-                <Paper 
-                  elevation={0}
-                  sx={{ 
-                    p: 2, 
-                    mb: 2, 
-                    backgroundColor: '#f0f9ff',
-                    border: '1px solid #e0f2fe',
-                    borderRadius: 2,
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.06)'
-                  }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                    <TimeIcon sx={{ color: '#0ea5e9', fontSize: 20 }} />
-                    <Typography variant="body2" sx={{ fontWeight: '600', color: '#0ea5e9' }}>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <TimeIcon className="w-4 h-4" style={{ color: uiTheme.textSecondary }} />
+                    <Typography variant="body2" className="text-xs" style={{ color: uiTheme.textSecondary }}>
                       {staff.workingHoursStart && staff.workingHoursEnd 
                         ? `${staff.workingHoursStart} - ${staff.workingHoursEnd}`
                         : staff.workingHoursStart 
                         ? `From ${staff.workingHoursStart}`
                         : staff.workingHoursEnd
                         ? `Until ${staff.workingHoursEnd}`
-                        : 'Not set'
+                        : 'Hours not set'
                       }
                     </Typography>
-                  </Box>
-                </Paper>
-
-                {/* Skills Section */}
-                {staff.skills && (
-                  <Paper 
-                    elevation={0}
-                    sx={{ 
-                      p: 2, 
-                      mb: 2, 
-                      backgroundColor: '#f0fdf4',
-                      border: '1px solid #dcfce7',
-                      borderRadius: 2,
-                      boxShadow: '0 1px 4px rgba(0,0,0,0.06)'
-                    }}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                      <SkillsIcon sx={{ color: '#16a34a', fontSize: 20, mt: 0.5 }} />
-                      <Typography 
-                        variant="body2" 
-                        sx={{ 
-                          fontWeight: '600', 
-                          color: '#16a34a',
-                          wordBreak: 'break-word'
-                        }}
-                      >
-                        {staff.skills.length > 100 
-                          ? `${staff.skills.substring(0, 100)}...` 
+                  </div>
+                  {staff.skills && (
+                    <div className="flex items-center gap-2">
+                      <SkillsIcon className="w-4 h-4" style={{ color: uiTheme.textSecondary }} />
+                      <Typography variant="body2" className="text-xs" style={{ color: uiTheme.textSecondary }}>
+                        {staff.skills.length > 30 
+                          ? `${staff.skills.substring(0, 30)}...` 
                           : staff.skills
                         }
                       </Typography>
-                    </Box>
-                  </Paper>
-                )}
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
-          </Grid>
+          </div>
         ))}
-      </Grid>
+      </div>
 
       {filteredStaff?.length === 0 && (
-        <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Box sx={{ 
-            width: 80, 
-            height: 80, 
-            borderRadius: '50%', 
-            backgroundColor: `${theme.primary}10`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            mx: 'auto',
-            mb: 3
-          }}>
-            <PeopleIcon sx={{ fontSize: 40, color: theme.primary }} />
-          </Box>
-          <Typography variant="h6" sx={{ color: theme.text, mb: 1, fontWeight: '600' }}>
+        <div className="text-center py-16">
+          <div 
+            className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
+            style={{ backgroundColor: `${uiTheme.primary}10` }}
+          >
+            <PeopleIcon className="text-4xl" style={{ color: uiTheme.primary }} />
+          </div>
+          <Typography variant="h6" className="mb-2 font-semibold" style={{ color: uiTheme.text }}>
             No staff members found
           </Typography>
-          <Typography variant="body2" sx={{ color: '#666' }}>
+          <Typography variant="body2" className="text-gray-600">
             Try adjusting your filters or add a new staff member
           </Typography>
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }
 

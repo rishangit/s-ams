@@ -17,7 +17,6 @@ import {
   Edit as EditIcon
 } from '@mui/icons-material'
 import { useSelector, useDispatch } from 'react-redux'
-// import { useNavigate } from 'react-router-dom'
 import { RootState } from '../../../store'
 import {
   createCompanyRequest,
@@ -146,16 +145,12 @@ const Company: React.FC = () => {
   }
 
   const onSubmit = async (data: CompanyFormData) => {
-    console.log('Company form submitted:', data)
-    console.log('Current user:', user)
     
     if (company?.id) {
       // Update existing company
-      console.log('Updating existing company:', company.id)
       dispatch(updateCompanyRequest({ id: company.id, data }))
     } else {
       // Create new company
-      console.log('Creating new company')
       dispatch(createCompanyRequest(data))
     }
     setIsEditing(false)
@@ -271,9 +266,6 @@ const Company: React.FC = () => {
             </Box>
             
                          <form onSubmit={handleSubmit((data) => {
-               console.log('Form submitted with data:', data)
-               console.log('Form errors:', errors)
-               console.log('Form is dirty:', isDirty)
                onSubmit(data)
              })}>
               <Grid container spacing={3}>

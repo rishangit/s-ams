@@ -1,17 +1,12 @@
 import React, { useState, useMemo } from 'react'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Typography,
-  Box,
   CircularProgress,
   Alert
 } from '@mui/material'
+import {
+  ArrowUpward as ArrowUpwardIcon,
+  ArrowDownward as ArrowDownwardIcon
+} from '@mui/icons-material'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../../store'
 import { RowActionsMenu } from '../../../components/shared'
@@ -28,7 +23,6 @@ import {
   shouldShowCustomerColumn, 
   shouldShowCompanyColumn 
 } from './utils/appointmentUtils'
-import AppointmentPagination from './utils/AppointmentPagination'
 
 interface AppointmentsListviewProps {
   filteredAppointments: any[]
@@ -70,7 +64,7 @@ const AppointmentsListview: React.FC<AppointmentsListviewProps> = ({
     setPage(newPage)
   }
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10))
     setPage(0)
   }
@@ -84,15 +78,15 @@ const AppointmentsListview: React.FC<AppointmentsListviewProps> = ({
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
+      <div className="flex justify-center items-center h-48">
         <CircularProgress />
-      </Box>
+      </div>
     )
   }
 
   if (error) {
     return (
-      <Alert severity="error" sx={{ mb: 2 }}>
+      <Alert severity="error" className="mb-4">
         {error}
       </Alert>
     )
@@ -100,123 +94,211 @@ const AppointmentsListview: React.FC<AppointmentsListviewProps> = ({
 
   if (success) {
     return (
-      <Alert severity="success" sx={{ mb: 2 }}>
+      <Alert severity="success" className="mb-4">
         {success}
       </Alert>
     )
   }
 
   return (
-    <Box>
-      <TableContainer component={Paper} sx={{ maxHeight: 'calc(100vh - 350px)' }}>
-        <Table stickyHeader>
-          <TableHead>
-            <TableRow>
-              {tableHeaders.map((header) => (
-                <TableCell
-                  key={header}
-                  sx={{
-                    backgroundColor: uiTheme.background,
-                    color: uiTheme.text,
-                    fontWeight: 'bold',
-                    borderBottom: `2px solid ${uiTheme.primary}`
-                  }}
-                >
-                  {header}
-                </TableCell>
+    <div 
+      className="rounded-lg shadow-sm overflow-visible flex flex-col h-auto min-h-0"
+      style={{ 
+        backgroundColor: uiTheme.surface,
+        border: `1px solid ${uiTheme.border}`
+      }}
+    >
+      {/* Modern Table Container */}
+      <div className="overflow-x-auto overflow-visible flex-1 min-h-0">
+        <table className="w-full">
+          {/* Table Header */}
+          <thead style={{ backgroundColor: uiTheme.background, borderBottom: `1px solid ${uiTheme.border}` }}>
+            <tr>
+              <th className="px-6 py-4 text-left">
+                <div className="flex items-center space-x-2">
+                  <input 
+                    type="checkbox" 
+                    className="w-4 h-4 rounded focus:ring-2"
+                    style={{ 
+                      accentColor: uiTheme.primary,
+                      backgroundColor: uiTheme.surface,
+                      borderColor: uiTheme.border
+                    }}
+                  />
+                </div>
+              </th>
+              {tableHeaders.map((header, index) => (
+                <th key={header} className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider" style={{ color: uiTheme.textSecondary }}>
+                  <div className="flex items-center space-x-1">
+                    <span>{header}</span>
+                    {index === 1 && <ArrowUpwardIcon className="w-4 h-4" style={{ color: uiTheme.textSecondary }} />}
+                  </div>
+                </th>
               ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
+            </tr>
+          </thead>
+          
+          {/* Table Body */}
+          <tbody style={{ backgroundColor: uiTheme.surface }}>
             {paginatedAppointments.map((appointment) => (
-              <TableRow key={appointment.id} hover>
+              <tr 
+                key={appointment.id} 
+                className="transition-colors duration-150 hover:opacity-80"
+                style={{ 
+                  borderBottom: `1px solid ${uiTheme.border}`
+                }}
+              >
+                {/* Checkbox */}
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <input 
+                    type="checkbox" 
+                    className="w-4 h-4 rounded focus:ring-2"
+                    style={{ 
+                      accentColor: uiTheme.primary,
+                      backgroundColor: uiTheme.surface,
+                      borderColor: uiTheme.border
+                    }}
+                  />
+                </td>
+
                 {/* Customer Column */}
                 {shouldShowCustomerColumn(user) && (
-                  <TableCell>
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <UserAvatar 
                       userName={appointment.userName || 'Unknown User'} 
                       userProfileImage={appointment.userProfileImage} 
                     />
-                  </TableCell>
+                  </td>
                 )}
 
                 {/* Company Column */}
                 {shouldShowCompanyColumn(user) && (
-                  <TableCell>
-                    <Typography variant="body2">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span style={{ color: uiTheme.text }}>
                       {appointment.companyName}
-                    </Typography>
-                  </TableCell>
+                    </span>
+                  </td>
                 )}
 
                 {/* Date */}
-                <TableCell>
-                  <Typography variant="body2">
-                    {appointment.appointmentDate}
-                  </Typography>
-                </TableCell>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span style={{ color: uiTheme.text }}>
+                    {new Date(appointment.appointmentDate).toLocaleDateString()}
+                  </span>
+                </td>
 
                 {/* Time */}
-                <TableCell>
-                  <Typography variant="body2">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span style={{ color: uiTheme.text }}>
                     {appointment.appointmentTime}
-                  </Typography>
-                </TableCell>
+                  </span>
+                </td>
 
                 {/* Service */}
-                <TableCell>
+                <td className="px-6 py-4 whitespace-nowrap">
                   <ServiceInfo 
                     serviceName={appointment.serviceName} 
                     servicePrice={appointment.servicePrice} 
                   />
-                </TableCell>
+                </td>
 
                 {/* Status */}
-                <TableCell>
+                <td className="px-6 py-4 whitespace-nowrap">
                   <StatusChip status={appointment.status} />
-                </TableCell>
+                </td>
 
                 {/* Staff Assignment */}
-                <TableCell>
+                <td className="px-6 py-4 whitespace-nowrap">
                   <StaffAssignment appointment={appointment} />
-                </TableCell>
+                </td>
 
                 {/* Notes */}
-                <TableCell>
+                <td className="px-6 py-4 whitespace-nowrap">
                   <NotesDisplay notes={appointment.notes} />
-                </TableCell>
+                </td>
 
                 {/* Created */}
-                <TableCell>
-                  <Typography variant="body2">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span style={{ color: uiTheme.text }}>
                     {new Date(appointment.createdAt).toLocaleDateString()}
-                  </Typography>
-                </TableCell>
+                  </span>
+                </td>
 
                 {/* Actions */}
-                <TableCell>
-                  <RowActionsMenu
-                    rowData={appointment}
-                    actions={rowActions}
-                    theme={uiTheme}
-                  />
-                </TableCell>
-              </TableRow>
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <div className="flex items-center justify-end">
+                    <RowActionsMenu
+                      rowData={appointment}
+                      actions={rowActions}
+                      theme={uiTheme}
+                    />
+                  </div>
+                </td>
+              </tr>
             ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+          </tbody>
+        </table>
+      </div>
       
-      {/* Pagination */}
-      <AppointmentPagination
-        count={filteredAppointments?.length || 0}
-        page={page}
-        rowsPerPage={rowsPerPage}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        uiTheme={uiTheme}
-      />
-    </Box>
+      {/* Modern Pagination */}
+      <div 
+        className="px-6 py-4 flex items-center justify-end flex-shrink-0"
+        style={{ 
+          backgroundColor: uiTheme.surface,
+          borderTop: `1px solid ${uiTheme.border}`
+        }}
+      >
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm" style={{ color: uiTheme.text }}>Rows per page:</span>
+            <select 
+              value={rowsPerPage}
+              onChange={(e) => handleChangeRowsPerPage(e)}
+              className="rounded px-2 py-1 text-sm focus:outline-none focus:ring-2"
+              style={{ 
+                backgroundColor: uiTheme.surface,
+                border: `1px solid ${uiTheme.border}`,
+                color: uiTheme.text
+              }}
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+            </select>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <span className="text-sm" style={{ color: uiTheme.text }}>
+              {page * rowsPerPage + 1}-{Math.min((page + 1) * rowsPerPage, filteredAppointments?.length || 0)} of {filteredAppointments?.length || 0}
+            </span>
+            
+            <div className="flex space-x-1">
+              <button
+                onClick={() => handleChangePage(null, page - 1)}
+                disabled={page === 0}
+                className="p-1 rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors hover:opacity-80"
+                style={{ 
+                  color: uiTheme.text
+                }}
+              >
+                <ArrowDownwardIcon className="w-4 h-4 rotate-90" style={{ color: uiTheme.textSecondary }} />
+              </button>
+              <button
+                onClick={() => handleChangePage(null, page + 1)}
+                disabled={page >= Math.ceil((filteredAppointments?.length || 0) / rowsPerPage) - 1}
+                className="p-1 rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors hover:opacity-80"
+                style={{ 
+                  color: uiTheme.text
+                }}
+              >
+                <ArrowUpwardIcon className="w-4 h-4 rotate-90" style={{ color: uiTheme.textSecondary }} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 

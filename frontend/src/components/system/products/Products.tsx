@@ -1,43 +1,37 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '../../../store'
-import { ColDef, ICellRendererParams } from 'ag-grid-community'
-import { CustomGrid, RowAction } from '../../shared'
+import { ViewSwitcher, ViewMode } from '../../shared'
 import ProductForm from './ProductForm'
+import ProductsGridview from './ProductsGridview'
 import ProductsListview from './ProductsListview'
 import ProductsCardview from './ProductsCardview'
 import {
   getProductsRequest,
   deleteProductRequest,
-  clearProductsMessages,
-  getProductCategoriesRequest
+  clearProductsMessages
 } from '../../../store/actions/productsActions'
 import { useTheme } from '../../../hooks/useTheme'
-import { Edit, Delete, Add, Inventory as ProductIcon, Warning as WarningIcon, ViewModule as GridViewIcon, ViewList as ListViewIcon, ViewComfy as CardViewIcon } from '@mui/icons-material'
-import { Button, Box, Dialog, DialogTitle, DialogContent, Typography, Chip, TextField, Select, MenuItem, FormControl, InputLabel, IconButton, Tooltip, useMediaQuery } from '@mui/material'
-import { Product } from '../../../types/product'
+import { Add, Inventory as ProductIcon } from '@mui/icons-material'
+import { Button, Box, Dialog, DialogTitle, DialogContent, Typography, useMediaQuery } from '@mui/material'
 
 const Products: React.FC = () => {
   const dispatch = useDispatch()
   const { user } = useSelector((state: RootState) => state.auth)
-  const { products, loading, error, success, categories } = useSelector((state: RootState) => state.products)
-  const { theme } = useTheme()
+  const { products, loading, error, success } = useSelector((state: RootState) => state.products)
+  const { theme: uiTheme } = useTheme()
   const isMobile = useMediaQuery('(max-width: 768px)')
 
-  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'card'>('grid')
+  const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [userSelectedView, setUserSelectedView] = useState<boolean>(false)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editingProductId, setEditingProductId] = useState<number | null>(null)
-  const [statusFilter, setStatusFilter] = useState<string>('')
-  const [categoryFilter, setCategoryFilter] = useState<string>('')
-  const [searchFilter, setSearchFilter] = useState<string>('')
 
   // Load products when component mounts
   useEffect(() => {
     if (user && parseInt(String(user.role)) === 1) {
       dispatch(getProductsRequest())
-      dispatch(getProductCategoriesRequest())
     }
   }, [user?.role, dispatch])
 
@@ -89,196 +83,18 @@ const Products: React.FC = () => {
   }
 
   // Handle view mode change
-  const handleViewModeChange = (newViewMode: 'grid' | 'list' | 'card') => {
+  const handleViewModeChange = (newViewMode: ViewMode) => {
     setViewMode(newViewMode)
     setUserSelectedView(true)
   }
 
 
-  // Filter products based on current filters
+  // Get all products
   const filteredProducts = useMemo(() => {
     if (!products) return []
-    
-    return products.filter(product => {
-      const matchesStatus = !statusFilter || product.status === statusFilter
-      const matchesCategory = !categoryFilter || product.category === categoryFilter
-      const matchesSearch = !searchFilter || 
-        product.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
-        (product.description && product.description.toLowerCase().includes(searchFilter.toLowerCase())) ||
-        (product.sku && product.sku.toLowerCase().includes(searchFilter.toLowerCase()))
-      
-      return matchesStatus && matchesCategory && matchesSearch
-    })
-  }, [products, statusFilter, categoryFilter, searchFilter])
+    return products
+  }, [products])
 
-  // Product Cell Renderer Component
-  const ProductCellRenderer = (props: ICellRendererParams) => {
-    const product = props.data as Product
-    
-    return (
-      <Box className="flex items-center gap-3">
-        <Box
-          className="w-10 h-10 rounded-lg flex items-center justify-center"
-          style={{ backgroundColor: theme.primary + '20' }}
-        >
-          <ProductIcon style={{ color: theme.primary }} />
-        </Box>
-        <Box className="flex flex-col">
-          <Typography variant="body2" className="font-medium">
-            {product.name}
-          </Typography>
-          <Typography variant="caption" className="text-gray-500">
-            {product.category || 'No category'}
-          </Typography>
-        </Box>
-      </Box>
-    )
-  }
-
-  // Status Cell Renderer Component
-  const StatusCellRenderer = (props: ICellRendererParams) => {
-    const product = props.data as Product
-    
-    const getStatusColor = (status: string) => {
-      switch (status) {
-        case 'active':
-          return '#10b981' // Green
-        case 'inactive':
-          return '#6b7280' // Gray
-        case 'discontinued':
-          return '#ef4444' // Red
-        default:
-          return '#6b7280' // Gray
-      }
-    }
-    
-    return (
-      <Chip
-        label={product.status.charAt(0).toUpperCase() + product.status.slice(1)}
-        size="small"
-        style={{
-          backgroundColor: getStatusColor(product.status),
-          color: '#fff',
-          fontWeight: 'bold'
-        }}
-      />
-    )
-  }
-
-  // Quantity Cell Renderer Component
-  const QuantityCellRenderer = (props: ICellRendererParams) => {
-    const product = props.data as Product
-    const isLowStock = product.quantity <= product.minQuantity
-    
-    return (
-      <Box className="flex items-center gap-2">
-        <Typography 
-          variant="body2" 
-          className={isLowStock ? 'text-red-600 font-semibold' : ''}
-        >
-          {product.quantity}
-        </Typography>
-        {isLowStock && (
-          <WarningIcon style={{ color: '#ef4444', fontSize: 16 }} />
-        )}
-      </Box>
-    )
-  }
-
-  // Price Cell Renderer Component
-  const PriceCellRenderer = (props: ICellRendererParams) => {
-    const product = props.data as Product
-    
-    // Ensure unitPrice is a number
-    const unitPrice = typeof product.unitPrice === 'number' 
-      ? product.unitPrice 
-      : parseFloat(product.unitPrice) || 0
-    
-    return (
-      <Typography variant="body2" className="font-medium">
-        ${unitPrice.toFixed(2)}
-        {product.unit && (
-          <span className="text-gray-500 text-xs ml-1">/ {product.unit}</span>
-        )}
-      </Typography>
-    )
-  }
-
-  // Row Actions Configuration
-  const rowActions: RowAction[] = [
-    {
-      id: 'edit',
-      label: 'Edit Product',
-      icon: <Edit fontSize="small" />,
-      onClick: (rowData) => handleEditProduct(rowData.id),
-      color: 'primary'
-    },
-    {
-      id: 'delete',
-      label: 'Delete Product',
-      icon: <Delete fontSize="small" />,
-      onClick: (rowData) => handleDeleteProduct(rowData.id),
-      color: 'error'
-    }
-  ]
-
-  const columnDefs: ColDef[] = [
-    {
-      headerName: 'Product',
-      field: 'name',
-      cellRenderer: ProductCellRenderer,
-      flex: 2,
-      minWidth: 250
-    },
-    {
-      headerName: 'Category',
-      field: 'category',
-      flex: 1,
-      minWidth: 150,
-      valueGetter: (params) => params.data.category || 'No category'
-    },
-    {
-      headerName: 'Unit Price',
-      field: 'unitPrice',
-      cellRenderer: PriceCellRenderer,
-      flex: 1,
-      minWidth: 120
-    },
-    {
-      headerName: 'Quantity',
-      field: 'quantity',
-      cellRenderer: QuantityCellRenderer,
-      flex: 1,
-      minWidth: 100
-    },
-    {
-      headerName: 'Min Qty',
-      field: 'minQuantity',
-      flex: 0.8,
-      minWidth: 80
-    },
-    {
-      headerName: 'Status',
-      field: 'status',
-      cellRenderer: StatusCellRenderer,
-      flex: 1,
-      minWidth: 100
-    },
-    {
-      headerName: 'Supplier',
-      field: 'supplier',
-      flex: 1,
-      minWidth: 150,
-      valueGetter: (params) => params.data.supplier || 'N/A'
-    },
-    {
-      headerName: 'SKU',
-      field: 'sku',
-      flex: 1,
-      minWidth: 120,
-      valueGetter: (params) => params.data.sku || 'N/A'
-    }
-  ]
 
   // Show loading while user is being loaded
   if (!user) {
@@ -287,7 +103,7 @@ const Products: React.FC = () => {
         <Typography
           variant="h6"
           className="text-base md:text-xl"
-          style={{ color: theme.text }}
+          style={{ color: uiTheme.text }}
         >
           Loading user data...
         </Typography>
@@ -302,7 +118,7 @@ const Products: React.FC = () => {
         <Typography
           variant="h6"
           className="text-base md:text-xl"
-          style={{ color: theme.text }}
+          style={{ color: uiTheme.text }}
         >
           Access denied. This page is only available for company owners.
         </Typography>
@@ -311,139 +127,53 @@ const Products: React.FC = () => {
   }
 
   return (
-    <Box className="h-full md:p-6">
+    <Box className="flex flex-col h-full">
       {/* Header Section */}
-      <Box className="mb-6">
-        <Box className="flex items-center justify-between mb-4">
-          <Box>
-            <Typography 
-              variant="h4" 
-              className="font-bold mb-2"
-              style={{ color: theme.text }}
-            >
-              <Box className="flex items-center gap-2">
-                <ProductIcon />
-                Products Management
-              </Box>
-            </Typography>
-            <Typography 
-              variant="body1"
-              style={{ color: theme.textSecondary }}
-            >
-              Manage your inventory and product catalog
-            </Typography>
-          </Box>
-          <Box className="flex items-center gap-4">
-            {/* View Switcher */}
-            <Box className="flex items-center gap-1 border rounded-lg p-1" style={{ borderColor: theme.border }}>
-              {!isMobile && (
-                <Tooltip title="Grid View">
-                  <IconButton
-                    size="small"
-                    onClick={() => handleViewModeChange('grid')}
-                    style={{
-                      backgroundColor: viewMode === 'grid' ? theme.primary : 'transparent',
-                      color: viewMode === 'grid' ? '#ffffff' : theme.text
-                    }}
-                  >
-                    <GridViewIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              )}
-              {!isMobile && (
-                <Tooltip title="List View">
-                  <IconButton
-                    size="small"
-                    onClick={() => handleViewModeChange('list')}
-                    style={{
-                      backgroundColor: viewMode === 'list' ? theme.primary : 'transparent',
-                      color: viewMode === 'list' ? '#ffffff' : theme.text
-                    }}
-                  >
-                    <ListViewIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              )}
-              <Tooltip title="Card View">
-                <IconButton
-                  size="small"
-                  onClick={() => handleViewModeChange('card')}
-                  style={{
-                    backgroundColor: viewMode === 'card' ? theme.primary : 'transparent',
-                    color: viewMode === 'card' ? '#ffffff' : theme.text
-                  }}
-                >
-                  <CardViewIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </Box>
-            <Button
-              variant="contained"
-              startIcon={<Add />}
-              onClick={handleAddProduct}
-              style={{ backgroundColor: theme.primary }}
-            >
-              Add Product
-            </Button>
-          </Box>
-        </Box>
+      <Box className="flex items-center gap-3 mb-6 flex-shrink-0">
+        <ProductIcon style={{ color: uiTheme.primary, fontSize: 32 }} />
+        <Typography
+          variant="h6"
+          className="text-xl md:text-3xl font-bold"
+          style={{ color: uiTheme.text }}
+        >
+          Products Management
+        </Typography>
+      </Box>
 
-        {/* Filters */}
-        <Box className="flex flex-wrap gap-4 mb-4">
-          <TextField
-            label="Search Products"
-            variant="outlined"
-            size="small"
-            value={searchFilter}
-            onChange={(e) => setSearchFilter(e.target.value)}
-            style={{ minWidth: 200 }}
+      {/* Controls Section - All on the right */}
+      <Box className="flex justify-end mb-6 flex-shrink-0">
+        <Box className="flex flex-row items-center gap-4">
+          {/* View Switcher */}
+          <ViewSwitcher
+            viewMode={viewMode}
+            onViewModeChange={handleViewModeChange}
+            theme={uiTheme}
           />
-          <FormControl size="small" style={{ minWidth: 150 }}>
-            <InputLabel>Status</InputLabel>
-            <Select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              label="Status"
-            >
-              <MenuItem value="">All Status</MenuItem>
-              <MenuItem value="active">Active</MenuItem>
-              <MenuItem value="inactive">Inactive</MenuItem>
-              <MenuItem value="discontinued">Discontinued</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl size="small" style={{ minWidth: 150 }}>
-            <InputLabel>Category</InputLabel>
-            <Select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              label="Category"
-            >
-              <MenuItem value="">All Categories</MenuItem>
-              {categories.map((category) => (
-                <MenuItem key={category} value={category}>
-                  {category}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+
+          {/* Add Button */}
+          <Button
+            variant="contained"
+            onClick={handleAddProduct}
+            style={{ backgroundColor: uiTheme.primary, color: '#ffffff' }}
+            startIcon={<Add />}
+            className="w-auto"
+          >
+            <span>Add Product</span>
+          </Button>
         </Box>
       </Box>
 
       {/* Conditional Rendering of Grid, List, or Card View */}
-      {viewMode === 'grid' ? (
-        <CustomGrid
-          title="Products"
-          data={filteredProducts || []}
-          columnDefs={columnDefs}
+      <Box className="flex-1 min-h-0">
+        {viewMode === 'grid' ? (
+        <ProductsGridview
+          filteredProducts={filteredProducts || []}
           loading={loading}
           error={error}
           success={success}
-          theme={theme}
-          height="calc(100vh - 280px)"
-          showTitle={false}
-          showAlerts={true}
-          rowActions={rowActions}
-          rowHeight={70}
+          uiTheme={uiTheme}
+          onEditProduct={handleEditProduct}
+          onDeleteProduct={handleDeleteProduct}
         />
       ) : viewMode === 'list' ? (
         <ProductsListview
@@ -451,7 +181,7 @@ const Products: React.FC = () => {
           loading={loading}
           error={error}
           success={success}
-          theme={theme}
+          uiTheme={uiTheme}
           onEditProduct={handleEditProduct}
           onDeleteProduct={handleDeleteProduct}
         />
@@ -461,11 +191,12 @@ const Products: React.FC = () => {
           loading={loading}
           error={error}
           success={success}
-          theme={theme}
+          uiTheme={uiTheme}
           onEditProduct={handleEditProduct}
           onDeleteProduct={handleDeleteProduct}
         />
-      )}
+        )}
+      </Box>
 
       {/* Add Product Modal */}
       <Dialog
@@ -475,12 +206,12 @@ const Products: React.FC = () => {
         fullWidth
         PaperProps={{
           style: {
-            backgroundColor: theme.surface,
-            color: theme.text
+            backgroundColor: uiTheme.surface,
+            color: uiTheme.text
           }
         }}
       >
-        <DialogTitle style={{ color: theme.text }}>
+        <DialogTitle style={{ color: uiTheme.text }}>
           Add New Product
         </DialogTitle>
         <DialogContent>
@@ -504,12 +235,12 @@ const Products: React.FC = () => {
         fullWidth
         PaperProps={{
           style: {
-            backgroundColor: theme.surface,
-            color: theme.text
+            backgroundColor: uiTheme.surface,
+            color: uiTheme.text
           }
         }}
       >
-        <DialogTitle style={{ color: theme.text }}>
+        <DialogTitle style={{ color: uiTheme.text }}>
           Edit Product
         </DialogTitle>
         <DialogContent>

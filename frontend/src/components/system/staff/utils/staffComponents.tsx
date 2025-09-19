@@ -16,16 +16,18 @@ import { getStaffStatusColor, getStaffStatusDisplayName, formatWorkingHours, for
 // Staff Avatar Component
 export const StaffAvatar = ({ 
   staff, 
-  size = 40 
+  size = 40,
+  theme
 }: { 
   staff: any
   size?: number
+  theme?: any
 }) => (
   <Avatar
     sx={{ 
       width: size, 
       height: size,
-      backgroundColor: '#6366f1'
+      backgroundColor: theme?.primary || '#6366f1'
     }}
     src={getProfileImageUrl(staff.profileImage)}
     onError={(e) => {
@@ -59,12 +61,14 @@ export const StaffName = ({
 
 // Staff Info Component (for cards)
 export const StaffInfo = ({ 
-  staff 
+  staff,
+  theme
 }: { 
   staff: any
+  theme?: any
 }) => (
   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-    <StaffAvatar staff={staff} size={48} />
+    <StaffAvatar staff={staff} size={48} theme={theme} />
     <StaffName staff={staff} variant="h6" />
   </Box>
 )

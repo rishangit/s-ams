@@ -8,10 +8,14 @@ import {
   Typography,
   Paper,
   Alert,
-  CircularProgress
+    CircularProgress,
+    Button,
+    ButtonGroup
 } from '@mui/material'
 import {
-  CalendarToday as CalendarIcon
+  CalendarToday as CalendarIcon,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon
 } from '@mui/icons-material'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '../../../store'
@@ -51,6 +55,8 @@ const CalendarView: React.FC = () => {
   const calendarRef = useRef<FullCalendar>(null)
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<number | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
+  const [currentView, setCurrentView] = useState('dayGridMonth')
+  const [currentDate, setCurrentDate] = useState(new Date())
 
   // Add custom CSS for mobile calendar toolbar and full height
   useEffect(() => {
@@ -58,52 +64,203 @@ const CalendarView: React.FC = () => {
     style.textContent = `
       @media (max-width: 768px) {
         .fc-toolbar {
-          flex-direction: column !important;
-          gap: 12px !important;
+          flex-direction: row !important;
+          flex-wrap: wrap !important;
+          gap: 8px !important;
           align-items: center !important;
+          justify-content: space-between !important;
         }
         
         .fc-toolbar-chunk {
           display: flex !important;
+          align-items: center !important;
+          gap: 4px !important;
+          flex: 1 !important;
+        }
+        
+        .fc-toolbar-chunk:first-child {
+          justify-content: flex-end !important;
+          flex: 0 0 auto !important;
+          order: 2 !important;
+        }
+        
+        .fc-toolbar-chunk:nth-child(2) {
           justify-content: center !important;
+          flex: 1 !important;
+          order: 1 !important;
           width: 100% !important;
+          margin-bottom: 8px !important;
+        }
+        
+        .fc-toolbar-chunk:last-child {
+          justify-content: flex-end !important;
+          flex: 0 0 auto !important;
+          order: 2 !important;
         }
         
         .fc-toolbar-title {
-          font-size: 1.25rem !important;
+          font-size: 1.125rem !important;
           margin: 0 !important;
           text-align: center !important;
         }
         
         .fc-button-group {
           display: flex !important;
-          justify-content: center !important;
-          gap: 4px !important;
+          gap: 2px !important;
         }
         
         .fc-button {
-          font-size: 0.875rem !important;
-          padding: 6px 12px !important;
+          font-size: 0.75rem !important;
+          padding: 4px 8px !important;
+          min-width: auto !important;
+        }
+        
+        .fc-button-group .fc-button {
+          font-size: 0.75rem !important;
+          padding: 4px 6px !important;
         }
       }
       
-      /* Full height calendar */
-      .fc {
-        height: 100% !important;
-        min-height: 600px !important;
+      /* Remove background colors and borders from navigation buttons */
+      .fc-button {
+        background: transparent !important;
+        border: none !important;
+        color: #374151 !important;
+        box-shadow: none !important;
+        border-radius: 6px !important;
+        font-weight: 500 !important;
+        transition: all 0.2s ease !important;
       }
       
-      .fc-view-harness {
-        height: 100% !important;
+      .fc-button:hover {
+        background: #f9fafb !important;
+        transform: translateY(-1px) !important;
       }
       
-      .fc-daygrid-body {
-        height: 100% !important;
+      .fc-button:focus {
+        outline: none !important;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5) !important;
       }
       
-      .fc-timegrid-body {
-        height: 100% !important;
+      .fc-button:active {
+        transform: translateY(0) !important;
       }
+      
+      /* Active/selected button styling */
+      .fc-button-active {
+        background: #3b82f6 !important;
+        color: white !important;
+      }
+      
+      .fc-button-active:hover {
+        background: #2563eb !important;
+      }
+      
+      /* Simplify day labels */
+      .fc-col-header-cell {
+        background: transparent !important;
+        border: none !important;
+        border-bottom: 1px solid #e5e7eb !important;
+        padding: 12px 8px !important;
+        font-weight: 600 !important;
+        font-size: 0.875rem !important;
+        color: #374151 !important;
+      }
+      
+      .fc-col-header-cell-cushion {
+        color: inherit !important;
+        text-decoration: none !important;
+        font-weight: inherit !important;
+      }
+      
+      /* Simplify toolbar */
+      .fc-toolbar {
+        background: transparent !important;
+        border: none !important;
+        padding: 16px 0 !important;
+        margin-bottom: 0 !important;
+      }
+      
+      .fc-toolbar-chunk {
+        background: transparent !important;
+      }
+      
+      /* Simplify title */
+      .fc-toolbar-title {
+        font-size: 1.5rem !important;
+        font-weight: 700 !important;
+        color: #111827 !important;
+        margin: 0 !important;
+      }
+      
+      /* Dark mode adjustments */
+      .dark-calendar .fc-button {
+        border: none !important;
+        color: #d1d5db !important;
+      }
+      
+      .dark-calendar .fc-button:hover {
+        background: #374151 !important;
+      }
+      
+      .dark-calendar .fc-button-active {
+        background: #3b82f6 !important;
+        color: white !important;
+      }
+      
+      .dark-calendar .fc-col-header-cell {
+        border-bottom-color: #4b5563 !important;
+        color: #d1d5db !important;
+      }
+      
+      .dark-calendar .fc-toolbar-title {
+        color: #f9fafb !important;
+      }
+      
+       /* Auto-adjusting calendar height */
+       .fc {
+         height: auto !important;
+         min-height: 600px !important;
+       }
+       
+       .fc-view-harness {
+         height: auto !important;
+       }
+       
+       .fc-daygrid-body {
+         height: auto !important;
+       }
+       
+       .fc-timegrid-body {
+         height: auto !important;
+       }
+       
+       /* Allow scrolling for time grid */
+       .fc-timegrid {
+         overflow: visible !important;
+       }
+       
+       .fc-timegrid-slot-table {
+         overflow: visible !important;
+       }
+       
+       /* Auto-adjust appointment card height */
+       .fc-event {
+         height: auto !important;
+         min-height: 20px !important;
+         padding: 2px 4px !important;
+         font-size: 12px !important;
+         line-height: 1.2 !important;
+         white-space: normal !important;
+         word-wrap: break-word !important;
+         overflow: visible !important;
+       }
+       
+       .fc-event-title {
+         white-space: normal !important;
+         word-wrap: break-word !important;
+         overflow: visible !important;
+       }
       
       /* Ensure scrollable content maintains borders */
       .fc-timegrid-body .fc-timegrid-slot-table {
@@ -125,7 +282,7 @@ const CalendarView: React.FC = () => {
         border-right: 1px solid #374151 !important;
       }
       
-      /* Fix day separator lines to extend to full height */
+      /* Fix day separator lines to extend to full height in week view */
       .fc-timegrid-slot {
         border-right: 1px solid #e5e7eb !important;
         min-height: 2.5em !important;
@@ -181,6 +338,40 @@ const CalendarView: React.FC = () => {
         border-right: none !important;
       }
       
+      /* Ensure week view day separators extend to full scrollable height */
+      .fc-timegrid-body .fc-timegrid-slot-table {
+        border-collapse: separate !important;
+        border-spacing: 0 !important;
+      }
+      
+      .fc-timegrid-body .fc-timegrid-slot-table td {
+        border-right: 1px solid #e5e7eb !important;
+        vertical-align: top !important;
+        position: relative !important;
+      }
+      
+      .fc-timegrid-body .fc-timegrid-slot-table td:last-child {
+        border-right: none !important;
+      }
+      
+      /* Ensure day separators are visible in scrollable content */
+      .fc-timegrid-body .fc-timegrid-slot-table tr td {
+        border-right: 1px solid #e5e7eb !important;
+      }
+      
+      .fc-timegrid-body .fc-timegrid-slot-table tr td:last-child {
+        border-right: none !important;
+      }
+      
+      /* Force day column borders in week view */
+      .fc-timegrid-day-frame {
+        border-right: 1px solid #d1d5db !important;
+      }
+      
+      .fc-timegrid-day-frame:last-child {
+        border-right: none !important;
+      }
+      
       /* Dark mode adjustments */
       .dark-calendar .fc-timegrid-slot {
         border-right: 1px solid #374151 !important;
@@ -204,6 +395,19 @@ const CalendarView: React.FC = () => {
       
       .dark-calendar .fc-timegrid-body .fc-timegrid-slot {
         border-right: 1px solid #374151 !important;
+      }
+      
+      /* Dark mode for week view day separators */
+      .dark-calendar .fc-timegrid-body .fc-timegrid-slot-table td {
+        border-right: 1px solid #374151 !important;
+      }
+      
+      .dark-calendar .fc-timegrid-body .fc-timegrid-slot-table tr td {
+        border-right: 1px solid #374151 !important;
+      }
+      
+      .dark-calendar .fc-timegrid-day-frame {
+        border-right: 1px solid #4b5563 !important;
       }
     `
     document.head.appendChild(style)
@@ -424,6 +628,36 @@ const CalendarView: React.FC = () => {
     }
   }
 
+  // Custom toolbar handlers
+  const handlePrev = () => {
+    if (calendarRef.current) {
+      calendarRef.current.getApi().prev()
+      setCurrentDate(calendarRef.current.getApi().getDate())
+    }
+  }
+
+  const handleNext = () => {
+    if (calendarRef.current) {
+      calendarRef.current.getApi().next()
+      setCurrentDate(calendarRef.current.getApi().getDate())
+    }
+  }
+
+  const handleToday = () => {
+    if (calendarRef.current) {
+      calendarRef.current.getApi().today()
+      setCurrentDate(calendarRef.current.getApi().getDate())
+    }
+  }
+
+  const handleViewChange = (view: string) => {
+    if (calendarRef.current) {
+      calendarRef.current.getApi().changeView(view)
+      setCurrentView(view)
+      setCurrentDate(calendarRef.current.getApi().getDate())
+    }
+  }
+
 
 
   if (loading) {
@@ -437,7 +671,10 @@ const CalendarView: React.FC = () => {
   if (error) {
     return (
       <Box className="p-0 md:p-6">
-        <Alert severity="error" style={{ backgroundColor: '#f44336', color: '#ffffff' }}>
+        <Alert 
+          severity="error" 
+          className="bg-red-600 text-white"
+        >
           {error}
         </Alert>
       </Box>
@@ -445,11 +682,10 @@ const CalendarView: React.FC = () => {
   }
 
   return (
-    <Box className="h-full flex flex-col p-0 md:p-6">
-      {/* Header */}
-      <Box className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4 flex-shrink-0">
-        <Box className="flex items-center space-x-3">
-          <CalendarIcon style={{ fontSize: '2rem', color: theme.primary }} />
+    <Box className="flex flex-col min-h-full">
+      {/* Header Section */}
+      <Box className="flex items-center gap-3 mb-6 flex-shrink-0">
+        <CalendarIcon className="text-3xl" style={{ color: theme.primary }} />
           <Typography 
             variant="h6" 
             className="text-xl md:text-3xl font-bold"
@@ -457,22 +693,22 @@ const CalendarView: React.FC = () => {
           >
             Appointment Calendar
           </Typography>
-        </Box>
       </Box>
 
-      {/* Calendar */}
-      <Paper className="p-4 flex-1 flex flex-col" style={{ backgroundColor: theme.surface }}>
+      {/* Calendar Content */}
+      <Box className="flex-1">
+        <Paper className="p-4 flex flex-col" style={{ backgroundColor: theme.surface }}>
         {calendarEvents.length === 0 ? (
           <Box className="flex flex-col items-center justify-center flex-1">
-            <CalendarIcon style={{ fontSize: '4rem', color: theme.textSecondary, marginBottom: '1rem' }} />
+             <CalendarIcon className="text-6xl mb-4" style={{ color: theme.textSecondary }} />
             <Typography 
               variant="h6" 
-              className="text-base md:text-xl" 
-              style={{ color: theme.textSecondary, marginBottom: '0.5rem' }}
+               className="text-base md:text-xl mb-2" 
+               style={{ color: theme.textSecondary }}
             >
               No Appointments Found
             </Typography>
-            <Typography variant="body2" style={{ color: theme.textSecondary }}>
+             <Typography variant="body2" className="text-sm" style={{ color: theme.textSecondary }}>
               {parseInt(String(user?.role || '3')) === 1
                 ? 'No appointments have been booked for your company yet.'
                 : parseInt(String(user?.role || '3')) === 2
@@ -482,25 +718,189 @@ const CalendarView: React.FC = () => {
             </Typography>
           </Box>
         ) : (
-          <Box className={`flex-1 ${isDarkMode ? 'dark-calendar' : 'light-calendar'}`}>
+           <Box className={`flex-1 ${isDarkMode ? 'dark-calendar' : 'light-calendar'}`}>
+             {/* Custom Toolbar */}
+             <Box className="mb-4">
+               {/* Row 1: Title */}
+               <Box className="flex justify-center mb-3">
+                 <Typography
+                   variant="h5"
+                   className="text-xl md:text-2xl font-bold"
+                   style={{ color: theme.text }}
+                 >
+                   {currentDate.toLocaleDateString('en-US', { 
+                     month: 'long', 
+                     year: 'numeric' 
+                   })}
+                 </Typography>
+               </Box>
+               
+               {/* Row 2: Navigation and View Controls */}
+               <Box className="flex justify-between items-center">
+                 {/* Left: Navigation and Today */}
+                 <Box className="flex items-center gap-1">
+                   <Button
+                     variant="text"
+                     size="large"
+                     onClick={handlePrev}
+                     className="min-w-0 px-1.5 py-2 transition-all duration-200 hover:scale-110 border-none focus:outline-none focus:ring-0 focus:border-none"
+                     sx={{
+                       color: theme.text,
+                       border: 'none !important',
+                       '&:focus': {
+                         outline: 'none !important',
+                         border: 'none !important',
+                         boxShadow: 'none !important'
+                       },
+                       '&:active': {
+                         border: 'none !important',
+                         boxShadow: 'none !important'
+                       }
+                     }}
+                     onMouseEnter={(e) => {
+                       e.currentTarget.style.backgroundColor = `${theme.primary}15`
+                     }}
+                     onMouseLeave={(e) => {
+                       e.currentTarget.style.backgroundColor = 'transparent'
+                     }}
+                   >
+                     <ChevronLeftIcon className="text-2xl" />
+                   </Button>
+                   <Button
+                     variant="text"
+                     size="large"
+                     onClick={handleNext}
+                     className="min-w-0 px-1.5 py-2 transition-all duration-200 hover:scale-110 border-none focus:outline-none focus:ring-0 focus:border-none"
+                     sx={{
+                       color: theme.text,
+                       border: 'none !important',
+                       '&:focus': {
+                         outline: 'none !important',
+                         border: 'none !important',
+                         boxShadow: 'none !important'
+                       },
+                       '&:active': {
+                         border: 'none !important',
+                         boxShadow: 'none !important'
+                       }
+                     }}
+                     onMouseEnter={(e) => {
+                       e.currentTarget.style.backgroundColor = `${theme.primary}15`
+                     }}
+                     onMouseLeave={(e) => {
+                       e.currentTarget.style.backgroundColor = 'transparent'
+                     }}
+                   >
+                     <ChevronRightIcon className="text-2xl" />
+                   </Button>
+                   <Button
+                     variant="text"
+                     size="small"
+                     onClick={handleToday}
+                     className="ml-2 border-none focus:outline-none focus:ring-0 focus:border-none"
+                     sx={{
+                       color: theme.text,
+                       border: 'none !important',
+                       '&:focus': {
+                         outline: 'none !important',
+                         border: 'none !important',
+                         boxShadow: 'none !important'
+                       },
+                       '&:active': {
+                         border: 'none !important',
+                         boxShadow: 'none !important'
+                       }
+                     }}
+                   >
+                     Today
+                   </Button>
+                 </Box>
+                 
+                 {/* Right: View Buttons */}
+                 <ButtonGroup size="small" variant="text">
+                   <Button
+                     onClick={() => handleViewChange('dayGridMonth')}
+                     className="border-none focus:outline-none focus:ring-0 focus:border-none"
+                     sx={{
+                       backgroundColor: currentView === 'dayGridMonth' ? theme.primary : 'transparent',
+                       color: currentView === 'dayGridMonth' ? '#ffffff' : theme.text,
+                       border: 'none !important',
+                       '&:focus': {
+                         outline: 'none !important',
+                         border: 'none !important',
+                         boxShadow: 'none !important'
+                       },
+                       '&:active': {
+                         border: 'none !important',
+                         boxShadow: 'none !important'
+                       }
+                     }}
+                   >
+                     Month
+                   </Button>
+                   <Button
+                     onClick={() => handleViewChange('timeGridWeek')}
+                     className="border-none focus:outline-none focus:ring-0 focus:border-none"
+                     sx={{
+                       backgroundColor: currentView === 'timeGridWeek' ? theme.primary : 'transparent',
+                       color: currentView === 'timeGridWeek' ? '#ffffff' : theme.text,
+                       border: 'none !important',
+                       '&:focus': {
+                         outline: 'none !important',
+                         border: 'none !important',
+                         boxShadow: 'none !important'
+                       },
+                       '&:active': {
+                         border: 'none !important',
+                         boxShadow: 'none !important'
+                       }
+                     }}
+                   >
+                     Week
+                   </Button>
+                   <Button
+                     onClick={() => handleViewChange('timeGridDay')}
+                     className="border-none focus:outline-none focus:ring-0 focus:border-none"
+                     sx={{
+                       backgroundColor: currentView === 'timeGridDay' ? theme.primary : 'transparent',
+                       color: currentView === 'timeGridDay' ? '#ffffff' : theme.text,
+                       border: 'none !important',
+                       '&:focus': {
+                         outline: 'none !important',
+                         border: 'none !important',
+                         boxShadow: 'none !important'
+                       },
+                       '&:active': {
+                         border: 'none !important',
+                         boxShadow: 'none !important'
+                       }
+                     }}
+                   >
+                     Day
+                   </Button>
+                 </ButtonGroup>
+               </Box>
+             </Box>
+
             {/* @ts-ignore */}
             <FullCalendar
               ref={calendarRef}
               key={`calendar-${isDarkMode ? 'dark' : 'light'}`}
               plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
               initialView="dayGridMonth"
-              headerToolbar={{
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay'
-              }}
+              headerToolbar={false}
               events={calendarEvents}
               eventClick={handleEventClick}
-              height="100%"
+              datesSet={(dateInfo: any) => {
+                setCurrentDate(dateInfo.start)
+              }}
+              height="auto"
               themeSystem="standard"
               eventDisplay="block"
               dayMaxEvents={3}
               moreLinkClick="popover"
+              slotMinTime="06:00:00"
+              slotMaxTime="20:00:00"
               eventTimeFormat={{
                 hour: '2-digit',
                 minute: '2-digit',
@@ -524,18 +924,7 @@ const CalendarView: React.FC = () => {
                     appointment={appointment}
                     userRole={user?.role}
                   >
-                    <div
-                      style={{
-                        padding: '2px 4px',
-                        borderRadius: '3px',
-                        fontSize: '12px',
-                        fontWeight: '500',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        cursor: 'pointer'
-                      }}
-                    >
+                     <div className="px-1 py-0.5 rounded text-xs font-medium overflow-hidden text-ellipsis whitespace-nowrap cursor-pointer">
                       {eventInfo.event.title}
                     </div>
                   </CalendarEventTooltip>
@@ -545,6 +934,7 @@ const CalendarView: React.FC = () => {
           </Box>
         )}
       </Paper>
+      </Box>
 
       {/* Appointment Form Popup */}
       <AppointmentForm

@@ -21,9 +21,15 @@ export const UserAvatar = ({
   userProfileImage?: string
   size?: number
 }) => (
-  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+  <Box sx={{ 
+    display: 'flex', 
+    alignItems: 'center', 
+    gap: 1.5,
+    minWidth: 0,
+    overflow: 'hidden'
+  }}>
     <Avatar
-      sx={{ width: size, height: size, backgroundColor: '#1976d2' }}
+      sx={{ width: size, height: size, backgroundColor: '#1976d2', flexShrink: 0 }}
       src={getProfileImageUrl(userProfileImage)}
       onError={(e) => {
         const target = e.currentTarget as HTMLImageElement
@@ -34,7 +40,16 @@ export const UserAvatar = ({
         {userName.split(' ').map((n: string) => n.charAt(0)).join('').substring(0, 2)}
       </span>
     </Avatar>
-    <Typography variant="body2" sx={{ fontWeight: '500' }}>
+    <Typography 
+      variant="body2" 
+      sx={{ 
+        fontWeight: '500',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+        minWidth: 0
+      }}
+    >
       {userName}
     </Typography>
   </Box>
@@ -53,9 +68,15 @@ export const StaffAssignment = ({
   if (staffId && staffName) {
     // Staff is assigned - show avatar
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <Box sx={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: 1.5,
+        minWidth: 0,
+        overflow: 'hidden'
+      }}>
         <Avatar
-          sx={{ width: 32, height: 32, backgroundColor: '#10b981' }}
+          sx={{ width: 32, height: 32, backgroundColor: '#10b981', flexShrink: 0 }}
           src={getProfileImageUrl(staffProfileImage)}
           onError={(e) => {
             const target = e.currentTarget as HTMLImageElement
@@ -66,12 +87,28 @@ export const StaffAssignment = ({
             {staffName.split(' ').map((n: string) => n.charAt(0)).join('').substring(0, 2)}
           </span>
         </Avatar>
-        <Box>
-          <Typography variant="body2" sx={{ fontWeight: '500' }}>
+        <Box sx={{ minWidth: 0, overflow: 'hidden' }}>
+          <Typography 
+            variant="body2" 
+            sx={{ 
+              fontWeight: '500',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
+            }}
+          >
             {staffName}
           </Typography>
           {showLabel && (
-            <Typography variant="caption" sx={{ color: '#666' }}>
+            <Typography 
+              variant="caption" 
+              sx={{ 
+                color: '#666',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}
+            >
               Assigned Staff
             </Typography>
           )}
@@ -81,14 +118,37 @@ export const StaffAssignment = ({
   } else if (staffPreferences && staffPreferences.length > 0) {
     // Has preferred staff but not assigned
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <ScheduleIcon sx={{ color: 'orange', fontSize: 16 }} />
-        <Box>
-          <Typography variant="body2" sx={{ color: 'orange', fontWeight: '500' }}>
+      <Box sx={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: 1,
+        minWidth: 0,
+        overflow: 'hidden'
+      }}>
+        <ScheduleIcon sx={{ color: 'orange', fontSize: 16, flexShrink: 0 }} />
+        <Box sx={{ minWidth: 0, overflow: 'hidden' }}>
+          <Typography 
+            variant="body2" 
+            sx={{ 
+              color: 'orange', 
+              fontWeight: '500',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
+            }}
+          >
             {staffPreferences.length} preferred staff
           </Typography>
           {showLabel && (
-            <Typography variant="caption" sx={{ color: '#666' }}>
+            <Typography 
+              variant="caption" 
+              sx={{ 
+                color: '#666',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}
+            >
               Pending assignment
             </Typography>
           )}
@@ -98,9 +158,23 @@ export const StaffAssignment = ({
   } else {
     // No staff preferences
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <PersonIcon sx={{ color: '#666', fontSize: 16 }} />
-        <Typography variant="body2" sx={{ color: '#666' }}>
+      <Box sx={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: 1,
+        minWidth: 0,
+        overflow: 'hidden'
+      }}>
+        <PersonIcon sx={{ color: '#666', fontSize: 16, flexShrink: 0 }} />
+        <Typography 
+          variant="body2" 
+          sx={{ 
+            color: '#666',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }}
+        >
           No staff assigned
         </Typography>
       </Box>
@@ -118,12 +192,33 @@ export const ServiceInfo = ({
   servicePrice?: number
   variant?: 'h6' | 'body2'
 }) => (
-  <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-    <Typography variant={variant} sx={{ fontWeight: 'bold' }}>
+  <Box sx={{ 
+    display: 'flex', 
+    flexDirection: 'column',
+    minWidth: 0,
+    overflow: 'hidden'
+  }}>
+    <Typography 
+      variant={variant} 
+      sx={{ 
+        fontWeight: 'bold',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
+      }}
+    >
       {serviceName || 'Unknown Service'}
     </Typography>
     {servicePrice && (
-      <Typography variant="caption" sx={{ color: '#666' }}>
+      <Typography 
+        variant="caption" 
+        sx={{ 
+          color: '#666',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap'
+        }}
+      >
         ${servicePrice}
       </Typography>
     )}

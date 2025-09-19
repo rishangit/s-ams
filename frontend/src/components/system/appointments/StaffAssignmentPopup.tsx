@@ -160,7 +160,7 @@ const StaffAssignmentPopup: React.FC<StaffAssignmentPopupProps> = ({
 
       <DialogContent sx={{ pt: 3 }}>
         {/* Appointment Info */}
-        <Box sx={{ mb: 3, p: 2, backgroundColor: uiTheme.mode === 'dark' ? '#1e293b' : '#f8fafc', borderRadius: 1 }}>
+        <Box sx={{ mb: 3, p: 2, backgroundColor: uiTheme.surface, borderRadius: 1 }}>
           <Typography variant="body2" sx={{ color: uiTheme.textSecondary, mb: 1 }}>
             <strong>Appointment Details:</strong>
           </Typography>

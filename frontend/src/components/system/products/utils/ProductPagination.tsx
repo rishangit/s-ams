@@ -41,40 +41,48 @@ function TablePaginationActions(props: TablePaginationActionsProps) {
   return (
     <Box sx={{ flexShrink: 0, ml: 2.5 }}>
       <Tooltip title="First page">
-        <IconButton
-          onClick={handleFirstPageButtonClick}
-          disabled={page === 0}
-          aria-label="first page"
-        >
-          <FirstPageIcon />
-        </IconButton>
+        <span>
+          <IconButton
+            onClick={handleFirstPageButtonClick}
+            disabled={page === 0}
+            aria-label="first page"
+          >
+            <FirstPageIcon />
+          </IconButton>
+        </span>
       </Tooltip>
       <Tooltip title="Previous page">
-        <IconButton
-          onClick={handleBackButtonClick}
-          disabled={page === 0}
-          aria-label="previous page"
-        >
-          <KeyboardArrowLeft />
-        </IconButton>
+        <span>
+          <IconButton
+            onClick={handleBackButtonClick}
+            disabled={page === 0}
+            aria-label="previous page"
+          >
+            <KeyboardArrowLeft />
+          </IconButton>
+        </span>
       </Tooltip>
       <Tooltip title="Next page">
-        <IconButton
-          onClick={handleNextButtonClick}
-          disabled={page >= Math.ceil(count / rowsPerPage) - 1}
-          aria-label="next page"
-        >
-          <KeyboardArrowRight />
-        </IconButton>
+        <span>
+          <IconButton
+            onClick={handleNextButtonClick}
+            disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+            aria-label="next page"
+          >
+            <KeyboardArrowRight />
+          </IconButton>
+        </span>
       </Tooltip>
       <Tooltip title="Last page">
-        <IconButton
-          onClick={handleLastPageButtonClick}
-          disabled={page >= Math.ceil(count / rowsPerPage) - 1}
-          aria-label="last page"
-        >
-          <LastPageIcon />
-        </IconButton>
+        <span>
+          <IconButton
+            onClick={handleLastPageButtonClick}
+            disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+            aria-label="last page"
+          >
+            <LastPageIcon />
+          </IconButton>
+        </span>
       </Tooltip>
     </Box>
   )
@@ -86,7 +94,7 @@ interface ProductPaginationProps {
   rowsPerPage: number
   onPageChange: (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => void
   onRowsPerPageChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
-  theme: any
+  uiTheme: any
 }
 
 const ProductPagination: React.FC<ProductPaginationProps> = ({
@@ -95,7 +103,7 @@ const ProductPagination: React.FC<ProductPaginationProps> = ({
   rowsPerPage,
   onPageChange,
   onRowsPerPageChange,
-  theme
+  uiTheme
 }) => {
   return (
     <TablePagination
@@ -108,23 +116,23 @@ const ProductPagination: React.FC<ProductPaginationProps> = ({
       onRowsPerPageChange={onRowsPerPageChange}
       ActionsComponent={TablePaginationActions}
       sx={{
-        borderTop: `1px solid ${theme.border}`,
-        backgroundColor: theme.background,
-        color: theme.text,
+        borderTop: `1px solid ${uiTheme.border}`,
+        backgroundColor: uiTheme.background,
+        color: uiTheme.text,
         '& .MuiTablePagination-toolbar': {
-          color: theme.text
+          color: uiTheme.text
         },
         '& .MuiTablePagination-selectLabel': {
-          color: theme.text
+          color: uiTheme.text
         },
         '& .MuiTablePagination-displayedRows': {
-          color: theme.text
+          color: uiTheme.text
         },
         '& .MuiTablePagination-select': {
-          color: theme.text
+          color: uiTheme.text
         },
         '& .MuiTablePagination-selectIcon': {
-          color: theme.text
+          color: uiTheme.text
         }
       }}
     />

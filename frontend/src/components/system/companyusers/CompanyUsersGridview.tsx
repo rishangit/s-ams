@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { ColDef } from 'ag-grid-community'
-import CustomGrid from '../../shared/CustomGrid'
+import CustomGrid from '../../shared/custom/CustomGrid'
 import { Box, Typography, Chip, Avatar } from '@mui/material'
 import { getProfileImageUrl } from '../../../utils/fileUtils'
 import { getRoleDisplayName } from '../../../constants/roles'
@@ -45,6 +45,8 @@ const CompanyUsersGridview: React.FC<CompanyUsersGridviewProps> = ({
       headerName: 'Name',
       field: 'name',
       width: 250,
+      minWidth: 200,
+      maxWidth: 300,
       valueGetter: (params: any) => {
         const user = params.data as CompanyUser
         return `${user.firstName} ${user.lastName}`
@@ -52,112 +54,244 @@ const CompanyUsersGridview: React.FC<CompanyUsersGridviewProps> = ({
       cellRenderer: (params: any) => {
         const user = params.data as CompanyUser
         return (
-          <Box className="flex items-center gap-3">
+          <Box className="flex items-center gap-3 h-full" sx={{ minWidth: 0, overflow: 'hidden' }}>
             <Avatar
               src={getProfileImageUrl(user.profileImage)}
               alt={`${user.firstName} ${user.lastName}`}
-              sx={{ width: 40, height: 40 }}
+              sx={{ width: 40, height: 40, flexShrink: 0 }}
             />
-            <Box className="flex flex-col">
-              <Typography variant="body2" className="font-medium">
+            <Box className="flex flex-col" sx={{ minWidth: 0, overflow: 'hidden' }}>
+              <Typography 
+                variant="body2" 
+                className="font-medium"
+                sx={{
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}
+              >
                 {user.firstName} {user.lastName}
               </Typography>
-              <Typography variant="caption" className="text-gray-500">
+              <Typography 
+                variant="caption" 
+                style={{ color: uiTheme.textSecondary }}
+                sx={{
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}
+              >
                 {getRoleDisplayName(user.role as any)}
               </Typography>
             </Box>
           </Box>
         )
+      },
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
       }
     },
     {
       headerName: 'Email',
       field: 'email',
-      width: 250,
+      width: 200,
+      minWidth: 150,
+      maxWidth: 280,
       cellRenderer: (params: any) => {
         const user = params.data as CompanyUser
         return (
-          <Typography variant="body2" className="truncate">
-            {user.email}
-          </Typography>
+          <Box className="flex items-center h-full">
+            <Typography 
+              variant="body2" 
+              style={{ 
+                color: uiTheme.text,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                minWidth: 0
+              }}
+            >
+              {user.email}
+            </Typography>
+          </Box>
         )
+      },
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
       }
     },
     {
       headerName: 'Phone',
       field: 'phoneNumber',
       width: 150,
+      minWidth: 120,
+      maxWidth: 180,
       cellRenderer: (params: any) => {
         const user = params.data as CompanyUser
         return (
-          <Typography variant="body2">
-            {user.phoneNumber || 'N/A'}
-          </Typography>
+          <Box className="flex items-center h-full">
+            <Typography 
+              variant="body2" 
+              style={{ 
+                color: uiTheme.text,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                minWidth: 0
+              }}
+            >
+              {user.phoneNumber || 'N/A'}
+            </Typography>
+          </Box>
         )
+      },
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
       }
     },
     {
       headerName: 'Total Appointments',
       field: 'totalAppointments',
       width: 150,
+      minWidth: 120,
+      maxWidth: 180,
       cellRenderer: (params: any) => {
         const user = params.data as CompanyUser
         return (
-          <Chip
-            label={user.totalAppointments}
-            size="small"
-            color="primary"
-            variant="outlined"
-          />
+          <Box className="flex items-center h-full justify-center">
+            <Chip
+              label={user.totalAppointments}
+              size="small"
+              color="primary"
+              variant="outlined"
+            />
+          </Box>
         )
+      },
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center',
+        justifyContent: 'center'
       }
     },
     {
       headerName: 'First Appointment',
       field: 'firstAppointmentDate',
       width: 150,
+      minWidth: 120,
+      maxWidth: 180,
       cellRenderer: (params: any) => {
         const user = params.data as CompanyUser
         return (
-          <Typography variant="body2">
-            {user.firstAppointmentDate 
-              ? format(new Date(user.firstAppointmentDate), 'MMM dd, yyyy')
-              : 'N/A'
-            }
-          </Typography>
+          <Box className="flex items-center h-full">
+            <Typography 
+              variant="body2" 
+              style={{ 
+                color: uiTheme.text,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                minWidth: 0
+              }}
+            >
+              {user.firstAppointmentDate 
+                ? format(new Date(user.firstAppointmentDate), 'MMM dd, yyyy')
+                : 'N/A'
+              }
+            </Typography>
+          </Box>
         )
+      },
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
       }
     },
     {
       headerName: 'Last Appointment',
       field: 'lastAppointmentDate',
       width: 150,
+      minWidth: 120,
+      maxWidth: 180,
       cellRenderer: (params: any) => {
         const user = params.data as CompanyUser
         return (
-          <Typography variant="body2">
-            {user.lastAppointmentDate 
-              ? format(new Date(user.lastAppointmentDate), 'MMM dd, yyyy')
-              : 'N/A'
-            }
-          </Typography>
+          <Box className="flex items-center h-full">
+            <Typography 
+              variant="body2" 
+              style={{ 
+                color: uiTheme.text,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                minWidth: 0
+              }}
+            >
+              {user.lastAppointmentDate 
+                ? format(new Date(user.lastAppointmentDate), 'MMM dd, yyyy')
+                : 'N/A'
+              }
+            </Typography>
+          </Box>
         )
+      },
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
       }
     },
     {
       headerName: 'Member Since',
       field: 'createdAt',
       width: 150,
+      minWidth: 120,
+      maxWidth: 180,
       cellRenderer: (params: any) => {
         const user = params.data as CompanyUser
         return (
-          <Typography variant="body2">
-            {format(new Date(user.createdAt), 'MMM dd, yyyy')}
-          </Typography>
+          <Box className="flex items-center h-full">
+            <Typography 
+              variant="body2" 
+              style={{ 
+                color: uiTheme.text,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                minWidth: 0
+              }}
+            >
+              {format(new Date(user.createdAt), 'MMM dd, yyyy')}
+            </Typography>
+          </Box>
         )
+      },
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
       }
     }
-  ], [])
+  ], [uiTheme])
 
   // Row Actions Configuration
   const rowActions = useMemo<RowAction[]>(() => [
@@ -179,7 +313,7 @@ const CompanyUsersGridview: React.FC<CompanyUsersGridviewProps> = ({
       error={error}
       success={success}
       theme={uiTheme}
-      height="calc(100vh - 280px)"
+      height="auto"
       showTitle={false}
       showAlerts={true}
       rowActions={rowActions}

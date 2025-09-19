@@ -1,8 +1,8 @@
 import React from 'react'
 import { Button, Stack } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
-import { setLoading } from '../../store/reducers/uiSlice'
-import { RootState } from '../../store'
+import { setLoading } from '../../../store/reducers/uiSlice'
+import { RootState } from '../../../store'
 
 const CustomButton: React.FC = () => {
   const dispatch = useDispatch()

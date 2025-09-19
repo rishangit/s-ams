@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react'
-import { Box } from '@mui/material'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../../store'
 import { CustomGrid, RowAction } from '../../../components/shared'
@@ -47,9 +46,9 @@ const AppointmentsGridview: React.FC<AppointmentsGridviewProps> = ({
     const userProfileImage = data?.userProfileImage
     
     return (
-      <Box sx={{ padding: '12px 0', height: '100%', display: 'flex', alignItems: 'center' }}>
+      <div className="flex items-center h-full">
         <UserAvatar userName={userName} userProfileImage={userProfileImage} />
-      </Box>
+      </div>
     )
   }
 
@@ -58,9 +57,9 @@ const AppointmentsGridview: React.FC<AppointmentsGridviewProps> = ({
     const { value } = props
 
     return (
-      <Box sx={{ padding: '12px 0', height: '100%', display: 'flex', alignItems: 'center' }}>
+      <div className="flex items-center h-full">
         <StatusChip status={value} />
-      </Box>
+      </div>
     )
   }
 
@@ -69,9 +68,9 @@ const AppointmentsGridview: React.FC<AppointmentsGridviewProps> = ({
     const { data } = props
     
     return (
-      <Box sx={{ padding: '12px 0', height: '100%', display: 'flex', alignItems: 'center' }}>
+      <div className="flex items-center h-full">
         <StaffAssignment appointment={data} />
-      </Box>
+      </div>
     )
   }
 
@@ -82,9 +81,9 @@ const AppointmentsGridview: React.FC<AppointmentsGridviewProps> = ({
     const servicePrice = data?.servicePrice
     
     return (
-      <Box sx={{ padding: '12px 0', height: '100%', display: 'flex', alignItems: 'center' }}>
+      <div className="flex items-center h-full">
         <ServiceInfo serviceName={serviceName} servicePrice={servicePrice} />
-      </Box>
+      </div>
     )
   }
 
@@ -93,9 +92,28 @@ const AppointmentsGridview: React.FC<AppointmentsGridviewProps> = ({
     const { value } = props
     
     return (
-      <Box sx={{ padding: '12px 0', height: '100%', display: 'flex', alignItems: 'center' }}>
+      <div className="flex items-center h-full">
         <NotesDisplay notes={value} />
-      </Box>
+      </div>
+    )
+  }
+
+  // Text Cell Renderer Component for simple text content
+  const TextCellRenderer = (props: ICellRendererParams) => {
+    const { value } = props
+    return (
+      <div 
+        className="flex items-center h-full" 
+        style={{ 
+          color: uiTheme.text,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          minWidth: 0
+        }}
+      >
+        {value}
+      </div>
     )
   }
 
@@ -110,20 +128,39 @@ const AppointmentsGridview: React.FC<AppointmentsGridviewProps> = ({
       {
         headerName: 'Date',
         field: 'appointmentDate',
+        cellRenderer: TextCellRenderer,
         sortable: true,
         filter: 'agDateColumnFilter',
         resizable: true,
-        width: 120,
-        minWidth: 100
+        width: 110,
+        minWidth: 100,
+        maxWidth: 130,
+        valueGetter: (params) => new Date(params.data.appointmentDate).toLocaleDateString(),
+        cellStyle: { 
+          display: 'flex', 
+          alignItems: 'center',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap'
+        }
       },
       {
         headerName: 'Time',
         field: 'appointmentTime',
+        cellRenderer: TextCellRenderer,
         sortable: true,
         filter: true,
         resizable: true,
-        width: 100,
-        minWidth: 80
+        width: 90,
+        minWidth: 80,
+        maxWidth: 110,
+        cellStyle: { 
+          display: 'flex', 
+          alignItems: 'center',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap'
+        }
       },
       {
         headerName: 'Service',
@@ -132,8 +169,16 @@ const AppointmentsGridview: React.FC<AppointmentsGridviewProps> = ({
         sortable: true,
         filter: true,
         resizable: true,
-        width: 200,
-        minWidth: 150
+        width: 220,
+        minWidth: 180,
+        maxWidth: 300,
+        cellStyle: { 
+          display: 'flex', 
+          alignItems: 'center',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap'
+        }
       },
       {
         headerName: 'Status',
@@ -143,7 +188,13 @@ const AppointmentsGridview: React.FC<AppointmentsGridviewProps> = ({
         filter: true,
         resizable: true,
         width: 120,
-        minWidth: 100
+        minWidth: 100,
+        maxWidth: 140,
+        cellStyle: { 
+          display: 'flex', 
+          alignItems: 'center',
+          justifyContent: 'center'
+        }
       },
       {
         headerName: 'Staff Assignment',
@@ -153,7 +204,15 @@ const AppointmentsGridview: React.FC<AppointmentsGridviewProps> = ({
         filter: true,
         resizable: true,
         width: 200,
-        minWidth: 180
+        minWidth: 180,
+        maxWidth: 250,
+        cellStyle: { 
+          display: 'flex', 
+          alignItems: 'center',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap'
+        }
       }
     ]
 
@@ -169,16 +228,33 @@ const AppointmentsGridview: React.FC<AppointmentsGridviewProps> = ({
           filter: true,
           resizable: true,
           width: 200,
-          minWidth: 180
+          minWidth: 180,
+          maxWidth: 250,
+          cellStyle: { 
+            display: 'flex', 
+            alignItems: 'center',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }
         },
         {
           headerName: 'Company',
           field: 'companyName',
+          cellRenderer: TextCellRenderer,
           sortable: true,
           filter: true,
           resizable: true,
           width: 150,
-          minWidth: 120
+          minWidth: 120,
+          maxWidth: 200,
+          cellStyle: { 
+            display: 'flex', 
+            alignItems: 'center',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }
         }
       )
     } else if (shouldShowCustomerColumn(user)) {
@@ -191,18 +267,35 @@ const AppointmentsGridview: React.FC<AppointmentsGridviewProps> = ({
         filter: true,
         resizable: true,
         width: 200,
-        minWidth: 180
+        minWidth: 180,
+        maxWidth: 250,
+        cellStyle: { 
+          display: 'flex', 
+          alignItems: 'center',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap'
+        }
       })
     } else if (shouldShowCompanyColumn(user)) {
       // Regular user sees company column
       baseColumns.unshift({
         headerName: 'Company',
         field: 'companyName',
+        cellRenderer: TextCellRenderer,
         sortable: true,
         filter: true,
         resizable: true,
         width: 150,
-        minWidth: 120
+        minWidth: 120,
+        maxWidth: 200,
+        cellStyle: { 
+          display: 'flex', 
+          alignItems: 'center',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap'
+        }
       })
     }
 
@@ -216,17 +309,34 @@ const AppointmentsGridview: React.FC<AppointmentsGridviewProps> = ({
         filter: true,
         resizable: true,
         width: 200,
-        minWidth: 150
+        minWidth: 150,
+        maxWidth: 300,
+        cellStyle: { 
+          display: 'flex', 
+          alignItems: 'center',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap'
+        }
       },
       {
         headerName: 'Created',
         field: 'createdAt',
+        cellRenderer: TextCellRenderer,
         sortable: true,
         filter: 'agDateColumnFilter',
         resizable: true,
-        width: 120,
+        width: 110,
         minWidth: 100,
-        valueGetter: (params) => new Date(params.data.createdAt).toLocaleDateString()
+        maxWidth: 130,
+        valueGetter: (params) => new Date(params.data.createdAt).toLocaleDateString(),
+        cellStyle: { 
+          display: 'flex', 
+          alignItems: 'center',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap'
+        }
       }
     )
 
@@ -242,11 +352,10 @@ const AppointmentsGridview: React.FC<AppointmentsGridviewProps> = ({
       error={error}
       success={success}
       theme={uiTheme}
-      height="calc(100vh - 280px)"
+      height="auto"
       showTitle={false}
       showAlerts={true}
       rowActions={rowActions}
-      rowHeight={70}
     />
   )
 }

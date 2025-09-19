@@ -3,7 +3,6 @@ import { useSelector, useDispatch } from 'react-redux'
 import { useEffect } from 'react'
 import { RootState } from './store'
 import { getProfileRequest } from './store/actions'
-import ComponentShowcase from './components/shared/ComponentShowcase'
 import { SystemRoutes } from './components/system/routing'
 
 function App() {
@@ -30,8 +29,6 @@ function App() {
         {/* Root redirect to system */}
         <Route path="/" element={<Navigate to="/system" replace />} />
         
-        {/* Showcase routes */}
-        <Route path="/showcase" element={<ComponentShowcase />} />
         
         {/* System Routes - all system functionality */}
         <Route path="/system/*" element={<SystemRoutes />} />

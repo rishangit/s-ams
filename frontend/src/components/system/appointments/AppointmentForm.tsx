@@ -539,7 +539,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
                 disabled={!watchedCompanyId || watchedCompanyId === '' || !staff || staff.length === 0}
               />
               {isEditMode && currentAppointment?.staffPreferences && currentAppointment.staffPreferences.length > 0 && (
-                <Box sx={{ mt: 1, p: 2, backgroundColor: uiTheme.mode === 'dark' ? '#1e293b' : '#f8fafc', borderRadius: 1 }}>
+                <Box sx={{ mt: 1, p: 2, backgroundColor: uiTheme.surface, borderRadius: 1 }}>
                   <Typography variant="body2" sx={{ color: uiTheme.textSecondary, mb: 1 }}>
                     <strong>Preferred Staff by User:</strong>
                   </Typography>

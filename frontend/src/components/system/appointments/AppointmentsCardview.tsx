@@ -162,7 +162,7 @@ const AppointmentsCardview: React.FC<AppointmentsCardviewProps> = ({
 
   return (
     <div className="p-0 overflow-visible">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 overflow-visible">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 overflow-visible">
         {filteredAppointments?.map((appointment) => (
           <div key={appointment.id} className="col-span-1 overflow-visible">
             <Card 

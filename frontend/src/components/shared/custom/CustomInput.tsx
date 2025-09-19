@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { TextField, Stack, InputAdornment } from '@mui/material'
 import { Email, Lock, Person, Search } from '@mui/icons-material'
 import { useSelector } from 'react-redux'
-import { RootState } from '../../store'
+import { RootState } from '../../../store'
 
 const CustomInput: React.FC = () => {
   const [email, setEmail] = useState('')

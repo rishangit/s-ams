@@ -1,22 +1,14 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import {
   Box,
-  Select,
-  MenuItem,
-  FormControl,
   Button,
   Typography,
-  IconButton,
-  Tooltip,
   useMediaQuery,
   useTheme
 } from '@mui/material'
 import {
   Add as AddIcon,
-  Schedule as ScheduleIcon,
-  ViewModule as GridViewIcon,
-  ViewList as ListViewIcon,
-  ViewComfy as CardViewIcon
+  Schedule as ScheduleIcon
 } from '@mui/icons-material'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '../../../store'
@@ -34,6 +26,7 @@ import AppointmentsGridview from './AppointmentsGridview'
 import AppointmentsListview from './AppointmentsListview'
 import AppointmentsCardview from './AppointmentsCardview'
 import { isOwnerRole, isAdminRole, isStaffRole, isUserRole } from '../../../constants/roles'
+import { ViewSwitcher, ViewMode } from '../../../components/shared'
 
 const Appointments: React.FC = () => {
   const dispatch = useDispatch()
@@ -45,8 +38,7 @@ const Appointments: React.FC = () => {
 
 
 
-  const [statusFilter, setStatusFilter] = useState<string>('')
-  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'card'>('grid')
+  const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [userSelectedView, setUserSelectedView] = useState<boolean>(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
@@ -175,7 +167,7 @@ const Appointments: React.FC = () => {
   }
 
   // Handle view mode change
-  const handleViewModeChange = (newViewMode: 'grid' | 'list' | 'card') => {
+  const handleViewModeChange = (newViewMode: ViewMode) => {
     setViewMode(newViewMode)
     setUserSelectedView(true)
   }
@@ -185,9 +177,8 @@ const Appointments: React.FC = () => {
   // Filter appointments based on status
   const filteredAppointments = useMemo(() => {
     if (!appointments) return []
-    if (!statusFilter) return appointments
-    return appointments.filter(appointment => appointment.status === statusFilter)
-  }, [appointments, statusFilter])
+    return appointments
+  }, [appointments])
 
 
   // Show loading while user is being loaded
@@ -206,9 +197,9 @@ const Appointments: React.FC = () => {
   }
 
   return (
-    <Box className="h-full md:p-6">
+    <Box className="flex flex-col h-full">
       {/* Header Section */}
-      <Box className="flex items-center gap-3 mb-6">
+      <Box className="flex items-center gap-3 mb-6 flex-shrink-0">
         <ScheduleIcon style={{ color: uiTheme.primary, fontSize: 32 }} />
         <Typography
           variant="h6"
@@ -220,64 +211,14 @@ const Appointments: React.FC = () => {
       </Box>
 
       {/* Controls Section - All on the right */}
-      <Box className="flex justify-end mb-6">
+      <Box className="flex justify-end mb-6 flex-shrink-0">
         <Box className="flex flex-row items-center gap-4">
           {/* View Switcher */}
-          {!isMobile && (
-            <Box className="flex items-center gap-1 border rounded-lg p-1" style={{ borderColor: uiTheme.border }}>
-              <Tooltip title="Grid View">
-                <IconButton
-                  size="small"
-                  onClick={() => handleViewModeChange('grid')}
-                  style={{
-                    backgroundColor: viewMode === 'grid' ? uiTheme.primary : 'transparent',
-                    color: viewMode === 'grid' ? '#ffffff' : uiTheme.text
-                  }}
-                >
-                  <GridViewIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="List View">
-                <IconButton
-                  size="small"
-                  onClick={() => handleViewModeChange('list')}
-                  style={{
-                    backgroundColor: viewMode === 'list' ? uiTheme.primary : 'transparent',
-                    color: viewMode === 'list' ? '#ffffff' : uiTheme.text
-                  }}
-                >
-                  <ListViewIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Card View">
-                <IconButton
-                  size="small"
-                  onClick={() => handleViewModeChange('card')}
-                  style={{
-                    backgroundColor: viewMode === 'card' ? uiTheme.primary : 'transparent',
-                    color: viewMode === 'card' ? '#ffffff' : uiTheme.text
-                  }}
-                >
-                  <CardViewIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </Box>
-          )}
-
-          {/* Status Filter */}
-          <FormControl size="small" style={{ minWidth: 120 }}>
-              <Select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                label="Status"
-              >
-                <MenuItem value="">All</MenuItem>
-                <MenuItem value="pending">Pending</MenuItem>
-                <MenuItem value="confirmed">Confirmed</MenuItem>
-                <MenuItem value="completed">Completed</MenuItem>
-                <MenuItem value="cancelled">Cancelled</MenuItem>
-              </Select>
-            </FormControl>
+          <ViewSwitcher
+            viewMode={viewMode}
+            onViewModeChange={handleViewModeChange}
+            theme={uiTheme}
+          />
 
           {/* Add Button */}
           {user && (isAdminRole(user.role as any) || isOwnerRole(user.role as any) || isStaffRole(user.role as any) || isUserRole(user.role as any)) && (
@@ -296,7 +237,8 @@ const Appointments: React.FC = () => {
 
 
       {/* Conditional Rendering of Grid, List, or Card View */}
-      {viewMode === 'grid' ? (
+      <Box className="flex-1 min-h-0">
+        {viewMode === 'grid' ? (
         <AppointmentsGridview
           filteredAppointments={filteredAppointments || []}
           loading={loading}
@@ -330,6 +272,7 @@ const Appointments: React.FC = () => {
           onDeleteAppointment={handleDeleteAppointment}
         />
       )}
+      </Box>
 
       {/* Add Appointment Modal */}
       <AppointmentForm

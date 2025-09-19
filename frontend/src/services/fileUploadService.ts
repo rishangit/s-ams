@@ -1,5 +1,4 @@
 import { apiService, ApiResponse } from './api'
-// import { getFileUrl } from '../utils/fileUtils'
 
 export interface FileUploadData {
   fileName: string

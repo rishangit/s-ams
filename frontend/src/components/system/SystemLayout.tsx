@@ -12,14 +12,12 @@ import { Header } from './header'
 
 interface SystemLayoutProps {
   children: React.ReactNode
-  title?: string
 }
 
 const drawerWidth = 250
 
 const SystemLayout: React.FC<SystemLayoutProps> = ({
-  children,
-  title = 'S-AMS System'
+  children
 }) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
@@ -55,7 +53,6 @@ const SystemLayout: React.FC<SystemLayoutProps> = ({
       >
         {/* Header Component */}
         <Header
-          title={title}
           drawerWidth={drawerWidth}
           onDrawerToggle={handleDrawerToggle}
         />

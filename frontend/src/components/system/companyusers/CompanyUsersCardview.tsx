@@ -70,7 +70,7 @@ const CompanyUsersCardview: React.FC<CompanyUsersCardviewProps> = ({
 
   return (
     <div className="p-0 overflow-visible">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 overflow-visible">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 overflow-visible">
         {filteredUsers?.map((user) => (
           <div key={user.id} className="col-span-1 overflow-visible">
             <Card 
@@ -229,7 +229,7 @@ const CompanyUsersCardview: React.FC<CompanyUsersCardviewProps> = ({
           <Typography variant="h6" className="mb-2 font-semibold" style={{ color: uiTheme.text }}>
             No company users found
           </Typography>
-          <Typography variant="body2" className="text-gray-600">
+          <Typography variant="body2" style={{ color: uiTheme.textSecondary }}>
             Users will appear here once they book appointments with your company
           </Typography>
         </div>

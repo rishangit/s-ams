@@ -1,7 +1,7 @@
 import React from 'react'
 import { Alert } from '@mui/material'
 import { useSelector } from 'react-redux'
-import { RootState } from '../../store'
+import { RootState } from '../../../store'
 
 interface CustomAlertProps {
   severity: 'success' | 'info' | 'warning' | 'error'

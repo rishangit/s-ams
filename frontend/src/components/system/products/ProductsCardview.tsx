@@ -3,26 +3,17 @@ import {
   Card,
   CardContent,
   Typography,
-  Box,
   CircularProgress,
   Alert,
-  Grid,
-  Paper,
-  Stack
+  Chip
 } from '@mui/material'
 import {
   Inventory as ProductIcon,
-  AttachMoney as PriceIcon,
   Inventory2 as QuantityIcon,
   Warning as WarningIcon,
-  Business as SupplierIcon,
-  QrCode as SKUIcon
+  PhotoLibrary as ImageIcon
 } from '@mui/icons-material'
 import { RowActionsMenu } from '../../../components/shared'
-import { 
-  ProductInfo, 
-  ProductStatusChip
-} from './utils/productComponents'
 import { 
   generateProductRowActions,
   isLowStock
@@ -33,7 +24,7 @@ interface ProductsCardviewProps {
   loading: boolean
   error: string | null
   success: string | null
-  theme: any
+  uiTheme: any
   onEditProduct: (productId: number) => void
   onDeleteProduct: (productId: number) => void
 }
@@ -43,7 +34,7 @@ const ProductsCardview: React.FC<ProductsCardviewProps> = ({
   loading,
   error,
   success,
-  theme,
+  uiTheme,
   onEditProduct,
   onDeleteProduct
 }) => {
@@ -54,15 +45,15 @@ const ProductsCardview: React.FC<ProductsCardviewProps> = ({
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
+      <div className="flex justify-center items-center h-48">
         <CircularProgress />
-      </Box>
+      </div>
     )
   }
 
   if (error) {
     return (
-      <Alert severity="error" sx={{ mb: 2 }}>
+      <Alert severity="error" className="mb-4">
         {error}
       </Alert>
     )
@@ -70,210 +61,192 @@ const ProductsCardview: React.FC<ProductsCardviewProps> = ({
 
   if (success) {
     return (
-      <Alert severity="success" sx={{ mb: 2 }}>
+      <Alert severity="success" className="mb-4">
         {success}
       </Alert>
     )
   }
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Grid container spacing={3}>
+    <div className="p-0 overflow-visible">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 overflow-visible">
         {filteredProducts?.map((product) => {
           const lowStock = isLowStock(product.quantity, product.minQuantity)
+          const imageCount = product.images?.length || 0 // Future: will show actual image count
           
           return (
-            <Grid item xs={12} sm={6} lg={4} key={product.id}>
+            <div key={product.id} className="col-span-1 overflow-visible">
               <Card 
                 elevation={0}
-                sx={{ 
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  backgroundColor: theme.background,
-                  border: `1px solid ${theme.border}`,
-                  borderRadius: 3,
-                  overflow: 'hidden',
-                  position: 'relative',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                  '&:hover': {
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
-                    transform: 'translateY(-2px)',
-                    borderColor: theme.primary
-                  }
-                }}
+                className="h-full flex flex-col relative overflow-visible rounded-xl transition-all duration-300 ease-out shadow-md hover:shadow-lg hover:-translate-y-1 group"
+                style={{ 
+                  backgroundColor: uiTheme.background,
+                  border: `1px solid ${uiTheme.border}`,
+                  '--hover-border-color': uiTheme.primary,
+                  transformOrigin: 'center center',
+                  willChange: 'transform, box-shadow'
+                } as React.CSSProperties}
               >
                 {/* 3-Dot Menu in Top Right Corner */}
-                <Box 
-                  sx={{ 
-                    position: 'absolute', 
-                    top: 8, 
-                    right: 8, 
-                    zIndex: 1,
-                    backgroundColor: theme.background,
-                    borderRadius: '50%',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                <div 
+                  className="absolute top-2 right-2 z-20 rounded-full shadow-md"
+                  style={{ 
+                    backgroundColor: uiTheme.background,
+                    transform: 'translateZ(0)',
+                    backfaceVisibility: 'hidden'
                   }}
                 >
                   <RowActionsMenu
                     rowData={product}
                     actions={rowActions}
-                    theme={theme}
+                    theme={uiTheme}
                   />
-                </Box>
+                </div>
 
-                <CardContent sx={{ flexGrow: 1, p: 3, pt: 4 }}>
-                  {/* Header with Product Info and Status */}
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
-                    <Box sx={{ flex: 1, pr: 1 }}>
-                      <ProductInfo product={product} />
-                    </Box>
-                    <ProductStatusChip status={product.status} />
-                  </Box>
-
-                  {/* Price Section */}
-                  <Paper 
-                    elevation={0}
-                    sx={{ 
-                      p: 2, 
-                      mb: 2, 
-                      backgroundColor: '#f0fdf4',
-                      border: '1px solid #dcfce7',
-                      borderRadius: 2,
-                      boxShadow: '0 1px 4px rgba(0,0,0,0.06)'
-                    }}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <PriceIcon sx={{ color: '#10b981', fontSize: 20 }} />
-                      <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#10b981' }}>
-                        ${typeof product.unitPrice === 'number' 
-                          ? product.unitPrice.toFixed(2) 
-                          : parseFloat(product.unitPrice || '0').toFixed(2)
-                        }
-                        {product.unit && (
-                          <Typography component="span" variant="body2" sx={{ ml: 1, color: '#10b981' }}>
-                            / {product.unit}
-                          </Typography>
-                        )}
-                      </Typography>
-                    </Box>
-                  </Paper>
-
-                  {/* Quantity Section */}
-                  <Paper 
-                    elevation={0}
-                    sx={{ 
-                      p: 2, 
-                      mb: 2, 
-                      backgroundColor: lowStock ? '#fef2f2' : '#f0f9ff',
-                      border: lowStock ? '1px solid #fecaca' : '1px solid #e0f2fe',
-                      borderRadius: 2,
-                      boxShadow: '0 1px 4px rgba(0,0,0,0.06)'
-                    }}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <QuantityIcon sx={{ color: lowStock ? '#ef4444' : '#0ea5e9', fontSize: 20 }} />
-                      <Typography 
-                        variant="body2" 
-                        sx={{ 
-                          fontWeight: '600', 
-                          color: lowStock ? '#ef4444' : '#0ea5e9'
+                {/* Product Image Section */}
+                <div
+                  className="h-48 relative overflow-hidden rounded-t-xl"
+                  style={{
+                    backgroundColor: '#f5f5f5',
+                    transform: 'translateZ(0)',
+                    backfaceVisibility: 'hidden'
+                  }}
+                >
+                  {/* Show actual product image if available */}
+                  {product.images && product.images.length > 0 ? (
+                    <>
+                      {/* Product image background */}
+                      <div 
+                        className="absolute inset-0 bg-cover bg-center scale-110 blur-sm"
+                        style={{
+                          backgroundImage: `url(${product.images[0]})`
                         }}
+                      />
+                      {/* Overlay */}
+                      <div className="absolute inset-0 bg-black bg-opacity-30" />
+                      
+                      {/* Image count badge - top left */}
+                      <div 
+                        className="absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-medium text-white shadow-md"
+                        style={{ backgroundColor: uiTheme.primary }}
                       >
-                        Quantity: {product.quantity}
+                        <ImageIcon className="w-3 h-3 inline mr-1" />
+                        {imageCount}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {/* Default background when no image */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200" />
+                      
+                      {/* Default product icon centered */}
+                      <div className="relative z-10 h-full flex items-center justify-center">
+                        <ProductIcon 
+                          className="text-gray-400" 
+                          style={{ fontSize: 64 }}
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Content Section */}
+                <CardContent 
+                  className="flex-grow p-5 rounded-t-xl"
+                  style={{
+                    transform: 'translateZ(0)',
+                    backfaceVisibility: 'hidden'
+                  }}
+                >
+                  {/* Title and Category */}
+                  <div className="mb-4">
+                    <Typography 
+                      variant="h6" 
+                      className="font-bold mb-1 leading-tight"
+                      style={{ color: uiTheme.text }}
+                    >
+                      {product.name}
+                    </Typography>
+                    <Typography 
+                      variant="body2" 
+                      className="text-sm"
+                      style={{ color: uiTheme.textSecondary }}
+                    >
+                      {product.category || 'No category'} • ${typeof product.unitPrice === 'number' 
+                        ? product.unitPrice.toFixed(2) 
+                        : parseFloat(product.unitPrice || '0').toFixed(2)
+                      }{product.unit && ` / ${product.unit}`}
+                    </Typography>
+                  </div>
+
+                  {/* Status Chip */}
+                  <div className="flex justify-start mb-4">
+                    <Chip
+                      label={product.status.charAt(0).toUpperCase() + product.status.slice(1)}
+                      size="small"
+                      className="text-white font-bold text-xs h-6 px-3"
+                      style={{
+                        backgroundColor: product.status === 'active' ? '#10b981' : 
+                                        product.status === 'inactive' ? '#6b7280' : '#ef4444'
+                      }}
+                    />
+                  </div>
+
+                  {/* Additional Info - Simplified */}
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <QuantityIcon className="w-4 h-4" style={{ color: lowStock ? '#ef4444' : uiTheme.textSecondary }} />
+                      <Typography variant="body2" className="text-xs" style={{ color: lowStock ? '#ef4444' : uiTheme.textSecondary }}>
+                        Qty: {product.quantity}
                         {lowStock && (
                           <>
-                            <WarningIcon sx={{ color: '#ef4444', fontSize: 16, ml: 1 }} />
-                            <Typography component="span" variant="body2" sx={{ ml: 1, color: '#ef4444' }}>
-                              (Low Stock!)
-                            </Typography>
+                            <WarningIcon className="w-3 h-3 inline ml-1" />
+                            <span className="ml-1">(Low Stock!)</span>
                           </>
                         )}
                       </Typography>
-                    </Box>
-                    <Typography variant="caption" sx={{ color: '#666', mt: 0.5, display: 'block' }}>
-                      Min: {product.minQuantity}
-                    </Typography>
-                  </Paper>
-
-                  {/* Supplier and SKU Section */}
-                  <Paper 
-                    elevation={0}
-                    sx={{ 
-                      p: 2, 
-                      mb: 2, 
-                      backgroundColor: `${theme.primary}08`,
-                      border: `1px solid ${theme.primary}20`,
-                      borderRadius: 2,
-                      boxShadow: '0 1px 4px rgba(0,0,0,0.06)'
-                    }}
-                  >
-                    <Stack spacing={1.5}>
-                      {product.supplier && (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                          <SupplierIcon sx={{ color: theme.primary, fontSize: 20 }} />
-                          <Typography 
-                            variant="body2" 
-                            sx={{ 
-                              fontWeight: '600', 
-                              color: theme.text,
-                              wordBreak: 'break-word'
-                            }}
-                          >
-                            {product.supplier}
-                          </Typography>
-                        </Box>
-                      )}
-                      {product.sku && (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                          <SKUIcon sx={{ color: theme.primary, fontSize: 20 }} />
-                          <Typography 
-                            variant="body2" 
-                            sx={{ 
-                              fontWeight: '600', 
-                              color: theme.text,
-                              fontFamily: 'monospace',
-                              fontSize: '0.75rem'
-                            }}
-                          >
-                            {product.sku}
-                          </Typography>
-                        </Box>
-                      )}
-                    </Stack>
-                  </Paper>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <ProductIcon className="w-4 h-4" style={{ color: uiTheme.textSecondary }} />
+                      <Typography variant="body2" className="text-xs" style={{ color: uiTheme.textSecondary }}>
+                        Min: {product.minQuantity}
+                      </Typography>
+                    </div>
+                    {product.sku && (
+                      <div className="flex items-center gap-2">
+                        <span className="w-4 h-4 text-xs font-mono flex items-center justify-center" style={{ color: uiTheme.textSecondary }}>
+                          #
+                        </span>
+                        <Typography variant="body2" className="text-xs font-mono" style={{ color: uiTheme.textSecondary }}>
+                          {product.sku}
+                        </Typography>
+                      </div>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
-            </Grid>
+            </div>
           )
         })}
-      </Grid>
+      </div>
 
       {filteredProducts?.length === 0 && (
-        <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Box sx={{ 
-            width: 80, 
-            height: 80, 
-            borderRadius: '50%', 
-            backgroundColor: `${theme.primary}10`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            mx: 'auto',
-            mb: 3
-          }}>
-            <ProductIcon sx={{ fontSize: 40, color: theme.primary }} />
-          </Box>
-          <Typography variant="h6" sx={{ color: theme.text, mb: 1, fontWeight: '600' }}>
+        <div className="text-center py-16">
+          <div 
+            className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
+            style={{ backgroundColor: `${uiTheme.primary}10` }}
+          >
+            <ProductIcon className="text-4xl" style={{ color: uiTheme.primary }} />
+          </div>
+          <Typography variant="h6" className="mb-2 font-semibold" style={{ color: uiTheme.text }}>
             No products found
           </Typography>
-          <Typography variant="body2" sx={{ color: '#666' }}>
+          <Typography variant="body2" className="text-gray-600">
             Try adjusting your filters or add a new product
           </Typography>
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }
 
