@@ -27,6 +27,9 @@ import AppointmentsListview from './AppointmentsListview'
 import AppointmentsCardview from './AppointmentsCardview'
 import { isOwnerRole, isAdminRole, isStaffRole, isUserRole } from '../../../constants/roles'
 import { ViewSwitcher, ViewMode } from '../../../components/shared'
+import { useViewMode } from '../../../hooks/useViewMode'
+import ViewModeSelector from '../../../components/shared/ViewModeSelector'
+import { getUserSettingsRequest } from '../../../store/actions/userSettingsActions'
 
 const Appointments: React.FC = () => {
   const dispatch = useDispatch()
@@ -34,12 +37,13 @@ const Appointments: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const { user, loading: authLoading } = useSelector((state: RootState) => state.auth)
   const { appointments, loading, error, success } = useSelector((state: RootState) => state.appointments)
+  const { settings, loading: settingsLoading } = useSelector((state: RootState) => state.userSettings)
   const uiTheme = useSelector((state: RootState) => state.ui.theme)
+  const { appointmentsView } = useViewMode()
 
-
-
-  const [viewMode, setViewMode] = useState<ViewMode>('grid')
+  const [viewMode, setViewMode] = useState<ViewMode>('grid') // Default, will be updated when settings load
   const [userSelectedView, setUserSelectedView] = useState<boolean>(false)
+  const [settingsLoaded, setSettingsLoaded] = useState<boolean>(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [editingAppointmentId, setEditingAppointmentId] = useState<number | null>(null)
@@ -53,8 +57,22 @@ const Appointments: React.FC = () => {
     if (user) {
       // Use unified appointments endpoint for all roles
       dispatch(getAppointmentsRequest())
+      
+      // Load user settings if not already loaded
+      if (!settings && !settingsLoading) {
+        dispatch(getUserSettingsRequest())
+      }
     }
-  }, [user?.role, dispatch])
+  }, [user?.role, dispatch, settings, settingsLoading])
+
+  // Sync view mode with user settings
+  useEffect(() => {
+    // Only update if settings are loaded and user hasn't manually selected a view
+    if (settings && !settingsLoading && !userSelectedView && !settingsLoaded) {
+      setViewMode(appointmentsView as ViewMode)
+      setSettingsLoaded(true)
+    }
+  }, [settings, settingsLoading, appointmentsView, userSelectedView, settingsLoaded])
 
   // Auto-switch to card view on mobile (only if user hasn't manually selected a view)
   useEffect(() => {
@@ -166,11 +184,6 @@ const Appointments: React.FC = () => {
     handleCloseCompletionPopup()
   }
 
-  // Handle view mode change
-  const handleViewModeChange = (newViewMode: ViewMode) => {
-    setViewMode(newViewMode)
-    setUserSelectedView(true)
-  }
 
 
 
@@ -213,11 +226,14 @@ const Appointments: React.FC = () => {
       {/* Controls Section - All on the right */}
       <Box className="flex justify-end mb-6 flex-shrink-0">
         <Box className="flex flex-row items-center gap-4">
-          {/* View Switcher */}
-          <ViewSwitcher
-            viewMode={viewMode}
-            onViewModeChange={handleViewModeChange}
-            theme={uiTheme}
+          {/* View Mode Selector */}
+          <ViewModeSelector
+            section="appointments"
+            currentView={viewMode}
+            onViewChange={(newView) => {
+              setViewMode(newView as ViewMode)
+              setUserSelectedView(true)
+            }}
           />
 
           {/* Add Button */}

@@ -63,6 +63,11 @@ import {
   deleteUserHistoryEpic,
   getCompanyStatsEpic
 } from './epics/userHistoryEpics'
+import {
+  getUserSettingsEpic,
+  updateUserSettingsEpic,
+  resetUserSettingsEpic
+} from './epics/userSettingsEpics'
 
 const epicMiddleware = createEpicMiddleware()
 
@@ -119,7 +124,10 @@ const rootEpic = combineEpics(
   getUserHistoryByUserIdEpic,
   updateUserHistoryEpic,
   deleteUserHistoryEpic,
-  getCompanyStatsEpic
+  getCompanyStatsEpic,
+  getUserSettingsEpic,
+  updateUserSettingsEpic,
+  resetUserSettingsEpic
 )
 
 export const store = configureStore({

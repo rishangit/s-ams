@@ -13,6 +13,8 @@ import {
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '../../../store'
 import { ViewSwitcher, ViewMode } from '../../../components/shared'
+import { useViewMode } from '../../../hooks/useViewMode'
+import ViewModeSelector from '../../../components/shared/ViewModeSelector'
 import ServiceForm from './ServiceForm'
 import ServicesGridview from './ServicesGridview'
 import ServicesListview from './ServicesListview'
@@ -30,6 +32,7 @@ const Services: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const { user } = useSelector((state: RootState) => state.auth)
   const uiTheme = useSelector((state: RootState) => state.ui.theme)
+  const { servicesView } = useViewMode()
   const { 
     services, 
     loading, 
@@ -39,7 +42,7 @@ const Services: React.FC = () => {
 
   // Memoize services to prevent unnecessary re-renders
 
-  const [viewMode, setViewMode] = useState<ViewMode>('grid')
+  const [viewMode, setViewMode] = useState<ViewMode>(servicesView as ViewMode)
   const [userSelectedView, setUserSelectedView] = useState<boolean>(false)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -53,6 +56,13 @@ const Services: React.FC = () => {
       dispatch(getServicesRequest())
     }
   }, [user]) // Run when user is available
+
+  // Sync view mode with user settings
+  useEffect(() => {
+    if (servicesView && !userSelectedView) {
+      setViewMode(servicesView as ViewMode)
+    }
+  }, [servicesView, userSelectedView])
 
   // Auto-switch to card view on mobile (only if user hasn't manually selected a view)
   useEffect(() => {
@@ -104,11 +114,6 @@ const Services: React.FC = () => {
     // No need to refresh - Redux automatically updates the list when service is updated
   }
 
-  // Handle view mode change
-  const handleViewModeChange = (newViewMode: ViewMode) => {
-    setViewMode(newViewMode)
-    setUserSelectedView(true)
-  }
 
   // Get all services
   const filteredServices = useMemo(() => {
@@ -145,11 +150,14 @@ const Services: React.FC = () => {
       {/* Controls Section - All on the right */}
       <Box className="flex justify-end mb-6 flex-shrink-0">
         <Box className="flex flex-row items-center gap-4">
-          {/* View Switcher */}
-          <ViewSwitcher
-            viewMode={viewMode}
-            onViewModeChange={handleViewModeChange}
-            theme={uiTheme}
+          {/* View Mode Selector */}
+          <ViewModeSelector
+            section="services"
+            currentView={viewMode}
+            onViewChange={(newView) => {
+              setViewMode(newView as ViewMode)
+              setUserSelectedView(true)
+            }}
           />
 
 

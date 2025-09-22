@@ -1,6 +1,6 @@
 import { ofType } from 'redux-observable'
 import { of, from } from 'rxjs'
-import { map, catchError, switchMap, debounceTime, distinctUntilChanged } from 'rxjs/operators'
+import { map, catchError, switchMap, debounceTime, distinctUntilChanged, mergeMap } from 'rxjs/operators'
 import { apiService } from '../../services/api'
 import {
   registerRequest,
@@ -25,6 +25,7 @@ import {
   switchBackSuccess,
   switchBackFailure,
 } from '../actions'
+import { getUserSettingsRequest } from '../actions/userSettingsActions'
 
 // Register Epic
 export const registerEpic = (action$: any) =>
@@ -71,6 +72,14 @@ export const loginEpic = (action$: any) =>
       )
     )
   )
+
+// Load User Settings after Login Success
+export const loadUserSettingsAfterLoginEpic = (action$: any) =>
+  action$.pipe(
+    ofType(loginSuccess.type),
+    mergeMap(() => of(getUserSettingsRequest()))
+  )
+
 
 // Get Profile Epic
 export const getProfileEpic = (action$: any) =>

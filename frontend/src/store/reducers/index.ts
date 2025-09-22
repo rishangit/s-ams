@@ -8,6 +8,7 @@ import appointmentsReducer from './appointmentsSlice'
 import staffReducer from './staffSlice'
 import productsReducer from './productsSlice'
 import userHistoryReducer from './userHistorySlice'
+import userSettingsReducer from './userSettingsSlice'
 
 export const rootReducer = combineReducers({
   ui: uiReducer,
@@ -18,5 +19,6 @@ export const rootReducer = combineReducers({
   appointments: appointmentsReducer,
   staff: staffReducer,
   products: productsReducer,
-  userHistory: userHistoryReducer
+  userHistory: userHistoryReducer,
+  userSettings: userSettingsReducer
 })

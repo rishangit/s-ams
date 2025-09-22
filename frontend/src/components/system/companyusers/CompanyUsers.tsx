@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { RootState } from '../../../store'
 import CompanyUsersGridview from './CompanyUsersGridview'
@@ -8,7 +8,11 @@ import CompanyUsersCardview from './CompanyUsersCardview'
 import { Box, Typography, useMediaQuery } from '@mui/material'
 import { People as PeopleIcon } from '@mui/icons-material'
 import { apiService } from '../../../services/api'
-import { ViewSwitcher, ViewMode } from '../../../components/shared'
+import { ViewMode } from '../../../components/shared'
+import ViewModeSelector from '../../../components/shared/ViewModeSelector'
+import { useViewMode } from '../../../hooks/useViewMode'
+import { useTheme } from '../../../hooks/useTheme'
+import { getUserSettingsRequest } from '../../../store/actions/userSettingsActions'
 
 interface CompanyUser {
   id: number
@@ -27,12 +31,16 @@ interface CompanyUser {
 
 const CompanyUsers: React.FC = () => {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
   const { user, loading: authLoading } = useSelector((state: RootState) => state.auth)
-  const uiTheme = useSelector((state: RootState) => state.ui.theme)
+  const { settings, loading: settingsLoading } = useSelector((state: RootState) => state.userSettings)
+  const { theme: uiTheme } = useTheme()
+  const { usersView } = useViewMode()
   const isMobile = useMediaQuery('(max-width: 768px)')
   
-  const [viewMode, setViewMode] = useState<ViewMode>('grid')
+  const [viewMode, setViewMode] = useState<ViewMode>('grid') // Default, will be updated when settings load
   const [userSelectedView, setUserSelectedView] = useState<boolean>(false)
+  const [settingsLoaded, setSettingsLoaded] = useState<boolean>(false)
   const [users, setUsers] = useState<CompanyUser[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -63,31 +71,43 @@ const CompanyUsers: React.FC = () => {
   useEffect(() => {
     if (user && user.role === 1) { // Only for shop owners
       fetchCompanyUsers()
+      
+      // Load user settings if not already loaded
+      if (!settings && !settingsLoading) {
+        dispatch(getUserSettingsRequest())
+      }
     }
-  }, [user])
+  }, [user, dispatch, settings, settingsLoading])
 
-  // Auto-switch to card view on mobile (only if user hasn't manually selected a view)
+  // Sync view mode with user settings
   useEffect(() => {
-    if (!userSelectedView) {
+    // Only update if settings are loaded and user hasn't manually selected a view
+    if (settings && !settingsLoading && !userSelectedView && !settingsLoaded) {
+      console.log('CompanyUsers: Setting view mode from settings:', usersView)
+      setViewMode(usersView as ViewMode)
+      setSettingsLoaded(true)
+    }
+  }, [settings, settingsLoading, usersView, userSelectedView, settingsLoaded])
+
+  // Auto-switch to card view on mobile (only if user hasn't manually selected a view and no saved settings)
+  useEffect(() => {
+    if (!userSelectedView && !settings) {
       if (isMobile && viewMode !== 'card') {
+        console.log('CompanyUsers: Auto-switching to card view for mobile')
         setViewMode('card')
       } else if (!isMobile && viewMode === 'card') {
+        console.log('CompanyUsers: Auto-switching to grid view for desktop')
         setViewMode('grid')
       }
     }
-  }, [isMobile, viewMode, userSelectedView])
+  }, [isMobile, viewMode, userSelectedView, settings])
 
-  // Reset user selection when screen size changes significantly
+  // Reset user selection when screen size changes significantly (only if no saved settings)
   useEffect(() => {
-    setUserSelectedView(false)
-  }, [isMobile])
-
-
-  // Handle view mode change
-  const handleViewModeChange = (newViewMode: ViewMode) => {
-    setViewMode(newViewMode)
-    setUserSelectedView(true)
-  }
+    if (!settings) {
+      setUserSelectedView(false)
+    }
+  }, [isMobile, settings])
 
   // Handle view appointments
   const handleViewAppointments = (userId: number) => {
@@ -132,11 +152,14 @@ const CompanyUsers: React.FC = () => {
       {/* Controls Section - All on the right */}
       <Box className="flex justify-end mb-6 flex-shrink-0">
         <Box className="flex flex-row items-center gap-4">
-          {/* View Switcher */}
-          <ViewSwitcher
-            viewMode={viewMode}
-            onViewModeChange={handleViewModeChange}
-            theme={uiTheme}
+          {/* View Mode Selector */}
+          <ViewModeSelector
+            section="users"
+            currentView={viewMode}
+            onViewChange={(newView) => {
+              setViewMode(newView as ViewMode)
+              setUserSelectedView(true)
+            }}
           />
         </Box>
       </Box>

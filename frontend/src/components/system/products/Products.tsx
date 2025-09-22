@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '../../../store'
-import { ViewSwitcher, ViewMode } from '../../shared'
+import { ViewMode } from '../../shared'
+import { useViewMode } from '../../../hooks/useViewMode'
+import ViewModeSelector from '../../shared/ViewModeSelector'
 import ProductForm from './ProductForm'
 import ProductsGridview from './ProductsGridview'
 import ProductsListview from './ProductsListview'
@@ -11,6 +13,7 @@ import {
   deleteProductRequest,
   clearProductsMessages
 } from '../../../store/actions/productsActions'
+import { getUserSettingsRequest } from '../../../store/actions/userSettingsActions'
 import { useTheme } from '../../../hooks/useTheme'
 import { Add, Inventory as ProductIcon } from '@mui/icons-material'
 import { Button, Box, Dialog, DialogTitle, DialogContent, Typography, useMediaQuery } from '@mui/material'
@@ -19,11 +22,14 @@ const Products: React.FC = () => {
   const dispatch = useDispatch()
   const { user } = useSelector((state: RootState) => state.auth)
   const { products, loading, error, success } = useSelector((state: RootState) => state.products)
+  const { settings, loading: settingsLoading } = useSelector((state: RootState) => state.userSettings)
   const { theme: uiTheme } = useTheme()
+  const { productsView } = useViewMode()
   const isMobile = useMediaQuery('(max-width: 768px)')
 
-  const [viewMode, setViewMode] = useState<ViewMode>('grid')
+  const [viewMode, setViewMode] = useState<ViewMode>('grid') // Default, will be updated when settings load
   const [userSelectedView, setUserSelectedView] = useState<boolean>(false)
+  const [settingsLoaded, setSettingsLoaded] = useState<boolean>(false)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editingProductId, setEditingProductId] = useState<number | null>(null)
@@ -32,24 +38,43 @@ const Products: React.FC = () => {
   useEffect(() => {
     if (user && parseInt(String(user.role)) === 1) {
       dispatch(getProductsRequest())
+      
+      // Load user settings if not already loaded
+      if (!settings && !settingsLoading) {
+        dispatch(getUserSettingsRequest())
+      }
     }
-  }, [user?.role, dispatch])
+  }, [user?.role, dispatch, settings, settingsLoading])
 
-  // Auto-switch to card view on mobile (only if user hasn't manually selected a view)
+  // Sync view mode with user settings
   useEffect(() => {
-    if (!userSelectedView) {
+    // Only update if settings are loaded and user hasn't manually selected a view
+    if (settings && !settingsLoading && !userSelectedView && !settingsLoaded) {
+      console.log('Products: Setting view mode from settings:', productsView)
+      setViewMode(productsView as ViewMode)
+      setSettingsLoaded(true)
+    }
+  }, [settings, settingsLoading, productsView, userSelectedView, settingsLoaded])
+
+  // Auto-switch to card view on mobile (only if user hasn't manually selected a view and no saved settings)
+  useEffect(() => {
+    if (!userSelectedView && !settings) {
       if (isMobile && viewMode !== 'card') {
+        console.log('Products: Auto-switching to card view for mobile')
         setViewMode('card')
       } else if (!isMobile && viewMode === 'card') {
+        console.log('Products: Auto-switching to grid view for desktop')
         setViewMode('grid')
       }
     }
-  }, [isMobile, viewMode, userSelectedView])
+  }, [isMobile, viewMode, userSelectedView, settings])
 
-  // Reset user selection when screen size changes significantly
+  // Reset user selection when screen size changes significantly (only if no saved settings)
   useEffect(() => {
-    setUserSelectedView(false)
-  }, [isMobile])
+    if (!settings) {
+      setUserSelectedView(false)
+    }
+  }, [isMobile, settings])
 
   // Clear error and success messages after 3 seconds
   useEffect(() => {
@@ -82,11 +107,6 @@ const Products: React.FC = () => {
     setEditingProductId(null)
   }
 
-  // Handle view mode change
-  const handleViewModeChange = (newViewMode: ViewMode) => {
-    setViewMode(newViewMode)
-    setUserSelectedView(true)
-  }
 
 
   // Get all products
@@ -143,11 +163,14 @@ const Products: React.FC = () => {
       {/* Controls Section - All on the right */}
       <Box className="flex justify-end mb-6 flex-shrink-0">
         <Box className="flex flex-row items-center gap-4">
-          {/* View Switcher */}
-          <ViewSwitcher
-            viewMode={viewMode}
-            onViewModeChange={handleViewModeChange}
-            theme={uiTheme}
+          {/* View Mode Selector */}
+          <ViewModeSelector
+            section="products"
+            currentView={viewMode}
+            onViewChange={(newView) => {
+              setViewMode(newView as ViewMode)
+              setUserSelectedView(true)
+            }}
           />
 
           {/* Add Button */}

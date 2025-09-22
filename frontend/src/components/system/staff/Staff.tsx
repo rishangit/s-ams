@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '../../../store'
 import { ViewSwitcher, ViewMode } from '../../shared'
+import { useViewMode } from '../../../hooks/useViewMode'
+import ViewModeSelector from '../../shared/ViewModeSelector'
 import StaffForm from './StaffForm'
 import StaffGridview from './StaffGridview'
 import StaffListview from './StaffListview'
@@ -20,9 +22,10 @@ const Staff: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth)
   const { staff, loading, error, success } = useSelector((state: RootState) => state.staff)
   const { theme: uiTheme } = useTheme()
+  const { staffView } = useViewMode()
   const isMobile = useMediaQuery('(max-width: 768px)')
 
-  const [viewMode, setViewMode] = useState<ViewMode>('grid')
+  const [viewMode, setViewMode] = useState<ViewMode>(staffView as ViewMode)
   const [userSelectedView, setUserSelectedView] = useState<boolean>(false)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -34,6 +37,13 @@ const Staff: React.FC = () => {
       dispatch(getStaffRequest())
     }
   }, [user?.role, dispatch])
+
+  // Sync view mode with user settings
+  useEffect(() => {
+    if (staffView && !userSelectedView) {
+      setViewMode(staffView as ViewMode)
+    }
+  }, [staffView, userSelectedView])
 
   // Auto-switch to card view on mobile (only if user hasn't manually selected a view)
   useEffect(() => {
@@ -82,11 +92,6 @@ const Staff: React.FC = () => {
     setEditingStaffId(null)
   }
 
-  // Handle view mode change
-  const handleViewModeChange = (newViewMode: ViewMode) => {
-    setViewMode(newViewMode)
-    setUserSelectedView(true)
-  }
 
 
   // Show loading while user is being loaded
@@ -136,11 +141,14 @@ const Staff: React.FC = () => {
       {/* Controls Section - All on the right */}
       <Box className="flex justify-end mb-6 flex-shrink-0">
         <Box className="flex flex-row items-center gap-4">
-          {/* View Switcher */}
-          <ViewSwitcher
-            viewMode={viewMode}
-            onViewModeChange={handleViewModeChange}
-            theme={uiTheme}
+          {/* View Mode Selector */}
+          <ViewModeSelector
+            section="staff"
+            currentView={viewMode}
+            onViewChange={(newView) => {
+              setViewMode(newView as ViewMode)
+              setUserSelectedView(true)
+            }}
           />
 
           {/* Add Button */}

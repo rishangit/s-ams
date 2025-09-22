@@ -9,8 +9,7 @@ import {
   Paper,
   Alert,
     CircularProgress,
-    Button,
-    ButtonGroup
+    Button
 } from '@mui/material'
 import {
   CalendarToday as CalendarIcon,
@@ -22,6 +21,9 @@ import { RootState } from '../../../store'
 import {
   getAppointmentsRequest
 } from '../../../store/actions/appointmentsActions'
+import { useViewMode } from '../../../hooks/useViewMode'
+import ViewModeSelector from '../../shared/ViewModeSelector'
+import { getUserSettingsRequest } from '../../../store/actions/userSettingsActions'
 import AppointmentForm from './AppointmentForm'
 import { CalendarEventTooltip } from '../../shared'
 import { getProfileImageUrl } from '../../../utils/fileUtils'
@@ -51,12 +53,28 @@ const CalendarView: React.FC = () => {
   const { appointments, loading, error } = useSelector((state: RootState) => state.appointments)
   const theme = useSelector((state: RootState) => state.ui.theme)
   const isDarkMode = useSelector((state: RootState) => state.ui.theme.mode === 'dark')
+  const { calendarView } = useViewMode()
+  const { settings, loading: settingsLoading } = useSelector((state: RootState) => state.userSettings)
 
   const calendarRef = useRef<FullCalendar>(null)
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<number | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
+  
+  // Convert calendar view preference to FullCalendar view
+  const getFullCalendarView = (view: string) => {
+    switch (view) {
+      case 'month': return 'dayGridMonth'
+      case 'week': return 'timeGridWeek'
+      case 'day': return 'timeGridDay'
+      default: return 'dayGridMonth'
+    }
+  }
+  
+  // Initialize with default view, will be updated when settings load
   const [currentView, setCurrentView] = useState('dayGridMonth')
   const [currentDate, setCurrentDate] = useState(new Date())
+  const [userSelectedView, setUserSelectedView] = useState<boolean>(false)
+  const [settingsLoaded, setSettingsLoaded] = useState<boolean>(false)
 
   // Add custom CSS for mobile calendar toolbar and full height
   useEffect(() => {
@@ -431,13 +449,36 @@ const CalendarView: React.FC = () => {
     return () => clearTimeout(timer)
   }, [isDarkMode])
 
-  // Load appointments based on user role
+  // Load appointments and user settings when component mounts
   useEffect(() => {
     if (user) {
       // Use unified appointments endpoint for all roles
       dispatch(getAppointmentsRequest())
+      
+      // Load user settings if not already loaded
+      if (!settings && !settingsLoading) {
+        dispatch(getUserSettingsRequest())
+      }
     }
-  }, [user, dispatch])
+  }, [user, dispatch, settings, settingsLoading])
+
+  // Sync view mode with user settings
+  useEffect(() => {
+    // Only update if settings are loaded and user hasn't manually selected a view
+    if (settings && !settingsLoading && !userSelectedView && !settingsLoaded) {
+      console.log('Calendar: Setting view mode from settings:', calendarView)
+      setCurrentView(getFullCalendarView(calendarView))
+      setSettingsLoaded(true)
+    }
+  }, [settings, settingsLoading, calendarView, userSelectedView, settingsLoaded])
+
+  // Handle view changes when currentView state changes
+  useEffect(() => {
+    if (calendarRef.current && settingsLoaded) {
+      console.log('Calendar: Changing view to:', currentView)
+      calendarRef.current.getApi().changeView(currentView)
+    }
+  }, [currentView, settingsLoaded])
 
   // Convert appointments to FullCalendar events
   const calendarEvents = useMemo((): CalendarEvent[] => {
@@ -650,16 +691,6 @@ const CalendarView: React.FC = () => {
     }
   }
 
-  const handleViewChange = (view: string) => {
-    if (calendarRef.current) {
-      calendarRef.current.getApi().changeView(view)
-      setCurrentView(view)
-      setCurrentDate(calendarRef.current.getApi().getDate())
-    }
-  }
-
-
-
   if (loading) {
     return (
       <Box className="flex items-center justify-center min-h-screen">
@@ -816,78 +847,25 @@ const CalendarView: React.FC = () => {
                    </Button>
                  </Box>
                  
-                 {/* Right: View Buttons */}
-                 <ButtonGroup size="small" variant="text">
-                   <Button
-                     onClick={() => handleViewChange('dayGridMonth')}
-                     className="border-none focus:outline-none focus:ring-0 focus:border-none"
-                     sx={{
-                       backgroundColor: currentView === 'dayGridMonth' ? theme.primary : 'transparent',
-                       color: currentView === 'dayGridMonth' ? '#ffffff' : theme.text,
-                       border: 'none !important',
-                       '&:focus': {
-                         outline: 'none !important',
-                         border: 'none !important',
-                         boxShadow: 'none !important'
-                       },
-                       '&:active': {
-                         border: 'none !important',
-                         boxShadow: 'none !important'
-                       }
-                     }}
-                   >
-                     Month
-                   </Button>
-                   <Button
-                     onClick={() => handleViewChange('timeGridWeek')}
-                     className="border-none focus:outline-none focus:ring-0 focus:border-none"
-                     sx={{
-                       backgroundColor: currentView === 'timeGridWeek' ? theme.primary : 'transparent',
-                       color: currentView === 'timeGridWeek' ? '#ffffff' : theme.text,
-                       border: 'none !important',
-                       '&:focus': {
-                         outline: 'none !important',
-                         border: 'none !important',
-                         boxShadow: 'none !important'
-                       },
-                       '&:active': {
-                         border: 'none !important',
-                         boxShadow: 'none !important'
-                       }
-                     }}
-                   >
-                     Week
-                   </Button>
-                   <Button
-                     onClick={() => handleViewChange('timeGridDay')}
-                     className="border-none focus:outline-none focus:ring-0 focus:border-none"
-                     sx={{
-                       backgroundColor: currentView === 'timeGridDay' ? theme.primary : 'transparent',
-                       color: currentView === 'timeGridDay' ? '#ffffff' : theme.text,
-                       border: 'none !important',
-                       '&:focus': {
-                         outline: 'none !important',
-                         border: 'none !important',
-                         boxShadow: 'none !important'
-                       },
-                       '&:active': {
-                         border: 'none !important',
-                         boxShadow: 'none !important'
-                       }
-                     }}
-                   >
-                     Day
-                   </Button>
-                 </ButtonGroup>
+                 {/* Right: View Mode Selector */}
+                 <ViewModeSelector
+                   section="calendar"
+                   currentView={calendarView}
+                   onViewChange={(newView) => {
+                     const fullCalendarView = getFullCalendarView(newView)
+                     setCurrentView(fullCalendarView)
+                     setUserSelectedView(true)
+                   }}
+                 />
                </Box>
              </Box>
 
             {/* @ts-ignore */}
             <FullCalendar
               ref={calendarRef}
-              key={`calendar-${isDarkMode ? 'dark' : 'light'}`}
+              key={`calendar-${isDarkMode ? 'dark' : 'light'}-${currentView}`}
               plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-              initialView="dayGridMonth"
+              initialView={currentView}
               headerToolbar={false}
               events={calendarEvents}
               eventClick={handleEventClick}

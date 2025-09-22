@@ -5,6 +5,7 @@ export { default as FormButton } from './FormButton'
 export { default as CalendarEventTooltip } from './CalendarEventTooltip'
 export { default as RowActionsMenu } from './RowActionsMenu'
 export { default as ViewSwitcher } from './ViewSwitcher'
+export { default as ViewModeSelector } from './ViewModeSelector'
 export type { RowAction } from './RowActionsMenu'
 export type { ViewMode } from './ViewSwitcher'
 

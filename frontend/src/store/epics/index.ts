@@ -1,5 +1,5 @@
 import { combineEpics } from 'redux-observable'
-import { loginEpic, registerEpic, getProfileEpic, updateProfileEpic } from './authEpics'
+import { loginEpic, registerEpic, getProfileEpic, updateProfileEpic, loadUserSettingsAfterLoginEpic } from './authEpics'
 import { getAllUsersEpic, updateUserRoleEpic, getUsersByRoleEpic } from './usersEpics'
 import { 
   createCompanyEpic, 
@@ -20,12 +20,18 @@ import {
   deleteStaffEpic,
   getAvailableUsersEpic
 } from './staffEpics'
+import {
+  getUserSettingsEpic,
+  updateUserSettingsEpic,
+  resetUserSettingsEpic
+} from './userSettingsEpics'
 
 export const rootEpic = combineEpics(
   loginEpic,
   registerEpic,
   getProfileEpic,
   updateProfileEpic,
+  loadUserSettingsAfterLoginEpic,
   getAllUsersEpic,
   updateUserRoleEpic,
   getUsersByRoleEpic,
@@ -43,7 +49,10 @@ export const rootEpic = combineEpics(
   createStaffEpic,
   updateStaffEpic,
   deleteStaffEpic,
-  getAvailableUsersEpic
+  getAvailableUsersEpic,
+  getUserSettingsEpic,
+  updateUserSettingsEpic,
+  resetUserSettingsEpic
 )
 
 // Export all epics from this central location

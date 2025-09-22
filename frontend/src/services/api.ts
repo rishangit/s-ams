@@ -542,6 +542,24 @@ class ApiService {
   async getCompanyStats(): Promise<ApiResponse<any>> {
     return this.request<any>('/user-history/company/stats')
   }
+
+  // User Settings endpoints
+  async getUserSettings(): Promise<ApiResponse<any>> {
+    return this.request<any>('/user-settings')
+  }
+
+  async updateUserSettings(data: any): Promise<ApiResponse<any>> {
+    return this.request<any>('/user-settings', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async resetUserSettings(): Promise<ApiResponse<any>> {
+    return this.request<any>('/user-settings/reset', {
+      method: 'POST',
+    })
+  }
 }
 
 // Export singleton instance

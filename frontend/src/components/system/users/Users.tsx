@@ -7,6 +7,8 @@ import { useSelector } from 'react-redux'
 import { RootState } from '../../../store'
 import { isAdminOnlyRole } from '../../../constants/roles'
 import { ViewSwitcher, ViewMode } from '../../../components/shared'
+import { useViewMode } from '../../../hooks/useViewMode'
+import ViewModeSelector from '../../../components/shared/ViewModeSelector'
 import { useUsers } from '../../../hooks/useUsers'
 import UsersListview from './UsersListview'
 import UsersCardview from './UsersCardview'
@@ -27,6 +29,7 @@ import UsersGridview from './UsersGridview'
 const Users: React.FC = () => {
   const { user: currentUser } = useSelector((state: RootState) => state.auth)
   const uiTheme = useSelector((state: RootState) => state.ui.theme)
+  const { usersView } = useViewMode()
   const isMobile = useMediaQuery('(max-width: 768px)')
   const { 
     users, 
@@ -38,7 +41,7 @@ const Users: React.FC = () => {
     clearSuccess 
   } = useUsers()
 
-  const [viewMode, setViewMode] = useState<ViewMode>('grid')
+  const [viewMode, setViewMode] = useState<ViewMode>(usersView as ViewMode)
   const [userSelectedView, setUserSelectedView] = useState<boolean>(false)
 
   useEffect(() => {
@@ -46,6 +49,13 @@ const Users: React.FC = () => {
       fetchAllUsers()
     }
   }, [fetchAllUsers, currentUser])
+
+  // Sync view mode with user settings
+  useEffect(() => {
+    if (usersView && !userSelectedView) {
+      setViewMode(usersView as ViewMode)
+    }
+  }, [usersView, userSelectedView])
 
   // Auto-switch to card view on mobile (only if user hasn't manually selected a view)
   useEffect(() => {
@@ -83,11 +93,6 @@ const Users: React.FC = () => {
   }, [success, clearSuccess])
 
 
-  // Handle view mode change
-  const handleViewModeChange = (newViewMode: ViewMode) => {
-    setViewMode(newViewMode)
-    setUserSelectedView(true)
-  }
 
   // User action handlers
   const handleViewUser = (_userId: number) => {
@@ -129,11 +134,14 @@ const Users: React.FC = () => {
           </p>
         </Box>
         
-        {/* View Switcher */}
-        <ViewSwitcher
-          viewMode={viewMode}
-          onViewModeChange={handleViewModeChange}
-          theme={uiTheme}
+        {/* View Mode Selector */}
+        <ViewModeSelector
+          section="users"
+          currentView={viewMode}
+          onViewChange={(newView) => {
+            setViewMode(newView as ViewMode)
+            setUserSelectedView(true)
+          }}
         />
       </Box>
 

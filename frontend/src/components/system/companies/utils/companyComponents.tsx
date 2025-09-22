@@ -129,16 +129,32 @@ export const CompanyLocation = ({
 )
 
 // Company Status Chip Component
-export const CompanyStatusChip = ({ status }: { status: number }) => {
-  // Convert number to CompanyStatus enum value
-  const statusMap: { [key: number]: string } = {
-    0: 'pending',
-    1: 'active', 
-    2: 'inactive'
+export const CompanyStatusChip = ({ status }: { status: number | string }) => {
+  // Debug logging to help identify issues
+  console.log('CompanyStatusChip received status:', status, 'type:', typeof status)
+  
+  // Handle both number and string status values
+  let statusEnum: string
+  
+  if (typeof status === 'number') {
+    // Convert number to CompanyStatus enum value
+    const statusMap: { [key: number]: string } = {
+      0: 'pending',
+      1: 'active', 
+      2: 'inactive'
+    }
+    statusEnum = statusMap[status] || 'unknown'
+  } else if (typeof status === 'string') {
+    // Handle string status values
+    statusEnum = status.toLowerCase()
+  } else {
+    statusEnum = 'unknown'
   }
-  const statusEnum = statusMap[status] as any
-  const statusColor = getCompanyStatusColor(statusEnum)
-  const statusDisplayName = getCompanyStatusDisplayName(statusEnum)
+  
+  console.log('CompanyStatusChip processed statusEnum:', statusEnum)
+  
+  const statusColor = getCompanyStatusColor(statusEnum as any)
+  const statusDisplayName = getCompanyStatusDisplayName(statusEnum as any)
 
   return (
     <Chip
