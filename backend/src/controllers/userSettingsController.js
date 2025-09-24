@@ -24,6 +24,7 @@ export const getUserSettings = async (req, res) => {
         products_view,
         users_view,
         companies_view,
+        categories_view,
         theme_mode,
         theme_primary_color,
         compact_mode,
@@ -46,6 +47,7 @@ export const getUserSettings = async (req, res) => {
         products_view: 0, // GRID
         users_view: 0, // GRID
         companies_view: 0, // GRID
+        categories_view: 0, // GRID
         theme_mode: 0, // LIGHT
         theme_primary_color: '#1976d2',
         compact_mode: false
@@ -54,9 +56,9 @@ export const getUserSettings = async (req, res) => {
       const insertQuery = `
         INSERT INTO user_settings (
           user_id, calendar_view, appointments_view, services_view, 
-          staff_view, products_view, users_view, companies_view, theme_mode, 
+          staff_view, products_view, users_view, companies_view, categories_view, theme_mode, 
           theme_primary_color, compact_mode
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `
 
       const insertValues = [
@@ -68,6 +70,7 @@ export const getUserSettings = async (req, res) => {
         defaultSettings.products_view,
         defaultSettings.users_view,
         defaultSettings.companies_view,
+        defaultSettings.categories_view,
         defaultSettings.theme_mode,
         defaultSettings.theme_primary_color,
         defaultSettings.compact_mode
@@ -108,6 +111,7 @@ export const getUserSettings = async (req, res) => {
       products_view: dataViewToString(settings.products_view),
       users_view: dataViewToString(settings.users_view),
       companies_view: dataViewToString(settings.companies_view),
+      categories_view: dataViewToString(settings.categories_view),
       theme_mode: themeModeToString(settings.theme_mode)
     }
     
@@ -137,6 +141,7 @@ export const updateUserSettings = async (req, res) => {
       products_view,
       users_view,
       companies_view,
+      categories_view,
       theme_mode,
       theme_primary_color,
       compact_mode
@@ -151,6 +156,7 @@ export const updateUserSettings = async (req, res) => {
       products_view: products_view ? stringToDataView(products_view) : 0,
       users_view: users_view ? stringToDataView(users_view) : 0,
       companies_view: companies_view ? stringToDataView(companies_view) : 0,
+      categories_view: categories_view ? stringToDataView(categories_view) : 0,
       theme_mode: theme_mode ? stringToThemeMode(theme_mode) : 0,
       theme_primary_color: theme_primary_color || '#1976d2',
       compact_mode: compact_mode || false
@@ -167,9 +173,9 @@ export const updateUserSettings = async (req, res) => {
       const insertQuery = `
         INSERT INTO user_settings (
           user_id, calendar_view, appointments_view, services_view, 
-          staff_view, products_view, users_view, companies_view, theme_mode, 
+          staff_view, products_view, users_view, companies_view, categories_view, theme_mode, 
           theme_primary_color, compact_mode
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `
 
       const insertValues = [
@@ -181,6 +187,7 @@ export const updateUserSettings = async (req, res) => {
         convertedSettings.products_view,
         convertedSettings.users_view,
         convertedSettings.companies_view,
+        convertedSettings.categories_view,
         convertedSettings.theme_mode,
         convertedSettings.theme_primary_color,
         convertedSettings.compact_mode
@@ -219,6 +226,10 @@ export const updateUserSettings = async (req, res) => {
       if (companies_view !== undefined) {
         updateFields.push('companies_view = ?')
         updateValues.push(convertedSettings.companies_view)
+      }
+      if (categories_view !== undefined) {
+        updateFields.push('categories_view = ?')
+        updateValues.push(convertedSettings.categories_view)
       }
       if (theme_mode !== undefined) {
         updateFields.push('theme_mode = ?')
@@ -264,6 +275,7 @@ export const updateUserSettings = async (req, res) => {
         products_view,
         users_view,
         companies_view,
+        categories_view,
         theme_mode,
         theme_primary_color,
         compact_mode,
@@ -286,6 +298,7 @@ export const updateUserSettings = async (req, res) => {
       products_view: dataViewToString(settings.products_view),
       users_view: dataViewToString(settings.users_view),
       companies_view: dataViewToString(settings.companies_view),
+      categories_view: dataViewToString(settings.categories_view),
       theme_mode: themeModeToString(settings.theme_mode)
     }
 
@@ -316,9 +329,9 @@ export const resetUserSettings = async (req, res) => {
     const insertQuery = `
       INSERT INTO user_settings (
         user_id, calendar_view, appointments_view, services_view, 
-        staff_view, products_view, users_view, companies_view, theme_mode, 
+        staff_view, products_view, users_view, companies_view, categories_view, theme_mode, 
         theme_primary_color, compact_mode
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `
 
     const insertValues = [
@@ -330,6 +343,7 @@ export const resetUserSettings = async (req, res) => {
       0,          // products_view (GRID)
       0,          // users_view (GRID)
       0,          // companies_view (GRID)
+      0,          // categories_view (GRID)
       0,          // theme_mode (LIGHT)
       '#1976d2',  // theme_primary_color
       false       // compact_mode
@@ -349,6 +363,7 @@ export const resetUserSettings = async (req, res) => {
         products_view,
         users_view,
         companies_view,
+        categories_view,
         theme_mode,
         theme_primary_color,
         compact_mode,
@@ -371,6 +386,7 @@ export const resetUserSettings = async (req, res) => {
       products_view: dataViewToString(settings.products_view),
       users_view: dataViewToString(settings.users_view),
       companies_view: dataViewToString(settings.companies_view),
+      categories_view: dataViewToString(settings.categories_view),
       theme_mode: themeModeToString(settings.theme_mode)
     }
 

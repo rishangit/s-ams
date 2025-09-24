@@ -16,6 +16,7 @@ import {
   setProductsView,
   setUsersView,
   setCompaniesView,
+  setCategoriesView,
   setThemeMode,
   setThemePrimaryColor,
   setCompactMode,
@@ -135,6 +136,11 @@ const userSettingsSlice = createSlice({
       .addCase(setCompaniesView, (state, action) => {
         if (state.settings) {
           state.settings.companies_view = action.payload
+        }
+      })
+      .addCase(setCategoriesView, (state, action) => {
+        if (state.settings) {
+          state.settings.categories_view = action.payload
         }
       })
       .addCase(setThemeMode, (state, action) => {

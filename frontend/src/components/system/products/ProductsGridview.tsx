@@ -202,124 +202,148 @@ const ProductsGridview: React.FC<ProductsGridviewProps> = ({
       headerName: 'Product',
       field: 'name',
       cellRenderer: ProductCellRenderer,
+      valueFormatter: (params) => params.value || '',
       sortable: true,
       filter: true,
       resizable: true,
-      width: 250,
+      flex: 2,
       minWidth: 200,
-      maxWidth: 300,
-        cellStyle: { 
-          display: 'flex', 
-          alignItems: 'center'
-        }
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
+      }
     },
     {
       headerName: 'Category',
       field: 'category',
       cellRenderer: TextCellRenderer,
+      valueFormatter: (params) => params.value || 'No category',
       sortable: true,
       filter: true,
       resizable: true,
-      width: 150,
+      flex: 1,
       minWidth: 120,
-      maxWidth: 200,
-      valueGetter: (params) => params.data.category || 'No category',
-        cellStyle: { 
-          display: 'flex', 
-          alignItems: 'center'
-        }
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
+      }
     },
     {
       headerName: 'Unit Price',
       field: 'unitPrice',
       cellRenderer: PriceCellRenderer,
+      valueFormatter: (params) => {
+        const unitPrice = typeof params.value === 'number' ? params.value : parseFloat(params.value) || 0
+        return `$${unitPrice.toFixed(2)}`
+      },
       sortable: true,
       filter: true,
       resizable: true,
-      width: 120,
+      flex: 1,
       minWidth: 100,
-      maxWidth: 150,
-        cellStyle: { 
-          display: 'flex', 
-          alignItems: 'center'
-        }
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
+      }
     },
     {
       headerName: 'Quantity',
       field: 'quantity',
       cellRenderer: QuantityCellRenderer,
+      valueFormatter: (params) => String(params.value || 0),
       sortable: true,
       filter: true,
       resizable: true,
-      width: 100,
+      flex: 1,
       minWidth: 80,
-      maxWidth: 120,
-        cellStyle: { 
-          display: 'flex', 
-          alignItems: 'center'
-        }
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
+      }
     },
     {
       headerName: 'Min Qty',
       field: 'minQuantity',
       cellRenderer: TextCellRenderer,
+      valueFormatter: (params) => String(params.value || 0),
       sortable: true,
       filter: true,
       resizable: true,
-      width: 80,
+      flex: 1,
       minWidth: 70,
-      maxWidth: 100,
-        cellStyle: { 
-          display: 'flex', 
-          alignItems: 'center'
-        }
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
+      }
     },
     {
       headerName: 'Status',
       field: 'status',
       cellRenderer: StatusCellRenderer,
+      valueFormatter: (params) => params.value || '',
       sortable: true,
       filter: true,
       resizable: true,
-      width: 100,
+      flex: 1,
       minWidth: 80,
-      maxWidth: 120,
-        cellStyle: { 
-          display: 'flex', 
-          alignItems: 'center'
-        }
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
+      }
     },
     {
       headerName: 'Supplier',
       field: 'supplier',
       cellRenderer: TextCellRenderer,
+      valueFormatter: (params) => params.value || 'N/A',
       sortable: true,
       filter: true,
       resizable: true,
-      width: 150,
+      flex: 1,
       minWidth: 120,
-      maxWidth: 200,
-      valueGetter: (params) => params.data.supplier || 'N/A',
-        cellStyle: { 
-          display: 'flex', 
-          alignItems: 'center'
-        }
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
+      }
     },
     {
       headerName: 'SKU',
       field: 'sku',
       cellRenderer: TextCellRenderer,
+      valueFormatter: (params) => params.value || 'N/A',
       sortable: true,
       filter: true,
       resizable: true,
-      width: 120,
+      flex: 1,
       minWidth: 100,
-      maxWidth: 150,
-      valueGetter: (params) => params.data.sku || 'N/A',
-        cellStyle: { 
-          display: 'flex', 
-          alignItems: 'center'
-        }
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
+      }
     }
   ], [uiTheme])
 

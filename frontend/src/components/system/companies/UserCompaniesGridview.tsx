@@ -214,76 +214,76 @@ const UserCompaniesGridview: React.FC<UserCompaniesGridviewProps> = ({
       headerName: 'Company',
       field: 'name',
       cellRenderer: CompanyNameCellRenderer,
+      valueFormatter: (params) => params.value || '',
       sortable: true,
       filter: true,
       resizable: true,
-      width: 250,
+      flex: 2,
       minWidth: 200,
-      maxWidth: 300,
-        cellStyle: { 
-          display: 'flex', 
-          alignItems: 'center'
-        }
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center'
+      }
     },
     {
       headerName: 'Contact Info',
       field: 'phoneNumber',
       cellRenderer: ContactInfoCellRenderer,
+      valueFormatter: (params) => params.value || '',
       sortable: true,
       filter: true,
       resizable: true,
-      width: 200,
+      flex: 1,
       minWidth: 150,
-      maxWidth: 250,
-        cellStyle: { 
-          display: 'flex', 
-          alignItems: 'center'
-        }
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center'
+      }
     },
     {
       headerName: 'Location',
       field: 'address',
       cellRenderer: LocationCellRenderer,
+      valueFormatter: (params) => params.value || '',
       sortable: true,
       filter: true,
       resizable: true,
-      width: 250,
+      flex: 2,
       minWidth: 200,
-      maxWidth: 350,
-        cellStyle: { 
-          display: 'flex', 
-          alignItems: 'center'
-        }
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center'
+      }
     },
     {
       headerName: 'Appointments',
       field: 'totalAppointments',
       cellRenderer: AppointmentsCellRenderer,
+      valueFormatter: (params) => String(params.value || 0),
       sortable: true,
       filter: 'agNumberColumnFilter',
       resizable: true,
-      width: 180,
+      flex: 1,
       minWidth: 150,
-      maxWidth: 220,
-        cellStyle: { 
-          display: 'flex', 
-          alignItems: 'center'
-        }
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center'
+      }
     },
     {
       headerName: 'Status',
       field: 'status',
       cellRenderer: StatusCellRenderer,
+      valueFormatter: (params) => params.value || '',
       sortable: true,
       filter: true,
       resizable: true,
-      width: 120,
+      flex: 1,
       minWidth: 100,
-      maxWidth: 140,
-        cellStyle: { 
-          display: 'flex', 
-          alignItems: 'center'
-        }
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center'
+      }
     }
   ], [])
 

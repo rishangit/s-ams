@@ -17,12 +17,13 @@ import {
   setStaffView,
   setProductsView,
   setUsersView,
-  setCompaniesView
+  setCompaniesView,
+  setCategoriesView
 } from '../../store/actions/userSettingsActions'
 import { updateUserSettingsRequest } from '../../store/actions/userSettingsActions'
 
 interface ViewModeSelectorProps {
-  section: 'calendar' | 'appointments' | 'services' | 'staff' | 'products' | 'users' | 'companies'
+  section: 'calendar' | 'appointments' | 'services' | 'staff' | 'products' | 'users' | 'companies' | 'categories'
   currentView: 'month' | 'week' | 'day' | 'grid' | 'list' | 'card'
   onViewChange?: (view: string) => void
 }
@@ -67,6 +68,10 @@ const ViewModeSelector: React.FC<ViewModeSelectorProps> = ({
       case 'companies':
         dispatch(setCompaniesView(view))
         settingsUpdate.companies_view = view
+        break
+      case 'categories':
+        dispatch(setCategoriesView(view))
+        settingsUpdate.categories_view = view
         break
     }
     

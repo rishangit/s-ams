@@ -171,31 +171,31 @@ const UsersGridview: React.FC<UsersGridviewProps> = ({
       headerName: 'User',
       field: 'firstName',
       cellRenderer: UserCellRenderer,
+      valueFormatter: (params) => params.value || '',
       sortable: true,
       filter: true,
       resizable: true,
-      width: 250,
+      flex: 2,
       minWidth: 200,
-      maxWidth: 300,
-        cellStyle: { 
-          display: 'flex', 
-          alignItems: 'center'
-        }
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center'
+      }
     },
     {
       headerName: 'Email',
       field: 'email',
       cellRenderer: TextCellRenderer,
+      valueFormatter: (params) => params.value || '',
       sortable: true,
       filter: true,
       resizable: true,
-      width: 200,
+      flex: 2,
       minWidth: 150,
-      maxWidth: 280,
-        cellStyle: { 
-          display: 'flex', 
-          alignItems: 'center'
-        }
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center'
+      }
     },
     {
       headerName: 'Phone',
@@ -204,29 +204,28 @@ const UsersGridview: React.FC<UsersGridviewProps> = ({
       sortable: true,
       filter: true,
       resizable: true,
-      width: 150,
+      flex: 1,
       minWidth: 120,
-      maxWidth: 180,
       valueGetter: (params) => params.data.phoneNumber || 'N/A',
-        cellStyle: { 
-          display: 'flex', 
-          alignItems: 'center'
-        }
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center'
+      }
     },
     {
       headerName: 'Role',
       field: 'role',
       cellRenderer: RoleCellRenderer,
+      valueFormatter: (params) => String(params.value || ''),
       sortable: true,
       filter: true,
       resizable: true,
-      width: 120,
+      flex: 1,
       minWidth: 100,
-      maxWidth: 140,
-        cellStyle: { 
-          display: 'flex', 
-          alignItems: 'center'
-        }
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center'
+      }
     },
     {
       headerName: 'Created',
@@ -235,14 +234,13 @@ const UsersGridview: React.FC<UsersGridviewProps> = ({
       sortable: true,
       filter: true,
       resizable: true,
-      width: 130,
+      flex: 1,
       minWidth: 120,
-      maxWidth: 150,
       valueGetter: (params) => formatDate(params.data.createdAt),
-        cellStyle: { 
-          display: 'flex', 
-          alignItems: 'center'
-        }
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center'
+      }
     }
   ], [uiTheme, currentUserId])
 

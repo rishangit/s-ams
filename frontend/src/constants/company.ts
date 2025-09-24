@@ -39,12 +39,17 @@ export interface Company {
   status: CompanyStatus
   geoLocation: string
   userId: number
+  categoryId?: number
+  subcategoryId?: number
   createdAt?: string
   updatedAt?: string
   // User information (for admin views)
   userFirstName?: string
   userLastName?: string
   userEmail?: string
+  // Category information
+  categoryName?: string
+  subcategoryName?: string
 }
 
 export interface CompanyFormData {
@@ -53,4 +58,6 @@ export interface CompanyFormData {
   phoneNumber: string
   landPhone: string
   geoLocation: string
+  categoryId?: number
+  subcategoryId?: number
 }

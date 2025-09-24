@@ -16,6 +16,7 @@ import companyUsersRoutes from './routes/companyUsers.js'
 import productRoutes from './routes/product.js'
 import userHistoryRoutes from './routes/userHistory.js'
 import userSettingsRoutes from './routes/userSettings.js'
+import categoryRoutes from './routes/category.js'
 
 const app = express()
 
@@ -123,6 +124,7 @@ app.use('/api/company-users', companyUsersRoutes)
 app.use('/api/products', productRoutes)
 app.use('/api/user-history', userHistoryRoutes)
 app.use('/api/user-settings', userSettingsRoutes)
+app.use('/api/categories', categoryRoutes)
 
 // 404 handler
 app.use('*', (req, res) => {

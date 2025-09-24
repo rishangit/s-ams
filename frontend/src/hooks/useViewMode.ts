@@ -18,13 +18,14 @@ export const useViewMode = () => {
     productsView: settings?.products_view || 'grid',
     usersView: settings?.users_view || 'grid',
     companiesView: settings?.companies_view || 'grid',
+    categoriesView: settings?.categories_view || 'grid',
     
     // Theme settings
     themeMode: settings?.theme_mode || 'light',
     compactMode: settings?.compact_mode || false,
     
     // Helper function to get view mode for a specific section
-    getViewMode: (section: 'appointments' | 'services' | 'staff' | 'products' | 'users' | 'companies'): ViewMode => {
+    getViewMode: (section: 'appointments' | 'services' | 'staff' | 'products' | 'users' | 'companies' | 'categories'): ViewMode => {
       switch (section) {
         case 'appointments':
           return settings?.appointments_view || 'grid'
@@ -38,6 +39,8 @@ export const useViewMode = () => {
           return settings?.users_view || 'grid'
         case 'companies':
           return settings?.companies_view || 'grid'
+        case 'categories':
+          return settings?.categories_view || 'grid'
         default:
           return 'grid'
       }

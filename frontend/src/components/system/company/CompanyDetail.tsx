@@ -28,6 +28,8 @@ import {
 import { CompanyFormData, CompanyStatus, getCompanyStatusDisplayName, getCompanyStatusColor } from '../../../constants/company'
 import FormInput from '../../shared/FormInput'
 import FormButton from '../../shared/FormButton'
+import CategorySelector from '../../shared/CategorySelector'
+import { useCategories } from '../../../hooks/useCategories'
 
 // Validation schema
 const companySchema = yup.object({
@@ -69,8 +71,11 @@ const CompanyDetail: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth)
   const { company, loading, error, success, updateLoading } = useSelector((state: RootState) => state.company)
   const uiTheme = useSelector((state: RootState) => state.ui.theme)
+  const { getAllCategories, categoriesWithSubcategories } = useCategories()
 
   const [isEditing, setIsEditing] = useState(false)
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null)
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<number | null>(null)
 
   // Check if current user can edit this company
   const canEditCompany = () => {
@@ -90,6 +95,8 @@ const CompanyDetail: React.FC = () => {
     control,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors, isDirty }
   } = useForm<CompanyFormData>({
     resolver: yupResolver(companySchema) as any,
@@ -98,7 +105,9 @@ const CompanyDetail: React.FC = () => {
       address: '',
       phoneNumber: '',
       landPhone: '',
-      geoLocation: ''
+      geoLocation: '',
+      categoryId: undefined,
+      subcategoryId: undefined
     }
   })
 
@@ -109,6 +118,11 @@ const CompanyDetail: React.FC = () => {
     }
   }, [id]) // Removed dispatch from dependencies as it's stable
 
+  // Load categories when component mounts
+  useEffect(() => {
+    getAllCategories()
+  }, [getAllCategories])
+
   // Initialize form data when company data is available
   useEffect(() => {
     if (company) {
@@ -117,8 +131,14 @@ const CompanyDetail: React.FC = () => {
         address: company.address || '',
         phoneNumber: company.phoneNumber || '',
         landPhone: company.landPhone || '',
-        geoLocation: company.geoLocation || ''
+        geoLocation: company.geoLocation || '',
+        categoryId: company.categoryId || undefined,
+        subcategoryId: company.subcategoryId || undefined
       })
+      
+      // Set category selection state
+      setSelectedCategoryId(company.categoryId || null)
+      setSelectedSubcategoryId(company.subcategoryId || null)
     }
   }, [company, reset])
 
@@ -154,16 +174,35 @@ const CompanyDetail: React.FC = () => {
         address: company.address || '',
         phoneNumber: company.phoneNumber || '',
         landPhone: company.landPhone || '',
-        geoLocation: company.geoLocation || ''
+        geoLocation: company.geoLocation || '',
+        categoryId: company.categoryId || undefined,
+        subcategoryId: company.subcategoryId || undefined
       })
+      
+      // Reset category selection state
+      setSelectedCategoryId(company.categoryId || null)
+      setSelectedSubcategoryId(company.subcategoryId || null)
     }
   }
 
   const onSubmit = async (data: CompanyFormData) => {
     if (company?.id) {
+      // The form data already includes categoryId and subcategoryId from setValue calls
       dispatch(updateCompanyRequest({ id: company.id, data }))
       setIsEditing(false)
     }
+  }
+
+  const handleCategoryChange = (categoryId: number | null) => {
+    setSelectedCategoryId(categoryId)
+    setSelectedSubcategoryId(null) // Reset subcategory when category changes
+    setValue('categoryId', categoryId || undefined, { shouldDirty: true })
+    setValue('subcategoryId', undefined, { shouldDirty: true })
+  }
+
+  const handleSubcategoryChange = (subcategoryId: number | null) => {
+    setSelectedSubcategoryId(subcategoryId)
+    setValue('subcategoryId', subcategoryId || undefined, { shouldDirty: true })
   }
 
 
@@ -237,6 +276,15 @@ const CompanyDetail: React.FC = () => {
                   >
                     Company ID: {company.id}
                   </Typography>
+                  {company.categoryName && (
+                    <Typography
+                      variant="body2"
+                      style={{ color: uiTheme.textSecondary }}
+                    >
+                      Category: {company.categoryName}
+                      {company.subcategoryName && ` - ${company.subcategoryName}`}
+                    </Typography>
+                  )}
                 </Box>
               </Box>
               <Chip
@@ -316,6 +364,46 @@ const CompanyDetail: React.FC = () => {
               )}
             </Box>
             
+            {/* Category Information Display */}
+            {company.categoryName && (
+              <Box className="mb-4 p-4 rounded-lg" style={{ backgroundColor: uiTheme.background, border: `1px solid ${uiTheme.border}` }}>
+                <Typography
+                  variant="h6"
+                  className="font-semibold mb-2"
+                  style={{ color: uiTheme.text }}
+                >
+                  Business Category
+                </Typography>
+                <Box className="flex items-center gap-2">
+                  <Chip
+                    label={company.categoryName}
+                    size="small"
+                    style={{
+                      backgroundColor: uiTheme.primary,
+                      color: 'white',
+                      fontWeight: 'bold'
+                    }}
+                  />
+                  {company.subcategoryName && (
+                    <>
+                      <Typography variant="body2" style={{ color: uiTheme.textSecondary }}>
+                        →
+                      </Typography>
+                      <Chip
+                        label={company.subcategoryName}
+                        size="small"
+                        variant="outlined"
+                        style={{
+                          borderColor: uiTheme.primary,
+                          color: uiTheme.primary
+                        }}
+                      />
+                    </>
+                  )}
+                </Box>
+              </Box>
+            )}
+            
             <form onSubmit={handleSubmit(onSubmit)}>
               <Grid container spacing={3}>
                 <Grid item xs={12} sm={6}>
@@ -373,6 +461,58 @@ const CompanyDetail: React.FC = () => {
                     disabled={!isEditing || !canEditCompany()}
                   />
                 </Grid>
+                
+                {/* Category Selection - Only show for role 1 (Owner) */}
+                {user && parseInt(String(user.role)) === 1 && (
+                  <>
+                    <Grid item xs={12}>
+                      <Typography
+                        variant="h6"
+                        className="font-semibold mb-3"
+                        style={{ color: uiTheme.text }}
+                      >
+                        Business Category
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <CategorySelector
+                        selectedCategoryId={selectedCategoryId}
+                        selectedSubcategoryId={selectedSubcategoryId}
+                        onCategoryChange={handleCategoryChange}
+                        onSubcategoryChange={handleSubcategoryChange}
+                        disabled={!isEditing || !canEditCompany()}
+                        label="Category"
+                        subcategoryLabel="Subcategory"
+                        theme={uiTheme}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      {/* Display current category info when not editing */}
+                      {!isEditing && company && (
+                        <Box className="p-4 rounded-lg" style={{ backgroundColor: uiTheme.background }}>
+                          <Typography variant="body2" style={{ color: uiTheme.textSecondary }} className="mb-2">
+                            Current Category:
+                          </Typography>
+                          {company.categoryName && (
+                            <Typography variant="body1" style={{ color: uiTheme.text }} className="font-medium">
+                              {company.categoryName}
+                            </Typography>
+                          )}
+                          {company.subcategoryName && (
+                            <Typography variant="body2" style={{ color: uiTheme.textSecondary }}>
+                              {company.subcategoryName}
+                            </Typography>
+                          )}
+                          {!company.categoryName && (
+                            <Typography variant="body2" style={{ color: uiTheme.textSecondary, fontStyle: 'italic' }}>
+                              No category selected
+                            </Typography>
+                          )}
+                        </Box>
+                      )}
+                    </Grid>
+                  </>
+                )}
               </Grid>
             </form>
           </Paper>

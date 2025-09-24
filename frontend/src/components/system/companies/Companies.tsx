@@ -33,49 +33,43 @@ const Companies: React.FC = () => {
 
   const [viewMode, setViewMode] = useState<ViewMode>('grid') // Default, will be updated when settings load
   const [userSelectedView, setUserSelectedView] = useState<boolean>(false)
-  const [settingsLoaded, setSettingsLoaded] = useState<boolean>(false)
 
-  // Load companies when component mounts
+  // Load companies when component mounts (only once)
   useEffect(() => {
     if (user && isAdminOnlyRole(parseInt(String(user.role)) as any)) {
       dispatch(getAllCompaniesRequest())
-      
-      // Load user settings if not already loaded
-      if (!settings && !settingsLoading) {
-        dispatch(getUserSettingsRequest())
-      }
+    }
+  }, [user?.role, dispatch])
+
+  // Load user settings only once when component mounts
+  useEffect(() => {
+    if (user && isAdminOnlyRole(parseInt(String(user.role)) as any) && !settings && !settingsLoading) {
+      dispatch(getUserSettingsRequest())
     }
   }, [user?.role, dispatch, settings, settingsLoading])
 
   // Sync view mode with user settings
   useEffect(() => {
-    // Only update if settings are loaded and user hasn't manually selected a view
-    if (settings && !settingsLoading && !userSelectedView && !settingsLoaded) {
-      console.log('Companies: Setting view mode from settings:', companiesView)
+    if (companiesView && !userSelectedView) {
       setViewMode(companiesView as ViewMode)
-      setSettingsLoaded(true)
     }
-  }, [settings, settingsLoading, companiesView, userSelectedView, settingsLoaded])
+  }, [companiesView, userSelectedView])
 
-  // Auto-switch to card view on mobile (only if user hasn't manually selected a view and no saved settings)
+  // Auto-switch to card view on mobile (only if user hasn't manually selected a view)
   useEffect(() => {
-    if (!userSelectedView && !settings) {
+    if (!userSelectedView) {
       if (isMobile && viewMode !== 'card') {
-        console.log('Companies: Auto-switching to card view for mobile')
         setViewMode('card')
       } else if (!isMobile && viewMode === 'card') {
-        console.log('Companies: Auto-switching to grid view for desktop')
         setViewMode('grid')
       }
     }
-  }, [isMobile, viewMode, userSelectedView, settings])
+  }, [isMobile, viewMode, userSelectedView])
 
-  // Reset user selection when screen size changes significantly (only if no saved settings)
+  // Reset user selection when screen size changes significantly
   useEffect(() => {
-    if (!settings) {
-      setUserSelectedView(false)
-    }
-  }, [isMobile, settings])
+    setUserSelectedView(false)
+  }, [isMobile])
 
   // Clear error and success messages after 3 seconds
   useEffect(() => {

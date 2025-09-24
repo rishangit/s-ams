@@ -560,6 +560,70 @@ class ApiService {
       method: 'POST',
     })
   }
+
+  // Categories API methods
+  async getAllCategories(): Promise<ApiResponse<any>> {
+    return this.request<any>('/categories')
+  }
+
+  async getCategories(options?: { search?: string; limit?: number; offset?: number }): Promise<ApiResponse<any>> {
+    const params = new URLSearchParams()
+    if (options?.search) params.append('search', options.search)
+    if (options?.limit) params.append('limit', options.limit.toString())
+    if (options?.offset) params.append('offset', options.offset.toString())
+    
+    const queryString = params.toString()
+    const url = queryString ? `/categories/list?${queryString}` : '/categories/list'
+    return this.request<any>(url)
+  }
+
+  async getCategoryById(id: number): Promise<ApiResponse<any>> {
+    return this.request<any>(`/categories/${id}`)
+  }
+
+  async createCategory(data: any): Promise<ApiResponse<any>> {
+    return this.request<any>('/categories', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+  }
+
+  async updateCategory(id: number, data: any): Promise<ApiResponse<any>> {
+    return this.request<any>(`/categories/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    })
+  }
+
+  async deleteCategory(id: number): Promise<ApiResponse<any>> {
+    return this.request<any>(`/categories/${id}`, {
+      method: 'DELETE'
+    })
+  }
+
+  async getSubcategoriesByCategory(categoryId: number): Promise<ApiResponse<any>> {
+    return this.request<any>(`/categories/${categoryId}/subcategories`)
+  }
+
+  async createSubcategory(data: any): Promise<ApiResponse<any>> {
+    return this.request<any>('/categories/subcategories', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+  }
+
+  async updateSubcategory(id: number, data: any): Promise<ApiResponse<any>> {
+    return this.request<any>(`/categories/subcategories/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    })
+  }
+
+  async deleteSubcategory(id: number): Promise<ApiResponse<any>> {
+    return this.request<any>(`/categories/subcategories/${id}`, {
+      method: 'DELETE'
+    })
+  }
 }
 
 // Export singleton instance

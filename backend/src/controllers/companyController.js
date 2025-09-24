@@ -102,6 +102,10 @@ export const getCompanyByUser = async (req, res) => {
           geoLocation: company.geoLocation,
           status: company.status,
           userId: company.userId,
+          categoryId: company.categoryId,
+          subcategoryId: company.subcategoryId,
+          categoryName: company.categoryName,
+          subcategoryName: company.subcategoryName,
           createdAt: company.createdAt,
           updatedAt: company.updatedAt
         }
@@ -121,7 +125,7 @@ export const getCompanyByUser = async (req, res) => {
 export const updateCompany = async (req, res) => {
   try {
     const companyId = parseInt(req.params.id)
-    const { name, address, phoneNumber, landPhone, geoLocation } = req.body
+    const { name, address, phoneNumber, landPhone, geoLocation, categoryId, subcategoryId } = req.body
 
     // Validate input data
     const validation = validateCompanyData(req.body)
@@ -155,7 +159,9 @@ export const updateCompany = async (req, res) => {
       address,
       phoneNumber,
       landPhone,
-      geoLocation
+      geoLocation,
+      categoryId: categoryId || null,
+      subcategoryId: subcategoryId || null
     }
 
     const updatedCompany = await Company.update(companyId, companyData)
@@ -225,6 +231,10 @@ export const getCompanyById = async (req, res) => {
           geoLocation: company.geoLocation,
           status: company.status,
           userId: company.userId,
+          categoryId: company.categoryId,
+          subcategoryId: company.subcategoryId,
+          categoryName: company.categoryName,
+          subcategoryName: company.subcategoryName,
           createdAt: company.createdAt,
           updatedAt: company.updatedAt
         }

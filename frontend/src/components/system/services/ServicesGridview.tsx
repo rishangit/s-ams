@@ -125,93 +125,100 @@ const ServicesGridview: React.FC<ServicesGridviewProps> = ({
       headerName: 'Service Name',
       field: 'name',
       cellRenderer: TextCellRenderer,
+      valueFormatter: (params) => params.value || '',
       sortable: true,
       filter: true,
       resizable: true,
-      width: 200,
+      flex: 2,
       minWidth: 150,
-      maxWidth: 300,
-        cellStyle: { 
-          display: 'flex', 
-          alignItems: 'center'
-        }
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center'
+      }
     },
     {
       headerName: 'Description',
       field: 'description',
       cellRenderer: TextCellRenderer,
+      valueFormatter: (params) => params.value || 'No description',
       sortable: true,
       filter: true,
       resizable: true,
-      width: 250,
+      flex: 3,
       minWidth: 200,
-      maxWidth: 400,
-      valueGetter: (params) => params.data.description || 'No description',
-        cellStyle: { 
-          display: 'flex', 
-          alignItems: 'center'
-        }
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center'
+      }
     },
     {
       headerName: 'Duration',
       field: 'duration',
       cellRenderer: DurationCellRenderer,
+      valueFormatter: (params) => params.value || 'Not specified',
       sortable: true,
       filter: true,
       resizable: true,
-      width: 120,
+      flex: 1,
       minWidth: 100,
-      maxWidth: 150,
-        cellStyle: { 
-          display: 'flex', 
-          alignItems: 'center'
-        }
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center'
+      }
     },
     {
       headerName: 'Price',
       field: 'price',
       cellRenderer: PriceCellRenderer,
+      valueFormatter: (params) => {
+        const numericValue = typeof params.value === 'string' ? parseFloat(params.value) : params.value
+        return !isNaN(numericValue) ? `$${numericValue.toFixed(2)}` : '$0.00'
+      },
       sortable: true,
       filter: 'agNumberColumnFilter',
       resizable: true,
-      width: 100,
+      flex: 1,
       minWidth: 80,
-      maxWidth: 120,
-        cellStyle: { 
-          display: 'flex', 
-          alignItems: 'center'
-        }
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center'
+      }
     },
     {
       headerName: 'Status',
       field: 'status',
       cellRenderer: StatusCellRenderer,
+      valueFormatter: (params) => params.value || '',
       sortable: true,
       filter: true,
       resizable: true,
-      width: 100,
+      flex: 1,
       minWidth: 80,
-      maxWidth: 120,
-        cellStyle: { 
-          display: 'flex', 
-          alignItems: 'center'
-        }
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center'
+      }
     },
     {
       headerName: 'Created',
       field: 'createdAt',
       cellRenderer: TextCellRenderer,
+      valueFormatter: (params) => {
+        try {
+          return new Date(params.value).toLocaleDateString()
+        } catch {
+          return 'Invalid Date'
+        }
+      },
       sortable: true,
       filter: 'agDateColumnFilter',
       resizable: true,
-      width: 110,
+      flex: 1,
       minWidth: 100,
-      maxWidth: 130,
-      valueGetter: (params) => new Date(params.data.createdAt).toLocaleDateString(),
-        cellStyle: { 
-          display: 'flex', 
-          alignItems: 'center'
-        }
+      cellStyle: { 
+        display: 'flex', 
+        alignItems: 'center'
+      }
     }
   ], [uiTheme])
 

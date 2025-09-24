@@ -41,40 +41,48 @@ function TablePaginationActions(props: TablePaginationActionsProps) {
   return (
     <Box className="flex-shrink-0 ml-5">
       <Tooltip title="First page">
-        <IconButton
-          onClick={handleFirstPageButtonClick}
-          disabled={page === 0}
-          aria-label="first page"
-        >
-          <FirstPageIcon />
-        </IconButton>
+        <span>
+          <IconButton
+            onClick={handleFirstPageButtonClick}
+            disabled={page === 0}
+            aria-label="first page"
+          >
+            <FirstPageIcon />
+          </IconButton>
+        </span>
       </Tooltip>
       <Tooltip title="Previous page">
-        <IconButton
-          onClick={handleBackButtonClick}
-          disabled={page === 0}
-          aria-label="previous page"
-        >
-          <KeyboardArrowLeft />
-        </IconButton>
+        <span>
+          <IconButton
+            onClick={handleBackButtonClick}
+            disabled={page === 0}
+            aria-label="previous page"
+          >
+            <KeyboardArrowLeft />
+          </IconButton>
+        </span>
       </Tooltip>
       <Tooltip title="Next page">
-        <IconButton
-          onClick={handleNextButtonClick}
-          disabled={page >= Math.ceil(count / rowsPerPage) - 1}
-          aria-label="next page"
-        >
-          <KeyboardArrowRight />
-        </IconButton>
+        <span>
+          <IconButton
+            onClick={handleNextButtonClick}
+            disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+            aria-label="next page"
+          >
+            <KeyboardArrowRight />
+          </IconButton>
+        </span>
       </Tooltip>
       <Tooltip title="Last page">
-        <IconButton
-          onClick={handleLastPageButtonClick}
-          disabled={page >= Math.ceil(count / rowsPerPage) - 1}
-          aria-label="last page"
-        >
-          <LastPageIcon />
-        </IconButton>
+        <span>
+          <IconButton
+            onClick={handleLastPageButtonClick}
+            disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+            aria-label="last page"
+          >
+            <LastPageIcon />
+          </IconButton>
+        </span>
       </Tooltip>
     </Box>
   )

@@ -68,6 +68,7 @@ import {
   updateUserSettingsEpic,
   resetUserSettingsEpic
 } from './epics/userSettingsEpics'
+import { categoryEpics } from './epics/categoryEpics'
 
 const epicMiddleware = createEpicMiddleware()
 
@@ -127,7 +128,8 @@ const rootEpic = combineEpics(
   getCompanyStatsEpic,
   getUserSettingsEpic,
   updateUserSettingsEpic,
-  resetUserSettingsEpic
+  resetUserSettingsEpic,
+  categoryEpics
 )
 
 export const store = configureStore({

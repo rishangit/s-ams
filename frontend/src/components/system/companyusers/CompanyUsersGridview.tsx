@@ -44,10 +44,13 @@ const CompanyUsersGridview: React.FC<CompanyUsersGridviewProps> = ({
     {
       headerName: 'Name',
       field: 'name',
-      width: 250,
+      flex: 2,
       minWidth: 200,
-      maxWidth: 300,
       valueGetter: (params: any) => {
+        const user = params.data as CompanyUser
+        return `${user.firstName} ${user.lastName}`
+      },
+      valueFormatter: (params) => {
         const user = params.data as CompanyUser
         return `${user.firstName} ${user.lastName}`
       },
@@ -98,9 +101,9 @@ const CompanyUsersGridview: React.FC<CompanyUsersGridviewProps> = ({
     {
       headerName: 'Email',
       field: 'email',
-      width: 200,
+      flex: 2,
       minWidth: 150,
-      maxWidth: 280,
+      valueFormatter: (params) => params.value || '',
       cellRenderer: (params: any) => {
         const user = params.data as CompanyUser
         return (
@@ -131,9 +134,9 @@ const CompanyUsersGridview: React.FC<CompanyUsersGridviewProps> = ({
     {
       headerName: 'Phone',
       field: 'phoneNumber',
-      width: 150,
+      flex: 1,
       minWidth: 120,
-      maxWidth: 180,
+      valueFormatter: (params) => params.value || 'N/A',
       cellRenderer: (params: any) => {
         const user = params.data as CompanyUser
         return (
@@ -164,9 +167,9 @@ const CompanyUsersGridview: React.FC<CompanyUsersGridviewProps> = ({
     {
       headerName: 'Total Appointments',
       field: 'totalAppointments',
-      width: 150,
+      flex: 1,
       minWidth: 120,
-      maxWidth: 180,
+      valueFormatter: (params) => String(params.value || 0),
       cellRenderer: (params: any) => {
         const user = params.data as CompanyUser
         return (
@@ -183,15 +186,24 @@ const CompanyUsersGridview: React.FC<CompanyUsersGridviewProps> = ({
       cellStyle: { 
         display: 'flex', 
         alignItems: 'center',
-        justifyContent: 'center'
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
       }
     },
     {
       headerName: 'First Appointment',
       field: 'firstAppointmentDate',
-      width: 150,
+      flex: 1,
       minWidth: 120,
-      maxWidth: 180,
+      valueFormatter: (params) => {
+        if (!params.value) return 'N/A'
+        try {
+          return format(new Date(params.value), 'MMM dd, yyyy')
+        } catch {
+          return 'Invalid Date'
+        }
+      },
       cellRenderer: (params: any) => {
         const user = params.data as CompanyUser
         return (
@@ -225,9 +237,16 @@ const CompanyUsersGridview: React.FC<CompanyUsersGridviewProps> = ({
     {
       headerName: 'Last Appointment',
       field: 'lastAppointmentDate',
-      width: 150,
+      flex: 1,
       minWidth: 120,
-      maxWidth: 180,
+      valueFormatter: (params) => {
+        if (!params.value) return 'N/A'
+        try {
+          return format(new Date(params.value), 'MMM dd, yyyy')
+        } catch {
+          return 'Invalid Date'
+        }
+      },
       cellRenderer: (params: any) => {
         const user = params.data as CompanyUser
         return (
@@ -261,9 +280,15 @@ const CompanyUsersGridview: React.FC<CompanyUsersGridviewProps> = ({
     {
       headerName: 'Member Since',
       field: 'createdAt',
-      width: 150,
+      flex: 1,
       minWidth: 120,
-      maxWidth: 180,
+      valueFormatter: (params) => {
+        try {
+          return format(new Date(params.value), 'MMM dd, yyyy')
+        } catch {
+          return 'Invalid Date'
+        }
+      },
       cellRenderer: (params: any) => {
         const user = params.data as CompanyUser
         return (

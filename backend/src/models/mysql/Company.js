@@ -26,11 +26,15 @@ export class Company {
   static async findById(id) {
     const query = `
       SELECT 
-        id, name, address, phone_number as phoneNumber, 
-        land_phone as landPhone, geo_location as geoLocation,
-        status, user_id as userId, created_at as createdAt, updated_at as updatedAt
-      FROM ${this.tableName} 
-      WHERE id = ?
+        c.id, c.name, c.address, c.phone_number as phoneNumber, 
+        c.land_phone as landPhone, c.geo_location as geoLocation,
+        c.status, c.user_id as userId, c.category_id as categoryId, c.subcategory_id as subcategoryId,
+        c.created_at as createdAt, c.updated_at as updatedAt,
+        cat.name as categoryName, sub.name as subcategoryName
+      FROM ${this.tableName} c
+      LEFT JOIN categories cat ON c.category_id = cat.id
+      LEFT JOIN subcategories sub ON c.subcategory_id = sub.id
+      WHERE c.id = ?
     `
     
     try {
@@ -45,11 +49,15 @@ export class Company {
   static async findByUserId(userId) {
     const query = `
       SELECT 
-        id, name, address, phone_number as phoneNumber, 
-        land_phone as landPhone, geo_location as geoLocation,
-        status, user_id as userId, created_at as createdAt, updated_at as updatedAt
-      FROM ${this.tableName} 
-      WHERE user_id = ?
+        c.id, c.name, c.address, c.phone_number as phoneNumber, 
+        c.land_phone as landPhone, c.geo_location as geoLocation,
+        c.status, c.user_id as userId, c.category_id as categoryId, c.subcategory_id as subcategoryId,
+        c.created_at as createdAt, c.updated_at as updatedAt,
+        cat.name as categoryName, sub.name as subcategoryName
+      FROM ${this.tableName} c
+      LEFT JOIN categories cat ON c.category_id = cat.id
+      LEFT JOIN subcategories sub ON c.subcategory_id = sub.id
+      WHERE c.user_id = ?
     `
     
     try {
@@ -62,16 +70,16 @@ export class Company {
   }
 
   static async update(id, companyData) {
-    const { name, address, phoneNumber, landPhone, geoLocation } = companyData
+    const { name, address, phoneNumber, landPhone, geoLocation, categoryId, subcategoryId } = companyData
     
     const query = `
       UPDATE ${this.tableName} 
       SET name = ?, address = ?, phone_number = ?, land_phone = ?, 
-          geo_location = ?, updated_at = CURRENT_TIMESTAMP
+          geo_location = ?, category_id = ?, subcategory_id = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `
     
-    const values = [name, address, phoneNumber, landPhone, geoLocation, id]
+    const values = [name, address, phoneNumber, landPhone, geoLocation, categoryId, subcategoryId, id]
     
     try {
       const result = await executeQuery(query, values)

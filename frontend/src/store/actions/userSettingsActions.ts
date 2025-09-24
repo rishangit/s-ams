@@ -11,6 +11,7 @@ export interface UserSettings {
   products_view: 'grid' | 'list' | 'card'
   users_view: 'grid' | 'list' | 'card'
   companies_view: 'grid' | 'list' | 'card'
+  categories_view: 'grid' | 'list' | 'card'
   theme_mode: 'light' | 'dark'
   theme_primary_color: string
   compact_mode: boolean
@@ -26,6 +27,7 @@ export interface UpdateUserSettingsPayload {
   products_view?: 'grid' | 'list' | 'card'
   users_view?: 'grid' | 'list' | 'card'
   companies_view?: 'grid' | 'list' | 'card'
+  categories_view?: 'grid' | 'list' | 'card'
   theme_mode?: 'light' | 'dark'
   theme_primary_color?: string
   compact_mode?: boolean
@@ -54,6 +56,7 @@ export const setStaffView = createAction<'grid' | 'list' | 'card'>('userSettings
 export const setProductsView = createAction<'grid' | 'list' | 'card'>('userSettings/setProductsView')
 export const setUsersView = createAction<'grid' | 'list' | 'card'>('userSettings/setUsersView')
 export const setCompaniesView = createAction<'grid' | 'list' | 'card'>('userSettings/setCompaniesView')
+export const setCategoriesView = createAction<'grid' | 'list' | 'card'>('userSettings/setCategoriesView')
 export const setThemeMode = createAction<'light' | 'dark'>('userSettings/setThemeMode')
 export const setThemePrimaryColor = createAction<string>('userSettings/setThemePrimaryColor')
 export const setCompactMode = createAction<boolean>('userSettings/setCompactMode')

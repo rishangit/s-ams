@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import Register from '../auth/register'
 import Login from '../auth/login'
 import { Dashboard, UserProfile, SystemLayout, Users, Companies, Appointments, Staff, Products, Settings } from '../'
+import { Categories, Subcategories } from '../categories'
 import CompanyUsers from '../companyusers/CompanyUsers'
 import UserAppointments from '../companyusers/UserAppointments'
 import UserCompanies from '../companies/UserCompanies'
@@ -57,6 +58,20 @@ const SystemRoutes: React.FC = () => {
         <AdminRoute>
           <SystemLayout>
             <Companies />
+          </SystemLayout>
+        </AdminRoute>
+      } />
+      <Route path="categories" element={
+        <AdminRoute>
+          <SystemLayout>
+            <Categories />
+          </SystemLayout>
+        </AdminRoute>
+      } />
+      <Route path="categories/:id" element={
+        <AdminRoute>
+          <SystemLayout>
+            <Subcategories />
           </SystemLayout>
         </AdminRoute>
       } />

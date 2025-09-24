@@ -8,6 +8,8 @@ import { Appointment as MySQLAppointment } from './mysql/Appointment.js'
 import { Staff as MySQLStaff } from './mysql/staff.js'
 import { Product as MySQLProduct } from './mysql/Product.js'
 import { UserHistory as MySQLUserHistory } from './mysql/UserHistory.js'
+import { Category as MySQLCategory } from './mysql/Category.js'
+import { Subcategory as MySQLSubcategory } from './mysql/Subcategory.js'
 
 // Get database type from config
 const getDatabaseType = () => {
@@ -22,6 +24,8 @@ export const Appointment = MySQLAppointment
 export const Staff = MySQLStaff
 export const Product = MySQLProduct
 export const UserHistory = MySQLUserHistory
+export const Category = MySQLCategory
+export const Subcategory = MySQLSubcategory
 
 // Export database type for other modules
 export const getCurrentDatabaseType = getDatabaseType

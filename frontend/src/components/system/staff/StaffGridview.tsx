@@ -151,12 +151,12 @@ const StaffGridview: React.FC<StaffGridviewProps> = ({
       headerName: 'Staff Member',
       field: 'firstName',
       cellRenderer: StaffCellRenderer,
+      valueFormatter: (params) => params.value || '',
       sortable: true,
       filter: true,
       resizable: true,
-      width: 250,
+      flex: 2,
       minWidth: 200,
-      maxWidth: 300,
       cellStyle: { 
         display: 'flex', 
         alignItems: 'center',
@@ -169,12 +169,12 @@ const StaffGridview: React.FC<StaffGridviewProps> = ({
       headerName: 'Email',
       field: 'email',
       cellRenderer: TextCellRenderer,
+      valueFormatter: (params) => params.value || '',
       sortable: true,
       filter: true,
       resizable: true,
-      width: 200,
+      flex: 2,
       minWidth: 150,
-      maxWidth: 280,
       cellStyle: { 
         display: 'flex', 
         alignItems: 'center',
@@ -187,13 +187,12 @@ const StaffGridview: React.FC<StaffGridviewProps> = ({
       headerName: 'Phone',
       field: 'phoneNumber',
       cellRenderer: TextCellRenderer,
+      valueFormatter: (params) => params.value || 'N/A',
       sortable: true,
       filter: true,
       resizable: true,
-      width: 150,
+      flex: 1,
       minWidth: 120,
-      maxWidth: 180,
-      valueGetter: (params) => params.data.phoneNumber || 'N/A',
       cellStyle: { 
         display: 'flex', 
         alignItems: 'center',
@@ -206,13 +205,7 @@ const StaffGridview: React.FC<StaffGridviewProps> = ({
       headerName: 'Working Hours',
       field: 'workingHours',
       cellRenderer: TextCellRenderer,
-      sortable: true,
-      filter: true,
-      resizable: true,
-      width: 150,
-      minWidth: 120,
-      maxWidth: 180,
-      valueGetter: (params) => {
+      valueFormatter: (params) => {
         const data = params.data
         if (!data) return ''
         const start = data.workingHoursStart || ''
@@ -226,6 +219,11 @@ const StaffGridview: React.FC<StaffGridviewProps> = ({
         }
         return 'Not set'
       },
+      sortable: true,
+      filter: true,
+      resizable: true,
+      flex: 1,
+      minWidth: 120,
       cellStyle: { 
         display: 'flex', 
         alignItems: 'center',
@@ -238,16 +236,15 @@ const StaffGridview: React.FC<StaffGridviewProps> = ({
       headerName: 'Skills',
       field: 'skills',
       cellRenderer: TextCellRenderer,
-      sortable: true,
-      filter: true,
-      resizable: true,
-      width: 200,
-      minWidth: 150,
-      maxWidth: 300,
-      valueGetter: (params) => {
+      valueFormatter: (params) => {
         const skills = params.data?.skills
         return skills ? (skills.length > 50 ? skills.substring(0, 50) + '...' : skills) : 'None'
       },
+      sortable: true,
+      filter: true,
+      resizable: true,
+      flex: 2,
+      minWidth: 150,
       cellStyle: { 
         display: 'flex', 
         alignItems: 'center',
@@ -260,16 +257,18 @@ const StaffGridview: React.FC<StaffGridviewProps> = ({
       headerName: 'Status',
       field: 'status',
       cellRenderer: StatusCellRenderer,
+      valueFormatter: (params) => String(params.value || ''),
       sortable: true,
       filter: true,
       resizable: true,
-      width: 120,
+      flex: 1,
       minWidth: 100,
-      maxWidth: 140,
       cellStyle: { 
         display: 'flex', 
         alignItems: 'center',
-        justifyContent: 'center'
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
       }
     }
   ], [uiTheme])

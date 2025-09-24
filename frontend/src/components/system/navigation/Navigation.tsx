@@ -23,7 +23,8 @@ import {
   CalendarToday as CalendarIcon,
   Group as StaffIcon,
   Inventory as ProductsIcon,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  Category as CategoryIcon
 } from '@mui/icons-material'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate, useLocation } from 'react-router-dom'
@@ -207,6 +208,25 @@ const Navigation: React.FC<NavigationProps> = ({
               <ListItemText
                 primary="Companies"
                 style={getTextStyles('/system/companies')}
+              />
+            </ListItemButton>
+          </ListItem>
+        )}
+
+        {/* Categories Management - Admin Only (role 0) */}
+        {user && user.role === 0 && (
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => handleNavigation('/system/categories')}
+              style={getNavButtonStyles('/system/categories')}
+              className="hover:opacity-80 transition-all duration-200"
+            >
+              <ListItemIcon>
+                <CategoryIcon style={getIconStyles('/system/categories')} />
+              </ListItemIcon>
+              <ListItemText
+                primary="Categories"
+                style={getTextStyles('/system/categories')}
               />
             </ListItemButton>
           </ListItem>
